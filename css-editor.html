@@ -1,0 +1,416 @@
+<!-- css-editor.html: Add page description here -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expanded CSS Editor</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1e1e2f;
+            color: #dcdcdc;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            padding: 20px 0;
+            background: linear-gradient(to right, #2a2a40, #1e1e2f);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            margin: 0 0 20px;
+        }
+
+        .description {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #9e9e9e;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #2a2a40;
+            color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #444;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3a3a50;
+            color: #ffffff;
+        }
+
+        td {
+            background-color: #2e2e44;
+        }
+
+        td input, td select {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            background-color: #39395b;
+            color: #ffffff;
+        }
+
+        td input:focus, td select:focus {
+            outline: 2px solid #5a5ab5;
+            background-color: #444466;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #5a5ab5;
+            color: #ffffff;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #4a4aa0;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 8px 10px;
+            }
+
+            button {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Expanded CSS Editor</h1>
+    <p class="description">
+        Fully customize your website's styles. Save your changes as a CSS file dynamically.
+    </p>
+
+    <form id="css-editor">
+        <!-- Title Element -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Element</th>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="5">&lt;title&gt;</td>
+                    <td>font-family</td>
+                    <td><select data-property="title:font-family"></select></td>
+                </tr>
+                <tr>
+                    <td>font-size</td>
+                    <td><input type="text" value="1.5rem" data-property="title:font-size"></td>
+                </tr>
+                <tr>
+                    <td>color</td>
+                    <td><select data-property="title:color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-color</td>
+                    <td><select data-property="title:background-color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-image</td>
+                    <td><input type="text" placeholder="e.g., url('image.jpg')" data-property="title:background-image"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Heading 1 Element -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Element</th>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="5">&lt;h1&gt;</td>
+                    <td>font-family</td>
+                    <td><select data-property="h1:font-family"></select></td>
+                </tr>
+                <tr>
+                    <td>font-size</td>
+                    <td><input type="text" value="2rem" data-property="h1:font-size"></td>
+                </tr>
+                <tr>
+                    <td>color</td>
+                    <td><select data-property="h1:color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-color</td>
+                    <td><select data-property="h1:background-color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-image</td>
+                    <td><input type="text" placeholder="e.g., url('image.jpg')" data-property="h1:background-image"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Heading 2 Element -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Element</th>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="5">&lt;h2&gt;</td>
+                    <td>font-family</td>
+                    <td><select data-property="h2:font-family"></select></td>
+                </tr>
+                <tr>
+                    <td>font-size</td>
+                    <td><input type="text" value="1.8rem" data-property="h2:font-size"></td>
+                </tr>
+                <tr>
+                    <td>color</td>
+                    <td><select data-property="h2:color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-color</td>
+                    <td><select data-property="h2:background-color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-image</td>
+                    <td><input type="text" placeholder="e.g., url('image.jpg')" data-property="h2:background-image"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Paragraph Element -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Element</th>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="5">&lt;p&gt;</td>
+                    <td>font-family</td>
+                    <td><select data-property="p:font-family"></select></td>
+                </tr>
+                <tr>
+                    <td>font-size</td>
+                    <td><input type="text" value="1rem" data-property="p:font-size"></td>
+                </tr>
+                <tr>
+                    <td>color</td>
+                    <td><select data-property="p:color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-color</td>
+                    <td><select data-property="p:background-color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-image</td>
+                    <td><input type="text" placeholder="e.g., url('image.jpg')" data-property="p:background-image"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Div Element -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Element</th>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="5">&lt;div&gt;</td>
+                    <td>font-family</td>
+                    <td><select data-property="div:font-family"></select></td>
+                </tr>
+                <tr>
+                    <td>font-size</td>
+                    <td><input type="text" value="1rem" data-property="div:font-size"></td>
+                </tr>
+                <tr>
+                    <td>color</td>
+                    <td><select data-property="div:color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-color</td>
+                    <td><select data-property="div:background-color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-image</td>
+                    <td><input type="text" placeholder="e.g., url('image.jpg')" data-property="div:background-image"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Anchor Element -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Element</th>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="5">&lt;a&gt;</td>
+                    <td>font-family</td>
+                    <td><select data-property="a:font-family"></select></td>
+                </tr>
+                <tr>
+                    <td>font-size</td>
+                    <td><input type="text" value="1rem" data-property="a:font-size"></td>
+                </tr>
+                <tr>
+                    <td>color</td>
+                    <td><select data-property="a:color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-color</td>
+                    <td><select data-property="a:background-color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-image</td>
+                    <td><input type="text" placeholder="e.g., url('image.jpg')" data-property="a:background-image"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Button Element -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Element</th>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="5">&lt;button&gt;</td>
+                    <td>font-family</td>
+                    <td><select data-property="button:font-family"></select></td>
+                </tr>
+                <tr>
+                    <td>font-size</td>
+                    <td><input type="text" value="1rem" data-property="button:font-size"></td>
+                </tr>
+                <tr>
+                    <td>color</td>
+                    <td><select data-property="button:color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-color</td>
+                    <td><select data-property="button:background-color"></select></td>
+                </tr>
+                <tr>
+                    <td>background-image</td>
+                    <td><input type="text" placeholder="e.g., url('image.jpg')" data-property="button:background-image"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button type="button" onclick="saveCSS()">Save Changes</button>
+    </form>
+
+    <script>
+        function loadOptions() {
+            const fonts = [
+                "Arial", "Verdana", "Georgia", "Times New Roman", "Courier New",
+                "Roboto", "Montserrat", "Lato", "Oswald", "Playfair Display",
+                "Poppins", "Raleway", "Merriweather", "Open Sans", "Ubuntu",
+                "Lora", "Quicksand", "Noto Sans", "Bitter", "Roboto Slab"
+            ];
+            const colors = [
+                "Red", "Blue", "Green", "Black", "White", "Yellow", "Pink", "Orange",
+                "Purple", "Gray", "Indigo", "Brown", "Teal", "Cyan", "Lime",
+                "Dark Red", "Royal Blue", "Olive", "Maroon", "Slate Blue"
+            ];
+
+            fonts.forEach(font => {
+                document.querySelectorAll('select[data-property$="font-family"]').forEach(select => {
+                    let option = document.createElement('option');
+                    option.value = font;
+                    option.textContent = font;
+                    option.style.fontFamily = font;
+                    select.appendChild(option);
+                });
+            });
+
+            colors.forEach(color => {
+                document.querySelectorAll('select[data-property$="color"], select[data-property$="background-color"]').forEach(select => {
+                    let option = document.createElement('option');
+                    option.value = color.toLowerCase();
+                    option.textContent = color;
+                    option.style.backgroundColor = color.toLowerCase();
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function saveCSS() {
+            const cssProperties = document.querySelectorAll('[data-property]');
+            let cssContent = '';
+
+            cssProperties.forEach(field => {
+                const property = field.dataset.property.split(':');
+                const selector = property[0];
+                const cssProp = property[1];
+                const value = field.value.trim();
+
+                cssContent += `${selector} {\n    ${cssProp}: ${value};\n}\n\n`;
+            });
+
+            const cssBlob = new Blob([cssContent], { type: 'text/css' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(cssBlob);
+            link.download = 'styles.css';
+            link.click();
+        }
+
+        loadOptions();
+    </script>
+</body>
+</html>

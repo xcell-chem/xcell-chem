@@ -1,0 +1,299 @@
+<!-- checkout.html: Add page description here -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Shiny Flakes</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=BAAvP4YqYY_dGtTw_tj6e2YQwq_x_21YlgIpeUuTZmBvP2s3udo599dYkJVz8AuZlZzijGIlYkEzTKIMG8&currency=GBP"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url('https://i.postimg.cc/TppSbvf2/Shimer.png');
+            background-size: cover;
+            background-position: center;
+            color: #333;
+        }
+
+        header {
+            background-color: #333;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+        }
+
+        nav ul li a:hover {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        .content {
+            background-color: #ededed;
+            padding: 20px;
+            margin: 70px auto 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .total {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .btnsubmit {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .empty-cart-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .charges-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #paypal-button-container {
+            width: 50%;
+        }
+
+        /* Styles for mobile portrait view */
+        @media only screen and (max-width: 768px) {
+            .charges-container p {
+                font-size: 0.9em;
+            }
+
+            #paypal-button-container {
+                width: 30%;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            .charges-container p {
+                font-size: 0.8em;
+            }
+
+            #paypal-button-container {
+                width: 50%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Shop</a></li>
+                <li><a href="uses.html">Uses for Shiny Flakes™</a></li>
+                <li><a href="about.html">More Info</a></li>
+                <li><a href="feedback.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="content">
+        <h1>Checkout</h1>
+
+        <button class="btn empty-cart-btn" onclick="emptyCart()">Empty Cart</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody id="cartItems">
+                <!-- Items will be dynamically added here -->
+            </tbody>
+        </table>
+
+        <div class="charges-container">
+            <div id="paypal-button-container"></div> <!-- PayPal buttons on the left -->
+            <div>
+                <p><strong>Delivery Charge:</strong> £<span id="deliveryCharge">4.99</span></p>
+                <p><strong>Service Charge:</strong> £<span id="serviceCharge">1.99</span></p>
+                <p class="total">Total: £<span id="totalAmount"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Example items in the cart (replace this with actual data fetched from localStorage)
+        let cart = JSON.parse(localStorage.getItem('basket')) || [];
+
+        // Example product catalog (replace this with actual product data)
+        const products = {
+            '1': { name: 'Boric Acid', prices: { '100g': 8.75, '200g': 14.50, '500g': 18.00, '1kg': 24.00, '2kg': 45.50, '5kg': 85.00 } },
+            '2': { name: 'Himalayan Pink Salt', prices: { '100g': 8.75, '200g': 14.50, '500g': 18.00, '1kg': 24.00, '2kg': 45.50, '5kg': 85.00 } },
+            '3': { name: 'Epsom Salts- Magnesium Sulphate', prices: { '100g': 8.75, '200g': 14.50, '500g': 18.00, '1kg': 24.00, '2kg': 45.50, '5kg': 85.00 } },
+            '4': { name: 'Boric Acid Capsules', prices: { '10': 8.65, '30': 11.99, '90': 29.95 } }
+        };
+
+        const deliveryCharge = 4.99;
+        const serviceCharge = 1.99;
+
+        // Function to display cart items and calculate total
+        function displayCartItems() {
+            let cartItemsElement = document.getElementById('cartItems');
+            let totalAmountElement = document.getElementById('totalAmount');
+            let total = 0;
+
+            cartItemsElement.innerHTML = ''; // Clear existing rows
+
+            cart.forEach(item => {
+                // Get product details from the product catalog
+                const product = products[item.id];
+                const variant = item.variant; // The selected pack size (e.g., "500g")
+                const quantity = item.quantity; // The quantity selected by the user
+                const productName = product ? product.name : 'Unknown';
+                const productPrice = product && product.prices[variant] ? product.prices[variant] : 0;
+                const itemNameAndVariant = `${productName} (${variant})`; // Display only product name and variant
+
+                const itemRow = document.createElement('tr');
+                itemRow.innerHTML = `
+                    <td>${itemNameAndVariant}</td>
+                    <td>${quantity}</td>
+                    <td>£${(productPrice * quantity).toFixed(2)}</td>
+                `;
+                cartItemsElement.appendChild(itemRow);
+                total += productPrice * quantity; // Calculate total
+            });
+
+            // Add delivery and service charges to total
+            total += deliveryCharge + serviceCharge;
+
+            // Display total amount
+            totalAmountElement.textContent = total.toFixed(2);
+        }
+
+        // Function to empty the cart
+        function emptyCart() {
+            localStorage.removeItem('basket');
+            alert('Cart has been emptied.');
+            window.location.reload(); // Reload page to update cart display
+        }
+
+        // Display PayPal button
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                const totalAmount = parseFloat(document.getElementById('totalAmount').textContent);
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: totalAmount.toFixed(2)
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    // Alert the user about the transaction
+                    alert('Transaction completed by ' + details.payer.name.given_name);
+
+                    // Get the total amount
+                    const totalAmount = parseFloat(document.getElementById('totalAmount').textContent);
+                    
+                    // Get the referral cookie if it exists
+                    const referralCookie = document.cookie.split('; ').find(row => row.startsWith('referral='));
+                    const referralCode = referralCookie ? referralCookie.split('=')[1] : null;
+
+                    // Prepare the data to send to the server
+                    const salesData = {
+                        sales_ID: 'sales_' + Date.now(), // Unique sales ID
+                        basket: JSON.stringify(cart), // Convert basket to string
+                        total: totalAmount,
+                        referral: referralCode
+                    };
+
+                    // Send data to the server using fetch
+                    fetch('insert_sales.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(salesData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Record added successfully:', data);
+                        } else {
+                            console.error('Error adding record:', data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            }
+        }).render('#paypal-button-container');
+
+        // Display cart items on page load
+        window.onload = displayCartItems;
+    </script>
+</body>
+</html>

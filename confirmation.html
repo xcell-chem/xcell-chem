@@ -1,0 +1,115 @@
+<!-- confirmation.html: Add page description here -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation</title>
+    <style>
+  
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0; /* Light grey background */
+        }
+        h1 {
+            color: #4CAF50; /* Green color */
+            border-radius: 10px;
+        }
+        .details {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        nav{
+        border-radius: 10px;
+        padding:5px 5px;
+        }
+        ul {
+        display: flex;
+        align-items: stretch; /* Default */
+        justify-content: space-between;
+        width: 100%;
+        
+        margin: 0;
+        padding: 0;
+        }
+        li {
+        display: block;
+        flex: 0 1 auto; /* Default */
+        list-style-type: none;
+        }
+        nav ul li a:hover {
+        background-color: #555;
+        }
+        nav ul li a {
+        color: white;
+        text-decoration: none;
+        padding: 8px 16px;
+        font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+<nav style="background-color: #333;">
+    <ul style="list-style-type: none; margin: 0; padding: 0; text-align: center;">
+        <li style="display: inline; margin-right: 20px;">
+            <a href="index.html" style="color: white; text-decoration: none;">Home</a>
+        </li>
+        <li style="display: inline; margin-right: 20px;">
+            <a href="uses.html" style="color: white; text-decoration: none;">Uses for shinyFlakes™</a>
+        </li>
+        <li style="display: inline;">
+            <a href="about.html" style="color: white; text-decoration: none;">More Info</a>
+        </li>
+        <li style="display: inline;">
+            <a href="feedback.html" style="color: white; text-decoration: none;">Feedback</a>
+        </li>
+    </ul>
+</nav>
+    <h1>Thank You for Your Purchase!</h1>
+    <div class="details">
+        <h2>Transaction Details</h2>
+        <p id="transaction-details"></p>
+    </div>
+    <button class="btn" onclick="location.href='home.html'">Go to Home</button>
+
+    <script>
+        // Get transaction details from localStorage
+        const transactionDetails = JSON.parse(localStorage.getItem('transactionDetails'));
+        
+        // Check if transaction details exist
+        if (transactionDetails) {
+            document.getElementById('transaction-details').innerText = 
+                Transaction ID: ${transactionDetails.id}\n +
+                Amount: £${transactionDetails.amount}\n +
+                Product: ${transactionDetails.product};
+        } else {
+            document.getElementById('transaction-details').innerText = 'No transaction details available.';
+        }
+        
+        // Clear transaction details from localStorage
+        localStorage.removeItem('transactionDetails');
+    </script>
+</body>
+</html>

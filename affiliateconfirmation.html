@@ -1,0 +1,184 @@
+<!-- affiliateconfirmation.html: Add page description here -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Confirmation - Shiny Flakes</title>
+    <style>
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden; /* Disable any scrolling */
+            font-family: 'Arial', sans-serif;
+            background-image: url('https://i.postimg.cc/TppSbvf2/Shimer.png');
+            background-size: cover;
+            background-position: center;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Centers all content vertically */
+        }
+
+        nav {
+            background-color: #333;
+            width: 100%;
+            padding: 10px 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        nav ul {
+            list-style-type: none;
+            display: flex;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+
+        nav ul li a:hover {
+            background-color: #555;
+            border-radius: 5px; /* Add rounded corners on hover */
+        }
+
+        .content {
+            background-color: rgba(30, 46, 62, 0.9);
+            padding: 20px;
+            margin: 100px auto 20px; /* Add margin to start below nav */
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 90%; /* Responsive width */
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ff9800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-top: 20px;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+        }
+
+        #referralCodeDisplay {
+            margin: 20px 0;
+            font-weight: bold;
+            color: #ff9800;
+            text-decoration: underline;
+        }
+
+        ol {
+            text-align: left;
+            margin: 20px auto;
+            padding: 0 20px; /* Padding for ol */
+            color: #fff;
+            font-size: 1.1em;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #fff;
+            background-color: #333;
+            position: relative; /* Adjust footer position */
+            margin-top: auto; /* Ensure footer stays at the bottom */
+            width: 100%;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        /* Media Query for Mobile Portrait */
+        @media (max-width: 600px) {
+            nav ul li {
+                margin: 0 5px; /* Adjust spacing for mobile */
+            }
+
+            .content {
+                padding: 15px; /* Reduce padding on mobile */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="uses.html">Uses for shinyFlakes™</a></li>
+            <li><a href="about.html">More Info</a></li>
+            <li><a href="feedback.html">Contact</a></li>
+        </ul>
+    </nav>
+
+    <div class="content">
+        <h1>Affiliate Confirmation</h1>
+        <h2>Your unique affiliate link:</h2>
+
+        <div id="referralCodeDisplay"></div> <!-- Placeholder for referral code -->
+
+        <h2>How to create a QR code for your affiliate link</h2>
+        <p>To create a QR code for your affiliate link using Google Chrome, follow these steps:</p>
+        <ol>
+            <li>After receiving your unique link, copy it.</li>
+            <li>Open a new tab in Chrome and paste your link.</li>
+            <li>Click on the address bar and look for the QR code icon on the right side.</li>
+            <li>Click the QR code icon and follow the prompts to download the QR code.</li>
+        </ol>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Shiny Flakes. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Function to get the value of a query parameter by name
+        function getQueryParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Get the referral code from the URL
+        const referralCode = getQueryParameter('affiliateID'); // Change 'referralCode' to whatever your parameter is called
+
+        // Display the referral code in the HTML
+        if (referralCode) {
+            document.getElementById('referralCodeDisplay').innerHTML =
+                "<a href='http://shinyFlake.co.uk?affiliateID=" + referralCode + "' style='color: #ff9800;'>http://www.shinyFlake.co.uk?affiliateID=" + referralCode + "</a>";
+        } else {
+            document.getElementById('referralCodeDisplay').textContent = 'No Referral Code found.';
+        }
+    </script>
+</body>
+
+</html>

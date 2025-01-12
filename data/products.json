@@ -1,0 +1,173 @@
+{
+    "products": [
+        {
+            "id": 1,
+            "active": true,
+            "archived": false,
+            "name": "Boric Acid",
+            "img": "../images/BA3pack.jpg",
+            "categories": [
+                "Household",
+                "All Products"
+            ],
+            "description": "💡 Keep your home spotless and pest-free with our high-purity boric acid! Trusted for cleaning, DIY pest control, and various household uses. 🏠 Its versatile nature makes it a must-have in every home. Safe, effective, and ready to tackle multiple tasks with ease. ✨",
+            "shortdescription": "🏠 A multipurpose household essential!",
+            "prices": [
+                {
+                    "quantity": "100g",
+                    "price": 8.75
+                },
+                {
+                    "quantity": "200g",
+                    "price": 14.5
+                },
+                {
+                    "quantity": "500g",
+                    "price": 18.0
+                },
+                {
+                    "quantity": "1kg",
+                    "price": 24.0
+                },
+                {
+                    "quantity": "2kg",
+                    "price": 45.5
+                },
+                {
+                    "quantity": "5kg",
+                    "price": 85.0
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "active": true,
+            "archived": false,
+            "name": "Himalayan Pink Salt",
+            "img": "../images/pinksalt.jpg",
+            "categories": [
+                "Household",
+                "All Products"
+            ],
+            "description": "🧂 Add a touch of natural health to your meals with our Himalayan Pink Salt! Packed with over 80 trace minerals, this salt not only enhances flavors but supports your well-being too. 🏔️ Straight from the majestic Himalayas, it's perfect for gourmet cooking, seasoning, and wellness routines. 🌟",
+            "shortdescription": "🏔️ Premium mineral-rich pink salt!",
+            "prices": [
+                {
+                    "quantity": "100g",
+                    "price": 8.75
+                },
+                {
+                    "quantity": "200g",
+                    "price": 14.5
+                },
+                {
+                    "quantity": "500g",
+                    "price": 18.0
+                },
+                {
+                    "quantity": "1kg",
+                    "price": 24.0
+                },
+                {
+                    "quantity": "2kg",
+                    "price": 45.5
+                },
+                {
+                    "quantity": "5kg",
+                    "price": 85.0
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "active": true,
+            "archived": false,
+            "name": "Epsom Salts- Magnesium Sulphate",
+            "img": "../images/Epsom.jpg",
+            "categories": [
+                "Health and Beauty",
+                "Household",
+                "Cosmetic",
+                "All Products"
+            ],
+            "description": "🛁 Transform your bath time into a relaxing spa experience with our premium Epsom Salts! Rich in magnesium, these salts soothe tired muscles, soften skin, and promote relaxation. 💆 Perfect for baths, scrubs, and therapeutic soaks. Your ticket to blissful wellness. 🌿",
+            "shortdescription": "🛁 Relaxing magnesium-rich bath salts!",
+            "prices": [
+                {
+                    "quantity": "100g",
+                    "price": 8.75
+                },
+                {
+                    "quantity": "200g",
+                    "price": 14.5
+                },
+                {
+                    "quantity": "500g",
+                    "price": 18.0
+                },
+                {
+                    "quantity": "1kg",
+                    "price": 24.0
+                },
+                {
+                    "quantity": "2kg",
+                    "price": 45.5
+                },
+                {
+                    "quantity": "5kg",
+                    "price": 85.0
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "active": true,
+            "archived": false,
+            "name": "Boric Acid Capsules",
+            "img": "../images/BAPills.jpg",
+            "categories": [
+                "Health and Beauty",
+                "All Products"
+            ],
+            "description": "🌸 Feel confident and fresh with our convenient Boric Acid Capsules. Designed for internal hygiene, these capsules support pH balance and promote comfort naturally. 🌿 Quick, easy-to-use, and effective for your well-being. Say hello to confidence and goodbye to worries! 🌟",
+            "shortdescription": "🌸 Easy-to-use capsules for hygiene!",
+            "prices": [
+                {
+                    "quantity": "10",
+                    "price": 8.65
+                },
+                {
+                    "quantity": "30",
+                    "price": 11.99
+                },
+                {
+                    "quantity": "90",
+                    "price": 29.95
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "active": true,
+            "archived": false,
+            "name": "Slime Activator",
+            "img": "../images/1lact.png",
+            "categories": [
+                "Childrens Products",
+                "All Products"
+            ],
+            "description": "🧪 Unleash creativity and fun with our premium Slime Activator! Perfect for kids and slime enthusiasts, this activator guarantees endless giggles and stretchy, gooey adventures. 👩‍🔬 Safe, easy-to-use, and perfect for DIY projects, this is the secret ingredient to magical slime-making! 🎨",
+            "shortdescription": "🧪 Perfect for slime-making fun!",
+            "prices": [
+                {
+                    "quantity": "10",
+                    "price": 8.65
+                },
+                {
+                    "quantity": "30",
+                    "price": 11.99
+                }
+            ]
+        }
+    ]
+}

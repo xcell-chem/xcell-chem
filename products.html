@@ -1,0 +1,90 @@
+<!-- products.html: Add page description here -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7SR5YRK9J"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-G7SR5YRK9J');
+    </script>
+    <meta charset="UTF-8">
+	
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XCell Chem</title>
+	 <link rel="stylesheet" href="css/main.css">
+    
+</head>
+<body>
+    <header>
+        <h1>XCell Chem</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/uses">Uses</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/feedback">Contact</a></li>
+        </ul>
+    </nav>
+<div class="content">
+       <h1>Products</h1>
+
+    <div class="container">
+        <!-- Products will be dynamically loaded here -->
+    </div>
+</div>
+
+    <script>
+        async function loadProducts() {
+            const params = new URLSearchParams(window.location.search);
+            const category = params.get("category") || "all";
+
+            try {
+                const response = await fetch("data/products.json");
+                const data = await response.json();
+                const products = data.products;
+
+                const filteredProducts = category === "all"
+                    ? products
+                    : products.filter(product =>
+                        product.categories.some(cat =>
+                            cat.toLowerCase() === category.toLowerCase()
+                        )
+                    );
+
+                const container = document.querySelector(".container");
+                container.innerHTML = "";
+
+                if (filteredProducts.length > 0) {
+                    filteredProducts.forEach(product => {
+                        const box = document.createElement("div");
+                        box.className = "box";
+                        box.innerHTML = `
+                            <a href="item.html?productid=${product.id}">
+                                <img src="${product.img}" alt="${product.name}">
+                                <p>${product.name}</p>
+                            </a>
+                        `;
+                        container.appendChild(box);
+                    });
+                } else {
+                    container.innerHTML = "<p>No products found for this category.</p>";
+                }
+            } catch (error) {
+                console.error("Error loading product data:", error);
+                document.querySelector(".container").innerHTML =
+                    "<p>Failed to load products. Please try again later.</p>";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadProducts);
+    </script>
+	 <footer>
+        <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
+    </footer>
+</body>
+</html>

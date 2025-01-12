@@ -1,0 +1,206 @@
+<!-- uses.html: Add page description here -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shinyFlakes™ Uses</title>
+    <script src="js/useslist.js" defer></script>
+    <script defer>
+        let currentIndex = 0;
+        const itemsPerPage = 10;
+
+        function displayUses() {
+            const container = document.getElementById('usesContainer');
+            const endIndex = Math.min(currentIndex + itemsPerPage, shinyFlakesUses.length);
+
+            for (let i = currentIndex; i < endIndex; i++) {
+                const item = document.createElement('div');
+                item.innerHTML = shinyFlakesUses[i]; // Use innerHTML to maintain formatting
+                container.appendChild(item);
+            }
+
+            currentIndex += itemsPerPage;
+
+            // Hide the "More" button if all items are displayed
+            if (currentIndex >= shinyFlakesUses.length) {
+                document.getElementById('loadMoreButton').style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayUses(); // Initial display of uses
+            document.getElementById('loadMoreButton').addEventListener('click', displayUses);
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-image: url('https://i.postimg.cc/TppSbvf2/Shimer.png');
+            background-size: 100vw;
+            background-repeat: repeat-y;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        nav {
+            position: fixed;
+            /* Pin the navbar to the top */
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #333;
+            z-index: 1000;
+            /* Ensure it stays on top */
+            border-radius: 10px;
+            padding: 10px 0;
+            /* Padding for the navbar */
+        }
+
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            text-align: center;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+            /* Smooth background color transition */
+        }
+
+        nav ul li a:hover {
+            background-color: #555;
+            /* Change background on hover */
+        }
+
+        header {
+            margin-bottom: 10px;
+            /* Add a gap between nav and content */
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2em;
+            text-align: center;
+            margin-top: 5px;
+            color: #f1f1f1;
+        }
+
+        main {
+            flex: 1;
+
+        }
+
+        .content {
+            background-color: #ededed;
+            padding: 5px 20px;
+            margin: 10px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            text-align: center;
+            /* Center text */
+        }
+
+        .titlecontent {
+            background-color: #ededed;
+            padding: 20px;
+            margin: 35px auto 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            text-align: center;
+            /* Center text */
+        }
+
+        ul li {
+            margin-bottom: 10px;
+        }
+
+        .load-more {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background: #007BFF;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .load-more:hover {
+            background: #0056b3;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background: #f1f1f1;
+        }
+
+        p {
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 600px) {
+            p {
+                font-size: 0.7em;
+
+            }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Shop</a></li>
+
+            <li><a href="about.html">More Info</a></li>
+            <li><a href="feedback.html">Contact</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <div class="titlecontent" style="background-color:black;text-align:center;">
+            <h1>101 More Uses for shinyFlakes™</h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="content">
+            <p>Disclaimer: The suggested uses for shinyFlakes™ are provided for informational purposes only. We make no
+                claims regarding the effectiveness, safety, or suitability of these uses. You should conduct your own
+                research and consult with professionals or experts before using shinyFlakes™ for any purpose.</h2>
+                <hr>
+            <div id="usesContainer" class="uses-container"></div>
+        </div>
+        <button id="loadMoreButton" class="load-more">More</button>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 shinyFlakes™</p>
+    </footer>
+</body>
+
+</html>

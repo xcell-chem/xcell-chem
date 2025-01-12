@@ -1,0 +1,127 @@
+<!-- countdown.html: Add page description here -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiny Flakes Countdown</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .countdown-container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #333;
+        }
+
+        .timer {
+            font-size: 2.5em;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="countdown-container" id="countdownContainer">
+    <h1>Time Left on Countdown</h1>
+    <div class="timer" id="timer">Loading...</div>
+</div>
+
+<script>
+    // Function to set a cookie
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        console.log(`Cookie set: ${name} = ${value}`);
+    }
+
+    // Function to get a cookie by name
+    function getCookie(name) {
+        const cname = name + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const cookies = decodedCookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.indexOf(cname) === 0) {
+                console.log(`Cookie found: ${cookie.substring(cname.length, cookie.length)}`);
+                return cookie.substring(cname.length, cookie.length);
+            }
+        }
+        console.log(`Cookie not found: ${name}`);
+        return "";
+    }
+
+    // Countdown logic
+    function startCountdown() {
+        const cookieName = "shinyflakesnewvisitor";
+        const countdownStartSeconds = 4 * 3600 + 55 * 60 + 20; // 4 hours, 55 minutes, 20 seconds = 17,720 seconds
+        const now = new Date().getTime();
+        
+        // Check if the cookie exists
+        let visitTime = getCookie(cookieName);
+        if (!visitTime) {
+            // If the cookie doesn't exist, set it with the current timestamp
+            setCookie(cookieName, now, 1); // 1 day expiration
+            visitTime = now; // Set visit time to now
+        } else {
+            visitTime = parseInt(visitTime); // Convert the cookie value to a number
+        }
+
+        // Calculate time difference between now and the first visit
+        const elapsedTime = Math.floor((now - visitTime) / 1000); // Elapsed time in seconds
+        let remainingTime = countdownStartSeconds - elapsedTime;
+
+        // If time has expired, stop the countdown
+        if (remainingTime <= 0) {
+            document.getElementById("timer").innerText = "Countdown expired!";
+            return;
+        }
+
+        // Update the countdown every second
+        const countdownInterval = setInterval(function () {
+            // Recalculate remaining time
+            remainingTime--;
+            
+            // Check if the countdown has ended
+            if (remainingTime <= 0) {
+                clearInterval(countdownInterval);
+                document.getElementById("timer").innerText = "Countdown expired!";
+                return;
+            }
+
+            // Convert remaining time into hours, minutes, and seconds
+            const hours = Math.floor(remainingTime / 3600);
+            const minutes = Math.floor((remainingTime % 3600) / 60);
+            const seconds = remainingTime % 60;
+
+            // Display the countdown in the format HH:MM:SS
+            document.getElementById("timer").innerText = 
+                String(hours).padStart(2, '0') + ":" + 
+                String(minutes).padStart(2, '0') + ":" + 
+                String(seconds).padStart(2, '0');
+        }, 1000);
+    }
+
+    // Start the countdown on page load
+    window.onload = startCountdown;
+</script>
+
+</body>
+</html>
