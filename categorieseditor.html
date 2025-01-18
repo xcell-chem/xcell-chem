@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Editor</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1e1e2f;
+            color: #dcdcdc;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            padding: 20px 0;
+            background: linear-gradient(to right, #2a2a40, #1e1e2f);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            margin: 0 0 20px;
+        }
+
+        .description {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #9e9e9e;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #2a2a40;
+            color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #444;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3a3a50;
+            color: #ffffff;
+        }
+
+        td input {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            background-color: #39395b;
+            color: #ffffff;
+        }
+
+        td input:focus {
+            outline: 2px solid #5a5ab5;
+            background-color: #444466;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #5a5ab5;
+            color: #ffffff;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #4a4aa0;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 8px 10px;
+            }
+
+            button {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>JSON Editor</h1>
+    <p class="description">
+        Edit and save your JSON file with ease.
+    </p>
+
+    <form id="json-editor">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="json-table-body">
+                <!-- Dynamic content will be added here -->
+            </tbody>
+        </table>
+        <button type="button" onclick="addRow()">Add Row</button>
+        <button type="button" onclick="saveJSON()">Save JSON</button>
+    </form>
+
+    <script>
+        const jsonData = [
+            {
+                "name": "Childrens Products",
+                "image": "../images/1lact.png",
+                "description": "Products designed for children's needs."
+            },
+            {
+                "name": "Household",
+                "image": "../images/BA3pack.jpg",
+                "description": "Find everything you need for your home."
+            },
+            {
+                "name": "Health and Beauty",
+                "image": "../images/BAPills.jpg",
+                "description": "Explore our range of health and beauty products."
+            },
+            {
+                "name": "All Products",
+                "image": "../images/pinksalt.jpg",
+                "description": "Browse all categories and products in one place."
+            },
+            {
+                "name": "Cosmetic",
+                "image": "../placeholder.jpg",
+                "description": "Explore our range of cosmetic products."
+            },
+            {
+                "name": "Beauty",
+                "image": "../placeholder.jpg",
+                "description": "Discover products to enhance your beauty."
+            }
+        ];
+
+        function loadTable() {
+            const tableBody = document.getElementById('json-table-body');
+            tableBody.innerHTML = '';
+            jsonData.forEach((item, index) => {
+                const row = `
+                    <tr>
+                        <td><input type="text" value="${item.name}" data-index="${index}" data-key="name"></td>
+                        <td><input type="text" value="${item.image}" data-index="${index}" data-key="image"></td>
+                        <td><input type="text" value="${item.description}" data-index="${index}" data-key="description"></td>
+                        <td><button type="button" onclick="deleteRow(${index})">Delete</button></td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        function addRow() {
+            jsonData.push({ name: '', image: '', description: '' });
+            loadTable();
+        }
+
+        function deleteRow(index) {
+            jsonData.splice(index, 1);
+            loadTable();
+        }
+
+        function saveJSON() {
+            const inputs = document.querySelectorAll('input[data-index]');
+            inputs.forEach(input => {
+                const index = input.getAttribute('data-index');
+                const key = input.getAttribute('data-key');
+                jsonData[index][key] = input.value;
+            });
+
+            const jsonBlob = new Blob([JSON.stringify(jsonData, null, 4)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(jsonBlob);
+            link.download = 'data.json';
+            link.click();
+        }
+
+        loadTable();
+    </script>
+</body>
+</html>
