@@ -99,7 +99,6 @@
 
         async function loadCategories() {
             try {
-                console.log('[loadCategories] Fetching categories...');
                 const { data: categories, error } = await supabaseClient.from('categories').select('*');
 
                 if (error) throw error;
@@ -119,11 +118,16 @@
         }
 
         function populateProductDetails(product) {
+            const savedProducts = localStorage.getItem('products');
+            if (savedProducts) {
+                products = JSON.parse(savedProducts);
+            }
+
             document.getElementById('name').value = product.name || '';
             document.getElementById('img').value = product.img || '';
             document.getElementById('imagePreview').src = product.img || '';
             document.getElementById('imagePreview').style.display = product.img ? 'block' : 'none';
-            document.getElementById('description').value = product.description || '';
+            document.getElementById('description').value = products[currentIndex]?.description || product.description || '';
             document.getElementById('shortdescription').value = product.shortdescription || '';
             document.getElementById('active').checked = product.active || false;
 
@@ -162,9 +166,15 @@
             return tableHtml;
         }
 
+        function deletePriceRow(index) {
+            console.log(`[deletePriceRow] Deleting price row at index: ${index}`);
+            products[currentIndex].product_prices.splice(index, 1);
+            saveToLocalStorage();
+            populatePriceTable(products[currentIndex].product_prices);
+        }
+
         function attachEventListeners() {
             document.getElementById('addPricingRowButton').addEventListener('click', () => {
-                console.log('[addPricingRowButton] Adding a price row...');
                 products[currentIndex].product_prices.push({ quantity: '', price: 0 });
                 saveToLocalStorage();
                 populatePriceTable(products[currentIndex].product_prices);
@@ -232,41 +242,11 @@
 
                 if (error) throw error;
 
-                console.log('[addCategory] Category added successfully.');
                 saveToLocalStorage();
                 await loadProducts();
                 populateProductDetails(products[currentIndex]);
             } catch (error) {
                 console.error('[addCategory] Failed to add category:', error);
-            }
-        }
-
-        async function removeCategory(categoryName) {
-            const productId = products[currentIndex].id;
-
-            try {
-                const { data: categories, error: fetchError } = await supabaseClient
-                    .from('categories')
-                    .select('id')
-                    .eq('name', categoryName)
-                    .single();
-
-                if (fetchError) throw fetchError;
-
-                const categoryId = categories.id;
-
-                const { error } = await supabaseClient
-                    .from('product_category')
-                    .delete()
-                    .match({ product_id: productId, category_id: categoryId });
-
-                if (error) throw error;
-
-                saveToLocalStorage();
-                await loadProducts();
-                populateProductDetails(products[currentIndex]);
-            } catch (error) {
-                console.error('[removeCategory] Failed to remove category:', error);
             }
         }
 
@@ -291,45 +271,6 @@
                 alert('Record saved successfully!');
             } catch (error) {
                 console.error('[saveRecord] Failed to save record:', error);
-            }
-        }
-
-        async function saveNewRecord() {
-            const product = {
-                name: document.getElementById('name').value,
-                img: document.getElementById('img').value,
-                description: document.getElementById('description').value,
-                shortdescription: document.getElementById('shortdescription').value,
-                active: document.getElementById('active').checked,
-                product_prices: [],
-                product_category: [],
-            };
-
-            try {
-                const { data, error } = await supabaseClient.from('products').insert(product);
-
-                if (error) throw error;
-
-                products.push(data[0]);
-                currentIndex = products.length - 1;
-                saveToLocalStorage();
-                alert('New record saved successfully!');
-                populateProductDetails(data[0]);
-            } catch (error) {
-                console.error('[saveNewRecord] Failed to save new record:', error);
-            }
-        }
-
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const imagePreview = document.getElementById('imagePreview');
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
             }
         }
     </script>
