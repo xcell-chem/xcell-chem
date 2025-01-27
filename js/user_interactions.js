@@ -1,5 +1,5 @@
 
-/
+
 /**
  * Attach event listeners to buttons and inputs
  */
