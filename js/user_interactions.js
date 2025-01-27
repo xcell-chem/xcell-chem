@@ -22,17 +22,26 @@ async function saveRecord() {
 /**
  * Load products and render them to the DOM
  */
+/**
+ * Load products and render them to the DOM
+ */
 async function initializePage() {
     console.log('[DEBUG] Initializing page...');
     const products = await loadProducts();
+
+    if (!products || !Array.isArray(products)) {
+        console.warn('[WARN] Failed to load products or products is not an array.');
+        return;
+    }
 
     if (products.length === 0) {
         console.warn('[WARN] No products found in the database.');
     } else {
         console.log('[DEBUG] Rendering products to the page...', products);
-        renderProducts(products); // Ensure renderProducts function exists and works
+        renderProducts(products); // Ensure renderProducts exists and is implemented correctly
     }
 }
+
 
 attachEventListeners();
 initializePage();

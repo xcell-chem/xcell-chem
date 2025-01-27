@@ -7,26 +7,33 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 /**
  * Load products from the database
  */
+/**
+ * Load products from the database
+ */
 async function loadProducts() {
+    console.log('[DEBUG] Attempting to load products from the database...');
     try {
         const { data, error } = await supabaseClient
             .from('products')
             .select(`
                 *,
                 product_prices (quantity, price),
-                product_category (categories (name))
+                product_categories (name)
             `);
 
-        if (error) throw error;
-
-        products = data;
-        if (products.length > 0) {
-            populateProductDetails(products[currentIndex]);
+        if (error) {
+            console.error('[ERROR] Failed to load products:', error);
+            return []; // Return an empty array on error to avoid undefined
         }
-    } catch (error) {
-        console.error('[Error] Failed to load products:', error);
+
+        console.log('[DEBUG] Products fetched successfully:', data);
+        return data;
+    } catch (err) {
+        console.error('[ERROR] Unexpected error while loading products:', err);
+        return []; // Return an empty array on exception
     }
 }
+
 
 /**
  * Load categories from the database
