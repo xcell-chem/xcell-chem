@@ -37,9 +37,20 @@ async function initializePage() {
     if (products.length === 0) {
         console.warn('[WARN] No products found in the database.');
     } else {
-        console.log('[DEBUG] Rendering products to the page...', products);
-        renderProducts(products); // Ensure renderProducts exists and is implemented correctly
+        console.log('[DEBUG] Rendering products to the page...');
+        renderProducts(products); // Call renderProducts here
     }
+}
+
+function renderProducts(products) {
+    const productList = document.getElementById('product-list');
+    productList.innerHTML = ''; // Clear the list
+
+    products.forEach((product) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = product.products.name; // Access the related product name
+        productList.appendChild(listItem);
+    });
 }
 
 

@@ -10,29 +10,24 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 /**
  * Load products from the database
  */
-async function loadProducts() {
-    console.log('[DEBUG] Attempting to load products from the database...');
-    try {
-        const { data, error } = await supabaseClient
-            .from('products')
-            .select(`
-                *,
-                product_prices (quantity, price),
-                product_category (name) -- Adjusted relationship name
-            `);
+async function initializePage() {
+    console.log('[DEBUG] Initializing page...');
+    const products = await loadProducts();
 
-        if (error) {
-            console.error('[ERROR] Failed to load products:', error);
-            return []; // Return an empty array on error
-        }
+    if (!products || !Array.isArray(products)) {
+        console.warn('[WARN] Failed to load products or products is not an array.');
+        return;
+    }
 
-        console.log('[DEBUG] Products fetched successfully:', data);
-        return data;
-    } catch (err) {
-        console.error('[ERROR] Unexpected error while loading products:', err);
-        return [];
+    if (products.length === 0) {
+        console.warn('[WARN] No products found in the database.');
+    } else {
+        console.log('[DEBUG] Rendering products to the page...', products);
+        renderProducts(products); // Ensure renderProducts can handle the new data structure
     }
 }
+
+
 
 
 
