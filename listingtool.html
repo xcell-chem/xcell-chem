@@ -8,29 +8,31 @@
     <link rel="stylesheet" href="css/styles.css">
 
     <!-- Load Supabase library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.6.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.6.4/dist/supabase.js"></script>
     <script>
-        // Check if Supabase is loaded
-        console.log('[Debug] Checking Supabase library:', typeof supabase);
+        window.onload = function () {
+            // Test if the library is loaded
+            console.log('[Debug] Supabase Object:', typeof supabase);
 
-        if (typeof supabase === 'undefined') {
-            console.error('[Error] Supabase library is not loaded!');
-            alert('Supabase library failed to load. Please check your network or script tag.');
-        }
+            if (typeof supabase === 'undefined') {
+                console.error('[Error] Supabase library failed to load.');
+                alert('Supabase library not loaded. Check your network or CDN source.');
+                return;
+            }
 
-        // Supabase configuration
-        const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
+            // Supabase configuration
+            const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
 
-        let supabase;
+            let supabase;
 
-        try {
-            supabase = supabase.createClient(supabaseUrl, supabaseKey);
-            console.log('[Supabase Initialized Successfully]', supabase);
-        } catch (error) {
-            console.error('[Supabase Initialization Failed]', error);
-            alert('Failed to initialize Supabase. Please check the console for details.');
-        }
+            try {
+                supabase = supabase.createClient(supabaseUrl, supabaseKey);
+                console.log('[Supabase Initialized Successfully]', supabase);
+            } catch (error) {
+                console.error('[Supabase Initialization Failed]', error);
+                alert('Failed to initialize Supabase. Please check your configuration.');
+            }
 
         // Debugging: Verify the Supabase object after initialization
         console.log('[Debug] Supabase object:', supabase);
