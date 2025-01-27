@@ -17,12 +17,12 @@
 
         // Wait for the entire window to load before running Supabase initialization
         window.onload = async function () {
-            console.log('[Debug] Checking Supabase library:', typeof supabase);
+            console.log('[Debug] Checking Supabase library:', typeof supabaseClient);
 
-            // Verify the Supabase library is available
-            if (typeof supabase === 'undefined') {
-                console.error('[Error] Supabase library failed to load.');
-                alert('Supabase library not loaded. Check your network or CDN source.');
+            // Verify the Supabase client is available
+            if (typeof supabaseClient === 'undefined') {
+                console.error('[Error] Supabase client failed to load.');
+                alert('Supabase client not loaded. Check your network or CDN source.');
                 return;
             }
 
