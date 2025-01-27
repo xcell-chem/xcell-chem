@@ -2,9 +2,6 @@
 <html lang="en">
 <head>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"></script>
-
-    
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XCell Chem</title>
@@ -35,53 +32,33 @@
         <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
     </footer>
     <script>
-        const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        document.addEventListener('DOMContentLoaded', () => {
+            const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
+            const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Function to load categories dynamically from Supabase
-        async function loadCategories() {
-    try {
-        console.log('[Debug] Fetching categories...');
-        const { data: categories, error } = await supabase.from('categories').select('*');
+            async function loadCategories() {
+                try {
+                    const { data: categories, error } = await supabase.from('categories').select('*');
+                    if (error) throw error;
 
-        // Debug the response
-        if (error) {
-            console.error('[Error] Failed to fetch categories:', error.message);
-            throw new Error('Failed to load categories.');
-        }
+                    const container = document.querySelector('.container');
+                    container.innerHTML = categories.map(cat => `
+                        <div class="box">
+                            <a href="/products.html?category=${encodeURIComponent(cat.name)}">
+                                <img src="${cat.image}" alt="${cat.name}">
+                                <p>${cat.name}</p>
+                            </a>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    document.querySelector('.container').innerHTML = '<p>Error loading categories.</p>';
+                    console.error(error);
+                }
+            }
 
-        if (!categories || categories.length === 0) {
-            console.warn('[Warning] No categories found in the database.');
-            document.querySelector(".container").innerHTML = "<p>No categories found.</p>";
-            return;
-        }
-
-        const container = document.querySelector(".container");
-        container.innerHTML = '';
-
-        categories.forEach(category => {
-            const box = document.createElement("div");
-            box.className = "box";
-            box.innerHTML = `
-                <a href="/products.html?category=${encodeURIComponent(category.name)}">
-                    <img src="${category.image}" alt="${category.name}">
-                    <p>${category.name}</p>
-                </a>
-            `;
-            container.appendChild(box);
+            loadCategories();
         });
-
-        console.log('[Debug] Categories loaded successfully:', categories);
-    } catch (error) {
-        console.error('Error loading categories:', error);
-        document.querySelector(".container").innerHTML =
-            "<p>Failed to load categories. Please try again later.</p>";
-    }
-}
-
-
-        document.addEventListener('DOMContentLoaded', loadCategories);
     </script>
 </body>
 </html>
