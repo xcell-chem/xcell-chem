@@ -32,8 +32,8 @@
                 console.log('[Supabase Initialized Successfully]', supabase);
 
                 // Fetch initial data
-                await fetchProducts(supabase);
-                await fetchCategories(supabase);
+                await fetchProducts(supabaseClient);
+                await fetchCategories(supabaseClient);
             } catch (error) {
                 console.error('[Supabase Initialization Failed]', error);
                 alert('Failed to initialize Supabase. Please check your configuration.');
@@ -42,10 +42,10 @@
         };
 
         // Fetch products from the Supabase database
-        async function fetchProducts(supabase) {
+        async function fetchProducts(supabaseClient) {
             try {
                 console.log('[fetchProducts] Fetching products...');
-                const { data: products, error } = await supabase
+                const { data: products, error } = await supabaseClient
                     .from('products')
                     .select('*, product_prices(quantity, price), categories(name)');
 
@@ -65,10 +65,10 @@
         }
 
         // Fetch categories from the Supabase database
-        async function fetchCategories(supabase) {
+        async function fetchCategories(supabaseClient) {
             try {
                 console.log('[fetchCategories] Fetching categories...');
-                const { data: categories, error } = await supabase.from('categories').select('*');
+                const { data: categories, error } = await supabaseClient.from('categories').select('*');
 
                 if (error) throw error;
 
