@@ -34,58 +34,165 @@
             <!-- Products will be dynamically loaded here -->
         </div>
     </div>
-
     <script>
-        async function loadProducts() {
-            const params = new URLSearchParams(window.location.search);
-            const category = params.get("category") || "all";
-
-            try {
-                // Fetch products from Supabase
-                const { data: products, error } = await supabaseClient
-                    .from('products')
-                    .select('*');
-
-                if (error) {
-                    throw new Error(error.message);
+    
+        async
+         
+        function
+         
+        loadProducts
+        (
+        ) 
+        {
+                
+        const
+         params = 
+        new
+         URLSearchParams(
+        window
+        .location.search);
+                
+        const
+         category = params.get(
+        "category"
+        ) || 
+        "all"
+        ;
+                
+        try
+         {
+                    
+        // Fetch products from Supabase
+        
+                    
+        const
+         { 
+        data
+        : products, error } = 
+        await
+         supabaseClient
+                        .from(
+        'products'
+        )
+                        .select(
+        '*'
+        );
+                    
+        if
+         (error) {
+                        
+        throw
+         
+        new
+         
+        Error
+        (error.message);
+                    }
+                    
+        console
+        .log(
+        "Fetched Products:"
+        , products); 
+        // Debugging line
+        
+                    
+        // Filter products based on category
+        
+                    
+        const
+         filteredProducts = category === 
+        "all"
+        
+                        ? products
+                        : products.filter(
+        product
+         =>
+         
+                            product.categories && product.categories.some(
+        cat
+         =>
+         
+                                cat.toLowerCase() === category.toLowerCase()
+                            )
+                        );
+                    
+        const
+         container = 
+        document
+        .querySelector(
+        ".container"
+        );
+                    container.innerHTML = 
+        ""
+        ;
+                    
+        if
+         (filteredProducts.length > 
+        0
+        ) {
+                        filteredProducts.forEach(
+        product
+         =>
+         {
+                            
+        const
+         box = 
+        document
+        .createElement(
+        "div"
+        );
+                            box.className = 
+        "box"
+        ;
+                            box.innerHTML = 
+        `
+                                <a href="item.html?productid=
+        ${product.id}
+        ">
+                                    <img src="
+        ${product.img}
+        " alt="
+        ${product.name}
+        ">
+                                    <p>
+        ${product.name}
+        </p>
+                                </a>
+                            `
+        ;
+                            container.appendChild(box);
+                        });
+                    } 
+        else
+         {
+                        container.innerHTML = 
+        "<p>No products found for this category.</p>"
+        ;
+                    }
+                } 
+        catch
+         (error) {
+                    
+        console
+        .error(
+        "Error loading products:"
+        , error);
+                    
+        document
+        .querySelector(
+        ".container"
+        ).innerHTML =
+                        
+        "<p>Failed to load products. Please try again later.</p>"
+        ;
                 }
-
-                // Filter products based on category
-                const filteredProducts = category === "all"
-                    ? products
-                    : products.filter(product => 
-                        product.categories && product.categories.some(cat => 
-                            cat.toLowerCase() === category.toLowerCase()
-                        )
-                    );
-
-                const container = document.querySelector(".container");
-                container.innerHTML = "";
-
-                if (filteredProducts.length > 0) {
-                    filteredProducts.forEach(product => {
-                        const box = document.createElement("div");
-                        box.className = "box";
-                        box.innerHTML = `
-                            <a href="item.html?productid=${product.id}">
-                                <img src="${product.img}" alt="${product.name}">
-                                <p>${product.name}</p>
-                            </a>
-                        `;
-                        container.appendChild(box);
-                    });
-                } else {
-                    container.innerHTML = "<p>No products found for this category.</p>";
-                }
-            } catch (error) {
-                console.error("Error loading products:", error);
-                document.querySelector(".container").innerHTML =
-                    "<p>Failed to load products. Please try again later.</p>";
             }
-        }
-
-        document.addEventListener("DOMContentLoaded", loadProducts);
-    </script>
+            
+        document
+        .addEventListener(
+        "DOMContentLoaded"
+        , loadProducts);
+        </script>
 
     <footer>
         <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
