@@ -78,29 +78,30 @@
         });
 
         async function loadProducts() {
-            try {
-                console.log('[loadProducts] Fetching products...');
-                const { data, error } = await supabaseClient
-                    .from('products')
-                    .select(`
-                        *,
-                        product_prices (quantity, price),
-                        product_category (category_id) -- Adjusted table name for categories
-                    `);
+    try {
+        console.log('[loadProducts] Fetching products...');
+        const { data, error } = await supabaseClient
+            .from('products')
+            .select(`
+                *,
+                product_prices (quantity, price),
+                product_category (categories (name)) -- Fetch category name
+            `);
 
-                if (error) throw error;
+        if (error) throw error;
 
-                products = data;
-                if (products.length > 0) {
-                    populateProductDetails(products[currentIndex]);
-                } else {
-                    alert('No products found in the database.');
-                }
-            } catch (error) {
-                console.error('[Error] Failed to load products:', error);
-                alert('Failed to load products. Check the console for details.');
-            }
+        products = data;
+        if (products.length > 0) {
+            populateProductDetails(products[currentIndex]);
+        } else {
+            alert('No products found in the database.');
         }
+    } catch (error) {
+        console.error('[Error] Failed to load products:', error);
+        alert('Failed to load products. Check the console for details.');
+    }
+}
+
 
         async function loadCategories() {
             try {
@@ -138,15 +139,46 @@
         }
 
         function populateCategoryList(categories) {
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = '';
-            categories.forEach(category => {
-                const li = document.createElement('li');
-                li.textContent = category.category_id; // Adjust based on your schema
-                li.addEventListener('click', () => removeCategory(category.category_id));
-                categoryList.appendChild(li);
-            });
-        }
+    const categoryList = document.getElementById('categoryList');
+    categoryList.innerHTML = '';
+    categories.forEach(category => {
+        const li = document.createElement('li');
+        li.textContent = category.categories.name; // Access the name of the category
+        li.addEventListener('click', () => removeCategory(category.categories.name));
+        categoryList.appendChild(li);
+    });
+}
+async function removeCategory(categoryName) {
+    const productId = products[currentIndex].id;
+
+    try {
+        const { data: categories, error: fetchError } = await supabaseClient
+            .from('categories')
+            .select('id')
+            .eq('name', categoryName)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        const categoryId = categories.id;
+
+        const { error } = await supabaseClient
+            .from('product_category')
+            .delete()
+            .match({ product_id: productId, category_id: categoryId });
+
+        if (error) throw error;
+
+        console.log('[removeCategory] Category removed successfully.');
+        await loadProducts(); // Refresh products to reflect changes
+        populateProductDetails(products[currentIndex]); // Keep current product data intact
+    } catch (error) {
+        console.error('[removeCategory] Failed to remove category:', error);
+        alert('Failed to remove category. Check the console for details.');
+    }
+}
+
+
 
         function populatePriceTable(prices) {
             const priceTableContainer = document.getElementById('priceTableContainer');
@@ -169,10 +201,25 @@
         }
 
         async function addCategory() {
-            const categoryName = document.getElementById('availableCategories').value;
-            console.log('[addCategory] Adding category:', categoryName);
-            // Add logic to update categories in the database
-        }
+    const categoryId = document.getElementById('availableCategories').value;
+    const productId = products[currentIndex].id;
+
+    try {
+        const { error } = await supabaseClient
+            .from('product_category')
+            .insert([{ product_id: productId, category_id: categoryId }]);
+
+        if (error) throw error;
+
+        console.log('[addCategory] Category added successfully.');
+        await loadProducts(); // Refresh products to reflect changes
+        populateProductDetails(products[currentIndex]); // Keep current product data intact
+    } catch (error) {
+        console.error('[addCategory] Failed to add category:', error);
+        alert('Failed to add category. Check the console for details.');
+    }
+}
+
 
         async function deletePriceRow(index) {
             console.log('[deletePriceRow] Deleting price row at index:', index);
