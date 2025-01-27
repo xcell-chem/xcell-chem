@@ -137,15 +137,16 @@
         }
 
         function populateCategoryList(categories) {
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = '';
-            categories.forEach(category => {
-                const li = document.createElement('li');
-                li.textContent = category.category_id; // Adjust based on your schema
-                li.addEventListener('click', () => removeCategory(category.category_id));
-                categoryList.appendChild(li);
-            });
-        }
+    const categoryList = document.getElementById('categoryList');
+    categoryList.innerHTML = '';
+    categories.forEach(category => {
+        const li = document.createElement('li');
+        li.textContent = category.category_name; // Use category_name instead of category_id
+        li.addEventListener('click', () => removeCategory(category.category_name));
+        categoryList.appendChild(li);
+    });
+}
+
 
         function populatePriceTable(prices) {
             const priceTableContainer = document.getElementById('priceTableContainer');
