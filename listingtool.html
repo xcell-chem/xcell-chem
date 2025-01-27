@@ -59,11 +59,10 @@
         </div>
     </div>
 
-    <!-- Load Supabase library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"></script>
     <script>
         const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
+        const supabaseKey = 'YOUR_SUPABASE_KEY';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         let currentIndex = 0;
@@ -106,7 +105,6 @@
         async function loadCategories() {
             try {
                 const { data: categories, error } = await supabaseClient.from('categories').select('*');
-
                 if (error) throw error;
 
                 const categoryDropdown = document.getElementById('availableCategories');
@@ -167,31 +165,21 @@
             return tableHtml;
         }
 
-        function deletePriceRow(index) {
-            products[currentIndex].product_prices.splice(index, 1);
-            saveToLocalStorage();
-            populatePriceTable(products[currentIndex].product_prices);
+        function saveToLocalStorage() {
+            const product = collectFormData();
+            localStorage.setItem('currentProduct', JSON.stringify(product));
+            localStorage.setItem('useLocalStorage', true);
         }
 
-        function addPricingRow() {
-            products[currentIndex].product_prices.push({ quantity: '', price: 0 });
-            saveToLocalStorage();
-            populatePriceTable(products[currentIndex].product_prices);
-        }
-
-        function attachEventListeners() {
-            document.getElementById('saveRecordButton').addEventListener('click', saveRecord);
-            document.getElementById('saveNewRecordButton').addEventListener('click', saveNewRecord);
-            document.getElementById('addCategoryButton').addEventListener('click', addCategory);
-            document.getElementById('addPricingRowButton').addEventListener('click', addPricingRow);
-            document.getElementById('previousRecordButton').addEventListener('click', showPreviousRecord);
-            document.getElementById('nextRecordButton').addEventListener('click', showNextRecord);
-            document.getElementById('changeImageButton').addEventListener('click', () => {
-                document.getElementById('imageInput').click();
-            });
+        function restoreFromLocalStorage() {
+            const savedProduct = localStorage.getItem('currentProduct');
+            if (savedProduct) {
+                populateProductDetails(JSON.parse(savedProduct));
+            }
         }
 
         async function addCategory() {
+            saveToLocalStorage(); // Save current form data before refreshing the UI
             const categoryId = document.getElementById('availableCategories').value;
             const productId = products[currentIndex].id;
 
@@ -202,86 +190,15 @@
 
                 if (error) throw error;
 
-                saveToLocalStorage();
-                await loadProducts();
+                await loadProducts(); // Refresh product data
                 populateProductDetails(products[currentIndex]);
             } catch (error) {
                 console.error('[addCategory] Failed to add category:', error);
             }
         }
 
-        async function saveRecord() {
-            const product = collectFormData();
-            saveToLocalStorage();
-            try {
-                const { error } = await supabaseClient
-                    .from('products')
-                    .update(product)
-                    .eq('id', products[currentIndex].id);
-
-                if (error) throw error;
-                alert('Record saved successfully!');
-            } catch (error) {
-                console.error('[saveRecord] Failed to save record:', error);
-            }
-        }
-
-        async function saveNewRecord() {
-            const product = collectFormData();
-            try {
-                const { data, error } = await supabaseClient.from('products').insert(product);
-
-                if (error) throw error;
-
-                products.push(data[0]);
-                currentIndex = products.length - 1;
-                saveToLocalStorage();
-                populateProductDetails(data[0]);
-                alert('New record saved successfully!');
-            } catch (error) {
-                console.error('[saveNewRecord] Failed to save new record:', error);
-            }
-        }
-
-        function collectFormData() {
-            return {
-                name: document.getElementById('name').value,
-                img: document.getElementById('img').value,
-                description: document.getElementById('description').value,
-                shortdescription: document.getElementById('shortdescription').value,
-                active: document.getElementById('active').checked,
-            };
-        }
-
-        function restoreFromLocalStorage() {
-            const savedProduct = localStorage.getItem('currentProduct');
-            if (savedProduct) {
-                populateProductDetails(JSON.parse(savedProduct));
-            }
-        }
-
-        function saveToLocalStorage() {
-            const product = collectFormData();
-            localStorage.setItem('currentProduct', JSON.stringify(product));
-            localStorage.setItem('useLocalStorage', true);
-        }
-
-        function showPreviousRecord() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                populateProductDetails(products[currentIndex]);
-            } else {
-                alert('Already at the first record.');
-            }
-        }
-
-        function showNextRecord() {
-            if (currentIndex < products.length - 1) {
-                currentIndex++;
-                populateProductDetails(products[currentIndex]);
-            } else {
-                alert('Already at the last record.');
-            }
+        function attachEventListeners() {
+            document.getElementById('addCategoryButton').addEventListener('click', addCategory);
         }
     </script>
 </body>
