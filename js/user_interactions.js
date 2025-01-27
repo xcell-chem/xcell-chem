@@ -22,7 +22,7 @@ function onLoadProducts() {
   }
   
   // Suppose you bind to a button click:
-  document.getElementById('load-button').addEventListener('click', onLoadProducts)
+ // document.getElementById('load-button').addEventListener('click', onLoadProducts)
   
 /**
  * Display a single product on the page
