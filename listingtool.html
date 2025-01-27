@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Editor</title>
     <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Load Supabase library -->
+    <script>
+        console.log('[Debug] Attempting to load Supabase library from CDN...');
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.6.4/dist/supabase.js" 
+        onload="console.log('[Debug] Supabase library loaded successfully.')"
+        onerror="console.error('[Error] Failed to load Supabase library. Check your network or CDN URL.'); alert('Failed to load Supabase library. Check console for details.');">
+    </script>
 </head>
 
 <body>
@@ -40,20 +49,19 @@
         </div>
     </div>
 
-    <!-- Load Supabase library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.6.4/dist/supabase.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('[Debug] DOMContentLoaded event fired.');
 
             // Check if Supabase is loaded
+            console.log('[Debug] Checking typeof supabase:', typeof supabase);
             if (typeof supabase === 'undefined') {
                 console.error('[Error] Supabase library failed to load.');
-                alert('Supabase library not loaded. Please check your CDN link or network connection.');
+                alert('Supabase library is undefined. Please ensure the CDN URL is correct or check your internet connection.');
                 return;
             }
 
-            console.log('[Debug] Supabase library loaded successfully.');
+            console.log('[Debug] Supabase library is loaded.');
 
             // Supabase configuration
             const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
