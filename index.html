@@ -35,11 +35,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-            const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+            const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
             async function loadCategories() {
                 try {
-                    const { data: categories, error } = await supabase.from('categories').select('*');
+                    const { data: categories, error } = await supabaseClient.from('categories').select('*');
                     if (error) throw error;
 
                     const container = document.querySelector('.container');
