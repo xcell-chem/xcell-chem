@@ -4,14 +4,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 /**
- * Load products from the database
- */
-// db_access.js
-const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
-const supabaseKey = 'YOUR_SUPABASE_KEY';
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-/**
  * Load products from the database
  */
 window.loadProducts = async function () {
@@ -33,6 +26,7 @@ window.loadProducts = async function () {
         return [];
     }
 };
+
 
 /**
  * Save a product to the database

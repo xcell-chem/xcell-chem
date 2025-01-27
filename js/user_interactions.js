@@ -53,17 +53,24 @@ function showPreviousProduct() {
  */
 async function initializePage() {
     console.log('[DEBUG] Initializing page...');
-    productList = await window.loadProducts(); // Load products into the array
+    try {
+        const products = await window.loadProducts(); // Ensure this function is accessible
 
-    if (!productList || productList.length === 0) {
-        console.warn('[WARN] No products found in the database.');
-        return;
+        if (!products || !Array.isArray(products)) {
+            console.warn('[WARN] Failed to load products or products is not an array.');
+            return;
+        }
+
+        if (products.length === 0) {
+            console.warn('[WARN] No products found in the database.');
+        } else {
+            renderProducts(products); // Ensure renderProducts is defined correctly
+        }
+    } catch (error) {
+        console.error('[ERROR] An error occurred while initializing the page:', error);
     }
-
-    console.log('[DEBUG] Products loaded:', productList);
-    currentIndex = 0; // Start with the first product
-    displayProduct(productList[currentIndex]); // Display the first product
 }
+
 
 // Initialize the page and attach event listeners
 attachEventListeners();
