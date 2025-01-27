@@ -1,5 +1,6 @@
+
+// user_interactions.js
 import { loadProducts } from './db_access.js';
-// Functions related to user interactions and button presses
 
 /**
  * Attach event listeners to buttons and inputs
@@ -8,22 +9,35 @@ function attachEventListeners() {
     console.log('[DEBUG] Attaching event listeners...');
     document.getElementById('saveRecordButton')?.addEventListener('click', saveRecord);
     document.getElementById('saveNewRecordButton')?.addEventListener('click', saveNewRecord);
-    // Add more event listeners as needed
 }
 
 /**
  * Save a new record
  */
-async function saveRecord() {
-    console.log('[DEBUG] Save Record button clicked.');
-    // Implement the logic to save the record
+async function saveNewRecord() {
+    console.log('[DEBUG] Save New Record button clicked.');
+    // Add logic to save a new record
 }
 
 /**
- * Load products and render them to the DOM
+ * Render products to the DOM
+ * @param {Array} products - List of products fetched from the database
  */
+function renderProducts(products) {
+    console.log('[DEBUG] Rendering products...', products);
+
+    const productList = document.getElementById('product-list'); // Ensure this ID exists in your HTML
+    productList.innerHTML = ''; // Clear the list before adding new items
+
+    products.forEach((product) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = product.products.name; // Adjust for your data structure
+        productList.appendChild(listItem);
+    });
+}
+
 /**
- * Load products and render them to the DOM
+ * Initialize the page by loading products and setting up event listeners
  */
 async function initializePage() {
     console.log('[DEBUG] Initializing page...');
@@ -37,22 +51,9 @@ async function initializePage() {
     if (products.length === 0) {
         console.warn('[WARN] No products found in the database.');
     } else {
-        console.log('[DEBUG] Rendering products to the page...');
-        renderProducts(products); // Call renderProducts here
+        renderProducts(products);
     }
 }
-
-function renderProducts(products) {
-    const productList = document.getElementById('product-list');
-    productList.innerHTML = ''; // Clear the list
-
-    products.forEach((product) => {
-        const listItem = document.createElement('li');
-        listItem.textContent = product.products.name; // Access the related product name
-        productList.appendChild(listItem);
-    });
-}
-
 
 attachEventListeners();
 initializePage();

@@ -1,3 +1,5 @@
+
+// db_access.js
 // Functions to access the database
 
 const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
@@ -7,29 +9,6 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 /**
  * Load products from the database
  */
-/**
- * Load products from the database
- */
-async function initializePage() {
-    console.log('[DEBUG] Initializing page...');
-    const products = await loadProducts();
-
-    if (!products || !Array.isArray(products)) {
-        console.warn('[WARN] Failed to load products or products is not an array.');
-        return;
-    }
-
-    if (products.length === 0) {
-        console.warn('[WARN] No products found in the database.');
-    } else {
-        console.log('[DEBUG] Rendering products to the page...', products);
-        renderProducts(products); // Ensure renderProducts can handle the new data structure
-    }
-}
-
-
-// db_access.js
-
 export async function loadProducts() {
     console.log('[DEBUG] Attempting to load products from the database...');
     try {
@@ -50,91 +29,5 @@ export async function loadProducts() {
     } catch (err) {
         console.error('[ERROR] Unexpected error while loading products:', err);
         return [];
-    }
-}
-
-
-
-/**
- * Load categories from the database
- */
-async function loadCategories() {
-    try {
-        const { data: categories, error } = await supabaseClient.from('categories').select('*');
-
-        if (error) throw error;
-
-        const categoryDropdown = document.getElementById('availableCategories');
-        categoryDropdown.innerHTML = '';
-
-        categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category.id;
-            option.textContent = category.name;
-            categoryDropdown.appendChild(option);
-        });
-    } catch (error) {
-        console.error('[Error] Failed to load categories:', error);
-    }
-}
-
-/**
- * Save record to the database
- */
-async function saveRecord() {
-    const product = collectFormData();
-    saveToLocalStorage();
-    try {
-        const { error } = await supabaseClient
-            .from('products')
-            .update(product)
-            .eq('id', products[currentIndex].id);
-
-        if (error) throw error;
-        alert('Record saved successfully!');
-    } catch (error) {
-        console.error('[saveRecord] Failed to save record:', error);
-    }
-}
-
-/**
- * Save a new record to the database
- */
-async function saveNewRecord() {
-    const product = collectFormData();
-    try {
-        const { data, error } = await supabaseClient.from('products').insert(product);
-
-        if (error) throw error;
-
-        products.push(data[0]);
-        currentIndex = products.length - 1;
-        saveToLocalStorage();
-        populateProductDetails(data[0]);
-        alert('New record saved successfully!');
-    } catch (error) {
-        console.error('[saveNewRecord] Failed to save new record:', error);
-    }
-}
-
-/**
- * Add a new category to the product
- */
-async function addCategory() {
-    const categoryId = document.getElementById('availableCategories').value;
-    const productId = products[currentIndex].id;
-
-    try {
-        const { error } = await supabaseClient
-            .from('product_category')
-            .insert([{ product_id: productId, category_id: categoryId }]);
-
-        if (error) throw error;
-
-        saveToLocalStorage();
-        await loadProducts();
-        populateProductDetails(products[currentIndex]);
-    } catch (error) {
-        console.error('[addCategory] Failed to add category:', error);
     }
 }
