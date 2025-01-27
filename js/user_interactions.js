@@ -51,6 +51,7 @@ function showPreviousProduct() {
 /**
  * Initialize the page by loading products and setting up event listeners
  */
+console.log('[DEBUG] window.loadProducts:', window.loadProducts);
 async function initializePage() {
     console.log('[DEBUG] Initializing page...');
     try {
