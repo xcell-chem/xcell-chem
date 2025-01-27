@@ -130,42 +130,84 @@
             populatePriceTable(product.product_prices || []);
         }
 
-        function attachEventListeners() {
-            document.getElementById('addPricingRowButton').addEventListener('click', () => {
-                products[currentIndex].product_prices.push({ quantity: '', price: 0 });
+        function populateCategoryList(categories) {
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '';
+            categories.forEach(category => {
+                const li = document.createElement('li');
+                li.textContent = category.categories.name; // Access the name of the category
+                li.addEventListener('click', () => removeCategory(category.categories.name));
+                categoryList.appendChild(li);
+            });
+        }
+
+        function populatePriceTable(prices) {
+            const priceTableContainer = document.getElementById('priceTableContainer');
+            priceTableContainer.innerHTML = createPriceTable(prices);
+        }
+
+        function createPriceTable(prices) {
+            let tableHtml = '<table><tr><th>Quantity</th><th>Price</th><th>Actions</th></tr>';
+            prices.forEach((price, index) => {
+                tableHtml += `
+                    <tr>
+                        <td><input type="text" value="${price.quantity}" /></td>
+                        <td><input type="number" value="${price.price}" /></td>
+                        <td><button onclick="deletePriceRow(${index})">Delete</button></td>
+                    </tr>
+                `;
+            });
+            tableHtml += '</table>';
+            return tableHtml;
+        }
+
+        function deletePriceRow(index) {
+            products[currentIndex].product_prices.splice(index, 1);
+            saveToLocalStorage();
+            populatePriceTable(products[currentIndex].product_prices);
+        }
+
+        async function addCategory() {
+            const categoryId = document.getElementById('availableCategories').value;
+            const productId = products[currentIndex].id;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('product_category')
+                    .insert([{ product_id: productId, category_id: categoryId }]);
+
+                if (error) throw error;
+
                 saveToLocalStorage();
-                populatePriceTable(products[currentIndex].product_prices);
-            });
+                await loadProducts();
+                populateProductDetails(products[currentIndex]);
+            } catch (error) {
+                console.error('[addCategory] Failed to add category:', error);
+            }
+        }
 
-            document.getElementById('addCategoryButton').addEventListener('click', addCategory);
+        async function saveRecord() {
+            saveToLocalStorage();
+            const product = products[currentIndex];
 
-            document.getElementById('saveRecordButton').addEventListener('click', saveRecord);
+            try {
+                const { error } = await supabaseClient
+                    .from('products')
+                    .update({
+                        name: product.name,
+                        img: product.img,
+                        description: product.description,
+                        shortdescription: product.shortdescription,
+                        active: product.active,
+                    })
+                    .eq('id', product.id);
 
-            document.getElementById('saveNewRecordButton').addEventListener('click', saveNewRecord);
+                if (error) throw error;
 
-            document.getElementById('previousRecordButton').addEventListener('click', () => {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    populateProductDetails(products[currentIndex]);
-                } else {
-                    alert('Already at the first record.');
-                }
-            });
-
-            document.getElementById('nextRecordButton').addEventListener('click', () => {
-                if (currentIndex < products.length - 1) {
-                    currentIndex++;
-                    populateProductDetails(products[currentIndex]);
-                } else {
-                    alert('Already at the last record.');
-                }
-            });
-
-            document.getElementById('changeImageButton').addEventListener('click', () => {
-                document.getElementById('imageInput').click();
-            });
-
-            document.getElementById('imageInput').addEventListener('change', previewImage);
+                alert('Record saved successfully!');
+            } catch (error) {
+                console.error('[saveRecord] Failed to save record:', error);
+            }
         }
 
         async function saveNewRecord() {
@@ -191,30 +233,6 @@
                 populateProductDetails(data[0]);
             } catch (error) {
                 console.error('[saveNewRecord] Failed to save new record:', error);
-            }
-        }
-
-        async function saveRecord() {
-            saveToLocalStorage();
-            const product = products[currentIndex];
-
-            try {
-                const { error } = await supabaseClient
-                    .from('products')
-                    .update({
-                        name: product.name,
-                        img: product.img,
-                        description: product.description,
-                        shortdescription: product.shortdescription,
-                        active: product.active,
-                    })
-                    .eq('id', product.id);
-
-                if (error) throw error;
-
-                alert('Record saved successfully!');
-            } catch (error) {
-                console.error('[saveRecord] Failed to save record:', error);
             }
         }
 
