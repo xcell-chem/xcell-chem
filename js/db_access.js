@@ -18,21 +18,22 @@ async function loadProducts() {
             .select(`
                 *,
                 product_prices (quantity, price),
-                product_categories (name)
+                product_category (name) -- Adjusted relationship name
             `);
 
         if (error) {
             console.error('[ERROR] Failed to load products:', error);
-            return []; // Return an empty array on error to avoid undefined
+            return []; // Return an empty array on error
         }
 
         console.log('[DEBUG] Products fetched successfully:', data);
         return data;
     } catch (err) {
         console.error('[ERROR] Unexpected error while loading products:', err);
-        return []; // Return an empty array on exception
+        return [];
     }
 }
+
 
 
 /**
