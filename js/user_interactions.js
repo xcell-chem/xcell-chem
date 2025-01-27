@@ -1,4 +1,4 @@
-
+import { loadProducts } from './db_access.js';
 // Functions related to user interactions and button presses
 
 /**

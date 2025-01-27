@@ -28,6 +28,30 @@ async function initializePage() {
 }
 
 
+// db_access.js
+
+export async function loadProducts() {
+    console.log('[DEBUG] Attempting to load products from the database...');
+    try {
+        const { data, error } = await supabaseClient
+            .from('product_category')
+            .select(`
+                *,
+                products (name) -- Fetch the name field from the related products table
+            `);
+
+        if (error) {
+            console.error('[ERROR] Failed to load products:', error);
+            return [];
+        }
+
+        console.log('[DEBUG] Products fetched successfully:', data);
+        return data;
+    } catch (err) {
+        console.error('[ERROR] Unexpected error while loading products:', err);
+        return [];
+    }
+}
 
 
 
