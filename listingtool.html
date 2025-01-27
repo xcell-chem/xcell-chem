@@ -173,6 +173,12 @@
             populatePriceTable(products[currentIndex].product_prices);
         }
 
+        function addPricingRow() {
+            products[currentIndex].product_prices.push({ quantity: '', price: 0 });
+            saveToLocalStorage();
+            populatePriceTable(products[currentIndex].product_prices);
+        }
+
         function attachEventListeners() {
             document.getElementById('saveRecordButton').addEventListener('click', saveRecord);
             document.getElementById('saveNewRecordButton').addEventListener('click', saveNewRecord);
