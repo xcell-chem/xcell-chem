@@ -49,26 +49,31 @@
                 alert('Initialization failed. Check the console for details.');
             }
         });
-
         async function fetchProducts() {
-            try {
-                const { data: products, error } = await supabase
-                    .from('products')
-                    .select('*, product_prices(quantity, price), categories(name)');
-                if (error) throw error;
+    try {
+        console.log('[fetchProducts] Fetching products...');
+        const { data: products, error } = await supabase
+            .from('products')
+            .select('*, product_prices(quantity, price), categories(name)');
 
-                data.products = products.map(product => ({
-                    ...product,
-                    prices: product.product_prices || [],
-                    categories: product.categories.map(category => category.name) || [],
-                }));
-
-                console.log('[fetchProducts] Products fetched:', data.products);
-            } catch (error) {
-                console.error('[fetchProducts] Error fetching products:', error);
-                alert('Failed to fetch products. Check the console for details.');
-            }
+        if (error) {
+            console.error('[fetchProducts] Supabase query error:', error);
+            alert('Failed to fetch products. Check the console for details.');
+            return;
         }
+
+        data.products = products.map(product => ({
+            ...product,
+            prices: product.product_prices || [],
+            categories: product.categories.map(category => category.name) || [],
+        }));
+
+        console.log('[fetchProducts] Products fetched:', data.products);
+    } catch (error) {
+        console.error('[fetchProducts] Unexpected error:', error);
+        alert('An unexpected error occurred while fetching products. Check the console for details.');
+    }
+}
 
         async function fetchCategories() {
             try {
