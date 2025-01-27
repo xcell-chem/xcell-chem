@@ -9,7 +9,21 @@ function attachEventListeners() {
     document.getElementById('nextButton')?.addEventListener('click', showNextProduct);
     document.getElementById('prevButton')?.addEventListener('click', showPreviousProduct);
 }
+// user_interactions.js
 
+/**
+ * Example function that triggers loadproduct
+ * when a user clicks a button or some event occurs.
+ */
+function onLoadProducts() {
+    // Simply call loadproduct (or window.loadproduct)
+    // Ensure db_access.js was loaded first in your HTML
+    window.loadproduct()
+  }
+  
+  // Suppose you bind to a button click:
+  document.getElementById('load-button').addEventListener('click', onLoadProducts)
+  
 /**
  * Display a single product on the page
  * @param {Object} product - The product object to display
