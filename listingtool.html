@@ -6,6 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Editor</title>
     <link rel="stylesheet" href="css/styles.css">
+
+    
+    
+</head>
+
+<body>
+    <div id="editor">
+        <div class="container">
+            <div class="left-column">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" />
+                <label for="img">Image URL</label>
+                <input type="text" id="img" />
+                <button id="changeImageButton">Change Image</button>
+                <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="previewImage(event)" />
+                <img id="imagePreview" src="" alt="Product Image" style="display:none;" />
+
+                <label for="active">Active</label>
+                <input type="checkbox" id="active" />
+                <label for="archived">Archived</label>
+                <input type="checkbox" id="archived" disabled />
+
+                <div>
+                    <button id="saveRecordButton" type="button">Save Record</button>
+                    <button id="saveNewRecordButton" type="button">Save New Record</button>
+                </div>
+                <div>
+                    <button id="previousRecordButton" type="button">Previous</button>
+                    <button id="nextRecordButton" type="button">Next</button>
+                </div>
+            </div>
+
+            <div class="middle-column">
+                <label for="shortdescription">Short Description</label>
+                <textarea id="shortdescription" rows="4" cols="30"></textarea>
+                <label for="description">Description</label>
+                <textarea id="description" rows="4" cols="30"></textarea>
+            </div>
+
+            <div class="right-column">
+                <h3>Categories</h3>
+                <ul class="category-list" id="categoryList"></ul>
+                <select id="availableCategories"></select>
+                <button id="addCategoryButton" type="button">Add Category</button>
+
+                <h3>Prices</h3>
+                <div id="priceTableContainer"></div>
+                <button id="addPricingRowButton" type="button">Add Price</button>
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
         // Supabase initialization
@@ -222,56 +273,6 @@
             }
         }
     </script>
-    
-    
-</head>
-
-<body>
-    <div id="editor">
-        <div class="container">
-            <div class="left-column">
-                <label for="name">Product Name</label>
-                <input type="text" id="name" />
-                <label for="img">Image URL</label>
-                <input type="text" id="img" />
-                <button id="changeImageButton">Change Image</button>
-                <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="previewImage(event)" />
-                <img id="imagePreview" src="" alt="Product Image" style="display:none;" />
-
-                <label for="active">Active</label>
-                <input type="checkbox" id="active" />
-                <label for="archived">Archived</label>
-                <input type="checkbox" id="archived" disabled />
-
-                <div>
-                    <button id="saveRecordButton" type="button">Save Record</button>
-                    <button id="saveNewRecordButton" type="button">Save New Record</button>
-                </div>
-                <div>
-                    <button id="previousRecordButton" type="button">Previous</button>
-                    <button id="nextRecordButton" type="button">Next</button>
-                </div>
-            </div>
-
-            <div class="middle-column">
-                <label for="shortdescription">Short Description</label>
-                <textarea id="shortdescription" rows="4" cols="30"></textarea>
-                <label for="description">Description</label>
-                <textarea id="description" rows="4" cols="30"></textarea>
-            </div>
-
-            <div class="right-column">
-                <h3>Categories</h3>
-                <ul class="category-list" id="categoryList"></ul>
-                <select id="availableCategories"></select>
-                <button id="addCategoryButton" type="button">Add Category</button>
-
-                <h3>Prices</h3>
-                <div id="priceTableContainer"></div>
-                <button id="addPricingRowButton" type="button">Add Price</button>
-            </div>
-        </div>
-    </div>
 </body>
 
 </html>
