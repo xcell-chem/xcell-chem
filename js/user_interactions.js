@@ -1,7 +1,5 @@
 
-// user_interactions.js
-import { loadProducts } from './db_access.js';
-
+/
 /**
  * Attach event listeners to buttons and inputs
  */
