@@ -110,6 +110,17 @@
             populatePriceTable(product.product_prices || []);
         }
 
+        function populateCategoryList(categories) {
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '';
+            categories.forEach(category => {
+                const li = document.createElement('li');
+                li.textContent = category.categories.name; // Access the name of the category
+                li.addEventListener('click', () => removeCategory(category.categories.name));
+                categoryList.appendChild(li);
+            });
+        }
+
         function saveToLocalStorage() {
             const product = products[currentIndex];
             product.name = document.getElementById('name').value;
@@ -130,34 +141,6 @@
             }
         }
 
-        async function saveRecord() {
-            saveToLocalStorage();
-            const product = products[currentIndex];
-
-            try {
-                const { error } = await supabaseClient
-                    .from('products')
-                    .update({
-                        name: product.name,
-                        img: product.img,
-                        description: product.description,
-                        shortdescription: product.shortdescription,
-                        active: product.active,
-                    })
-                    .eq('id', product.id);
-
-                if (error) throw error;
-
-                alert('Record saved successfully!');
-            } catch (error) {
-                console.error('[Error] Failed to save record:', error);
-            }
-        }
-
-        document.getElementById('changeImageButton').addEventListener('click', () => {
-            document.getElementById('imageInput').click();
-        });
-
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
@@ -168,6 +151,39 @@
                     imagePreview.style.display = 'block';
                 };
                 reader.readAsDataURL(file);
+            }
+        }
+
+        document.getElementById('changeImageButton').addEventListener('click', () => {
+            document.getElementById('imageInput').click();
+        });
+
+        async function removeCategory(categoryName) {
+            const productId = products[currentIndex].id;
+
+            try {
+                const { data: categories, error: fetchError } = await supabaseClient
+                    .from('categories')
+                    .select('id')
+                    .eq('name', categoryName)
+                    .single();
+
+                if (fetchError) throw fetchError;
+
+                const categoryId = categories.id;
+
+                const { error } = await supabaseClient
+                    .from('product_category')
+                    .delete()
+                    .match({ product_id: productId, category_id: categoryId });
+
+                if (error) throw error;
+
+                saveToLocalStorage();
+                await loadProducts();
+                populateProductDetails(products[currentIndex]);
+            } catch (error) {
+                console.error('[removeCategory] Failed to remove category:', error);
             }
         }
     </script>
