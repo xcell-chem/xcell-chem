@@ -11,13 +11,15 @@
         const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
+    
         let currentIndex = 0;
         let data = { products: [] };
-
-        window.addEventListener('DOMContentLoaded', () => {
+    
+        window.addEventListener('DOMContentLoaded', async () => {
             console.log('[DOMContentLoaded] Page loaded.');
-            fetchProducts().then(() => {
+    
+            try {
+                await fetchProducts();
                 if (data.products.length > 0) {
                     console.log('[DOMContentLoaded] Fetched products loaded into memory:', data);
                     loadProductFromMemory();
@@ -25,34 +27,38 @@
                     console.warn('[DOMContentLoaded] No products fetched. Initializing default data.');
                     initializeDefaultData();
                 }
-            });
-
-            fetchCategories();
-            attachEventListeners();
+    
+                await fetchCategories();
+                attachEventListeners();
+            } catch (error) {
+                console.error('[DOMContentLoaded] Error during initialization:', error);
+            }
         });
-
+    
         async function fetchProducts() {
             try {
-                const { data: products, error } = await supabase.from('products').select('*, product_prices(*), categories!inner(*)');
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*, product_prices(quantity, price), categories(name)');
                 if (error) throw error;
-
+    
                 data.products = products.map(product => ({
                     ...product,
                     prices: product.product_prices || [],
-                    categories: product.categories.map(category => category.name) || []
+                    categories: product.categories.map(category => category.name) || [],
                 }));
-
+    
                 console.log('[fetchProducts] Fetched products:', data.products);
             } catch (error) {
                 console.error('[fetchProducts] Error fetching products:', error);
             }
         }
-
+    
         async function fetchCategories() {
             try {
                 const { data: categories, error } = await supabase.from('categories').select('*');
                 if (error) throw error;
-
+    
                 const categoryDropdown = document.getElementById('availableCategories');
                 categoryDropdown.innerHTML = '';
                 categories.forEach(category => {
@@ -61,13 +67,13 @@
                     option.textContent = category.name;
                     categoryDropdown.appendChild(option);
                 });
-
+    
                 console.log('[fetchCategories] Fetched categories:', categories);
             } catch (error) {
                 console.error('[fetchCategories] Error fetching categories:', error);
             }
         }
-
+    
         function attachEventListeners() {
             console.log('[attachEventListeners] Attaching event listeners...');
             document.getElementById('addPricingRowButton').addEventListener('click', addPricingRow);
@@ -78,53 +84,7 @@
             document.getElementById('nextRecordButton').addEventListener('click', nextRecord);
             console.log('[attachEventListeners] Event listeners attached.');
         }
-
-        function initializeDefaultData() {
-            data = {
-                products: [
-                    {
-                        id: 1,
-                        name: 'Default Product',
-                        img: '',
-                        description: 'Default description for the product.',
-                        shortdescription: 'Default short description.',
-                        active: true,
-                        archived: false,
-                        prices: [
-                            { quantity: '100g', price: 10.0 },
-                            { quantity: '200g', price: 18.0 }
-                        ],
-                        categories: ['Default Category']
-                    }
-                ]
-            };
-
-            console.log('[initializeDefaultData] Loaded default data:', data);
-            populateProductDetails(data.products[0]);
-        }
-
-        async function saveRecord() {
-            console.log('[saveRecord] Saving current record...');
-            const product = data.products[currentIndex];
-
-            product.name = document.getElementById('name').value;
-            product.img = document.getElementById('img').value;
-            product.description = document.getElementById('description').value;
-            product.shortdescription = document.getElementById('shortdescription').value;
-            product.active = document.getElementById('active').checked;
-
-            try {
-                const { error } = await supabase.from('products').update(product).eq('id', product.id);
-                if (error) throw error;
-
-                console.log('[saveRecord] Record saved:', product);
-                alert('Record saved!');
-            } catch (error) {
-                console.error('[saveRecord] Error saving record:', error);
-                alert('Failed to save record.');
-            }
-        }
-
+    
         function loadProductFromMemory() {
             const product = data.products[currentIndex];
             if (product) {
@@ -133,19 +93,19 @@
                 console.error('[loadProductFromMemory] No product found at current index.');
             }
         }
-
+    
         function populateProductDetails(product) {
             document.getElementById('name').value = product.name || '';
             document.getElementById('img').value = product.img || '';
             document.getElementById('description').value = product.description || '';
             document.getElementById('shortdescription').value = product.shortdescription || '';
             document.getElementById('active').checked = product.active || false;
-
+    
             const priceTableContainer = document.getElementById('priceTableContainer');
             priceTableContainer.innerHTML = '';
             const table = createPriceTable(product.prices || []);
             priceTableContainer.appendChild(table);
-
+    
             const categoryList = document.getElementById('categoryList');
             categoryList.innerHTML = '';
             (product.categories || []).forEach(category => {
@@ -154,14 +114,14 @@
                 categoryList.appendChild(li);
             });
         }
-
+    
         function createPriceTable(prices = []) {
             const table = document.createElement('table');
             const headerRow = table.insertRow();
             headerRow.insertCell().textContent = 'Quantity';
             headerRow.insertCell().textContent = 'Price';
             headerRow.insertCell().textContent = 'Actions';
-
+    
             prices.forEach((price, index) => {
                 const row = table.insertRow();
                 row.insertCell().innerHTML = `<input type="text" value="${price.quantity}" />`;
@@ -171,10 +131,10 @@
                 deleteButton.addEventListener('click', () => deletePriceRow(index));
                 row.insertCell().appendChild(deleteButton);
             });
-
+    
             return table;
         }
-
+    
         function deletePriceRow(index) {
             const product = data.products[currentIndex];
             if (product && Array.isArray(product.prices)) {
@@ -182,7 +142,7 @@
                 populateProductDetails(product);
             }
         }
-
+    
         function addPricingRow() {
             const product = data.products[currentIndex];
             if (!product.prices) {
@@ -191,17 +151,36 @@
             product.prices.push({ quantity: '', price: 0 });
             populateProductDetails(product);
         }
-
+    
         function addCategory() {
             const category = document.getElementById('availableCategories').value;
             const product = data.products[currentIndex];
-
+    
             if (!product.categories.includes(category)) {
                 product.categories.push(category);
                 populateProductDetails(product);
             }
         }
-
+    
+        async function saveRecord() {
+            const product = data.products[currentIndex];
+            product.name = document.getElementById('name').value;
+            product.img = document.getElementById('img').value;
+            product.description = document.getElementById('description').value;
+            product.shortdescription = document.getElementById('shortdescription').value;
+            product.active = document.getElementById('active').checked;
+    
+            try {
+                const { error } = await supabase.from('products').update(product).eq('id', product.id);
+                if (error) throw error;
+    
+                alert('Record saved successfully!');
+            } catch (error) {
+                console.error('Error saving record:', error);
+                alert('Failed to save record.');
+            }
+        }
+    
         function saveNewRecord() {
             const newProduct = {
                 id: data.products.length + 1,
@@ -214,19 +193,19 @@
                 prices: [],
                 categories: []
             };
-
+    
             data.products.push(newProduct);
             currentIndex = data.products.length - 1;
             populateProductDetails(newProduct);
         }
-
+    
         function previousRecord() {
             if (currentIndex > 0) {
                 currentIndex--;
                 loadProductFromMemory();
             }
         }
-
+    
         function nextRecord() {
             if (currentIndex < data.products.length - 1) {
                 currentIndex++;
@@ -234,6 +213,7 @@
             }
         }
     </script>
+    
 </head>
 
 <body>
