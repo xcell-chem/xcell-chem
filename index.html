@@ -1,26 +1,22 @@
-<!-- index.html: Add page description here -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-    const supabaseUrl = 'https://your-supabase-url.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-</script>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XCell Chem</title>
-    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        // Function to load categories dynamically
+        const supabaseUrl = 'https://your-supabase-url.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Function to load categories dynamically from Supabase
         async function loadCategories() {
             try {
-                const response = await fetch('data/categories.json');
-                const categories = await response.json();
+                const { data: categories, error } = await supabase.from('categories').select('*');
+                if (error) throw error;
+
                 const container = document.querySelector(".container");
+
+                // Clear existing content before populating
+                container.innerHTML = '';
 
                 categories.forEach(category => {
                     const box = document.createElement("div");
@@ -34,7 +30,7 @@
                     container.appendChild(box);
                 });
             } catch (error) {
-                console.error('Error loading categories:', error);
+                console.error('Error loading categories from Supabase:', error);
                 document.querySelector(".container").innerHTML =
                     "<p>Failed to load categories. Please try again later.</p>";
             }
@@ -42,6 +38,11 @@
 
         document.addEventListener('DOMContentLoaded', loadCategories);
     </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XCell Chem</title>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
     <header>
@@ -65,7 +66,7 @@
     </div>
 
     <footer>
-        <p class="footer" >&copy; 2025 XCell Chem. All rights reserved.</p>
+        <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
     </footer>
 </body>
 </html>

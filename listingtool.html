@@ -10,10 +10,11 @@
     <!-- Load Supabase library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.6.4/dist/supabase.js"></script>
     <script>
-        window.onload = function () {
-            // Test if the library is loaded
-            console.log('[Debug] Supabase Object:', typeof supabase);
+        // Wait for the entire window to load before running Supabase initialization
+        window.onload = async function () {
+            console.log('[Debug] Checking Supabase library:', typeof supabase);
 
+            // Verify the Supabase library is available
             if (typeof supabase === 'undefined') {
                 console.error('[Error] Supabase library failed to load.');
                 alert('Supabase library not loaded. Check your network or CDN source.');
@@ -23,117 +24,150 @@
             // Supabase configuration
             const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-
             let supabase;
 
             try {
+                // Initialize Supabase
                 supabase = supabase.createClient(supabaseUrl, supabaseKey);
                 console.log('[Supabase Initialized Successfully]', supabase);
+
+                // Fetch initial data
+                await fetchProducts(supabase);
+                await fetchCategories(supabase);
             } catch (error) {
                 console.error('[Supabase Initialization Failed]', error);
                 alert('Failed to initialize Supabase. Please check your configuration.');
-            }
-
-        // Debugging: Verify the Supabase object after initialization
-        console.log('[Debug] Supabase object:', supabase);
-    </script>
-</head>
-
-<body>
-    <div id="editor">
-        <!-- Your existing form elements remain the same -->
-    </div>
-
-    <script>
-        // Global variables
-        let currentIndex = 0;
-        let data = { products: [] };
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('[DOMContentLoaded] DOM fully loaded.');
-
-            if (!supabase) {
-                console.error('[Error] Supabase is not initialized. Exiting script.');
-                alert('Supabase client is not initialized. Cannot proceed.');
                 return;
             }
+        };
 
-            try {
-                console.log('[Debug] Starting product and category fetch...');
-                await fetchProducts();
-                await fetchCategories();
-
-                if (data.products.length > 0) {
-                    console.log('[DOMContentLoaded] Products loaded:', data.products);
-                    loadProductFromMemory();
-                } else {
-                    console.warn('[DOMContentLoaded] No products found.');
-                    initializeDefaultData();
-                }
-
-                attachEventListeners();
-            } catch (error) {
-                console.error('[Error] Failed during initialization:', error);
-                alert('Error occurred during initialization. Check console for details.');
-            }
-        });
-
-        async function fetchProducts() {
+        // Fetch products from the Supabase database
+        async function fetchProducts(supabase) {
             try {
                 console.log('[fetchProducts] Fetching products...');
                 const { data: products, error } = await supabase
                     .from('products')
                     .select('*, product_prices(quantity, price), categories(name)');
+
                 if (error) throw error;
 
-                data.products = products.map(product => ({
-                    ...product,
-                    prices: product.product_prices || [],
-                    categories: product.categories.map(category => category.name) || [],
-                }));
+                console.log('[fetchProducts] Products fetched:', products);
 
-                console.log('[fetchProducts] Products fetched:', data.products);
+                if (products && products.length > 0) {
+                    populateProducts(products);
+                } else {
+                    console.warn('[fetchProducts] No products found.');
+                }
             } catch (error) {
                 console.error('[fetchProducts] Error fetching products:', error);
                 alert('Failed to fetch products. Check the console for details.');
             }
         }
 
-        async function fetchCategories() {
+        // Fetch categories from the Supabase database
+        async function fetchCategories(supabase) {
             try {
                 console.log('[fetchCategories] Fetching categories...');
                 const { data: categories, error } = await supabase.from('categories').select('*');
+
                 if (error) throw error;
 
-                const categoryDropdown = document.getElementById('availableCategories');
-                categoryDropdown.innerHTML = '';
-                categories.forEach(category => {
-                    const option = document.createElement('option');
-                    option.value = category.name;
-                    option.textContent = category.name;
-                    categoryDropdown.appendChild(option);
-                });
-
                 console.log('[fetchCategories] Categories fetched:', categories);
+
+                if (categories && categories.length > 0) {
+                    populateCategories(categories);
+                } else {
+                    console.warn('[fetchCategories] No categories found.');
+                }
             } catch (error) {
                 console.error('[fetchCategories] Error fetching categories:', error);
                 alert('Failed to fetch categories. Check the console for details.');
             }
         }
 
-        function attachEventListeners() {
-            console.log('[attachEventListeners] Adding event listeners...');
-            document.getElementById('addPricingRowButton').addEventListener('click', addPricingRow);
-            document.getElementById('addCategoryButton').addEventListener('click', addCategory);
-            document.getElementById('saveRecordButton').addEventListener('click', saveRecord);
-            document.getElementById('saveNewRecordButton').addEventListener('click', saveNewRecord);
-            document.getElementById('previousRecordButton').addEventListener('click', previousRecord);
-            document.getElementById('nextRecordButton').addEventListener('click', nextRecord);
-            console.log('[attachEventListeners] Event listeners added.');
+        // Populate products into the editor
+        function populateProducts(products) {
+            console.log('[populateProducts] Populating product details:', products);
+            const firstProduct = products[0]; // Load the first product as an example
+
+            if (firstProduct) {
+                document.getElementById('name').value = firstProduct.name || '';
+                document.getElementById('img').value = firstProduct.img || '';
+                document.getElementById('description').value = firstProduct.description || '';
+                document.getElementById('shortdescription').value = firstProduct.shortdescription || '';
+                document.getElementById('active').checked = firstProduct.active || false;
+
+                // Populate price table
+                const priceTableContainer = document.getElementById('priceTableContainer');
+                priceTableContainer.innerHTML = createPriceTable(firstProduct.product_prices || []);
+
+                console.log('[populateProducts] Product populated successfully.');
+            } else {
+                console.warn('[populateProducts] No product to populate.');
+            }
         }
 
-        // Other functions like populateProductDetails, saveRecord, etc., remain unchanged.
+        // Populate categories into the dropdown
+        function populateCategories(categories) {
+            console.log('[populateCategories] Populating categories:', categories);
+            const categoryDropdown = document.getElementById('availableCategories');
+            categoryDropdown.innerHTML = '';
+
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name;
+                option.textContent = category.name;
+                categoryDropdown.appendChild(option);
+            });
+
+            console.log('[populateCategories] Categories populated successfully.');
+        }
+
+        // Create price table HTML
+        function createPriceTable(prices) {
+            let tableHtml = '<table><tr><th>Quantity</th><th>Price</th></tr>';
+
+            prices.forEach(price => {
+                tableHtml += `<tr><td>${price.quantity}</td><td>${price.price}</td></tr>`;
+            });
+
+            tableHtml += '</table>';
+            return tableHtml;
+        }
     </script>
+</head>
+
+<body>
+    <div id="editor">
+        <div class="container">
+            <div class="left-column">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" />
+
+                <label for="img">Image URL</label>
+                <input type="text" id="img" />
+
+                <label for="active">Active</label>
+                <input type="checkbox" id="active" />
+            </div>
+
+            <div class="middle-column">
+                <label for="shortdescription">Short Description</label>
+                <textarea id="shortdescription" rows="4"></textarea>
+
+                <label for="description">Description</label>
+                <textarea id="description" rows="4"></textarea>
+            </div>
+
+            <div class="right-column">
+                <h3>Categories</h3>
+                <select id="availableCategories"></select>
+
+                <h3>Prices</h3>
+                <div id="priceTableContainer"></div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
