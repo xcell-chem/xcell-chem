@@ -162,6 +162,45 @@
             return tableHtml;
         }
 
+        function attachEventListeners() {
+            document.getElementById('addPricingRowButton').addEventListener('click', () => {
+                console.log('[addPricingRowButton] Adding a price row...');
+                products[currentIndex].product_prices.push({ quantity: '', price: 0 });
+                saveToLocalStorage();
+                populatePriceTable(products[currentIndex].product_prices);
+            });
+
+            document.getElementById('addCategoryButton').addEventListener('click', addCategory);
+
+            document.getElementById('saveRecordButton').addEventListener('click', saveRecord);
+
+            document.getElementById('saveNewRecordButton').addEventListener('click', saveNewRecord);
+
+            document.getElementById('previousRecordButton').addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    populateProductDetails(products[currentIndex]);
+                } else {
+                    alert('Already at the first record.');
+                }
+            });
+
+            document.getElementById('nextRecordButton').addEventListener('click', () => {
+                if (currentIndex < products.length - 1) {
+                    currentIndex++;
+                    populateProductDetails(products[currentIndex]);
+                } else {
+                    alert('Already at the last record.');
+                }
+            });
+
+            document.getElementById('changeImageButton').addEventListener('click', () => {
+                document.getElementById('imageInput').click();
+            });
+
+            document.getElementById('imageInput').addEventListener('change', previewImage);
+        }
+
         function saveToLocalStorage() {
             const product = products[currentIndex];
             product.name = document.getElementById('name').value;
@@ -179,6 +218,26 @@
                 if (products[currentIndex]) {
                     populateProductDetails(products[currentIndex]);
                 }
+            }
+        }
+
+        async function addCategory() {
+            const categoryId = document.getElementById('availableCategories').value;
+            const productId = products[currentIndex].id;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('product_category')
+                    .insert([{ product_id: productId, category_id: categoryId }]);
+
+                if (error) throw error;
+
+                console.log('[addCategory] Category added successfully.');
+                saveToLocalStorage();
+                await loadProducts();
+                populateProductDetails(products[currentIndex]);
+            } catch (error) {
+                console.error('[addCategory] Failed to add category:', error);
             }
         }
 
@@ -208,6 +267,69 @@
                 populateProductDetails(products[currentIndex]);
             } catch (error) {
                 console.error('[removeCategory] Failed to remove category:', error);
+            }
+        }
+
+        async function saveRecord() {
+            saveToLocalStorage();
+            const product = products[currentIndex];
+
+            try {
+                const { error } = await supabaseClient
+                    .from('products')
+                    .update({
+                        name: product.name,
+                        img: product.img,
+                        description: product.description,
+                        shortdescription: product.shortdescription,
+                        active: product.active,
+                    })
+                    .eq('id', product.id);
+
+                if (error) throw error;
+
+                alert('Record saved successfully!');
+            } catch (error) {
+                console.error('[saveRecord] Failed to save record:', error);
+            }
+        }
+
+        async function saveNewRecord() {
+            const product = {
+                name: document.getElementById('name').value,
+                img: document.getElementById('img').value,
+                description: document.getElementById('description').value,
+                shortdescription: document.getElementById('shortdescription').value,
+                active: document.getElementById('active').checked,
+                product_prices: [],
+                product_category: [],
+            };
+
+            try {
+                const { data, error } = await supabaseClient.from('products').insert(product);
+
+                if (error) throw error;
+
+                products.push(data[0]);
+                currentIndex = products.length - 1;
+                saveToLocalStorage();
+                alert('New record saved successfully!');
+                populateProductDetails(data[0]);
+            } catch (error) {
+                console.error('[saveNewRecord] Failed to save new record:', error);
+            }
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const imagePreview = document.getElementById('imagePreview');
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
             }
         }
     </script>
