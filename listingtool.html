@@ -61,7 +61,7 @@
 
     <!-- Load Supabase library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"></script>
-     <script>
+    <script>
         // Supabase configuration
         const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
@@ -132,21 +132,21 @@
             document.getElementById('shortdescription').value = product.shortdescription || '';
             document.getElementById('active').checked = product.active || false;
 
+            // Populate selected categories
             populateCategoryList(product.product_category || []);
             populatePriceTable(product.product_prices || []);
         }
 
         function populateCategoryList(categories) {
-    const categoryList = document.getElementById('categoryList');
-    categoryList.innerHTML = '';
-    categories.forEach(category => {
-        const li = document.createElement('li');
-        li.textContent = category.category_name; // Use category_name instead of category_id
-        li.addEventListener('click', () => removeCategory(category.category_name));
-        categoryList.appendChild(li);
-    });
-}
-
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '';
+            categories.forEach(category => {
+                const li = document.createElement('li');
+                li.textContent = category.category_id; // Adjust based on your schema
+                li.addEventListener('click', () => removeCategory(category.category_id));
+                categoryList.appendChild(li);
+            });
+        }
 
         function populatePriceTable(prices) {
             const priceTableContainer = document.getElementById('priceTableContainer');
