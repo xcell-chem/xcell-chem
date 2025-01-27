@@ -82,7 +82,6 @@
             attachEventListeners();
         });
 
-        // Load products from database
         async function loadProducts() {
             try {
                 const { data, error } = await supabaseClient
@@ -104,7 +103,6 @@
             }
         }
 
-        // Load categories from database
         async function loadCategories() {
             try {
                 const { data: categories, error } = await supabaseClient.from('categories').select('*');
@@ -125,7 +123,6 @@
             }
         }
 
-        // Populate product details into the form
         function populateProductDetails(product) {
             document.getElementById('name').value = product.name || '';
             document.getElementById('img').value = product.img || '';
@@ -139,7 +136,6 @@
             populatePriceTable(product.product_prices || []);
         }
 
-        // Populate selected categories
         function populateCategoryList(categories) {
             const categoryList = document.getElementById('categoryList');
             categoryList.innerHTML = '';
@@ -151,13 +147,11 @@
             });
         }
 
-        // Populate product prices
         function populatePriceTable(prices) {
             const priceTableContainer = document.getElementById('priceTableContainer');
             priceTableContainer.innerHTML = createPriceTable(prices);
         }
 
-        // Create price table
         function createPriceTable(prices) {
             let tableHtml = '<table><tr><th>Quantity</th><th>Price</th><th>Actions</th></tr>';
             prices.forEach((price, index) => {
@@ -173,7 +167,12 @@
             return tableHtml;
         }
 
-        // Add event listeners
+        function deletePriceRow(index) {
+            products[currentIndex].product_prices.splice(index, 1);
+            saveToLocalStorage();
+            populatePriceTable(products[currentIndex].product_prices);
+        }
+
         function attachEventListeners() {
             document.getElementById('saveRecordButton').addEventListener('click', saveRecord);
             document.getElementById('saveNewRecordButton').addEventListener('click', saveNewRecord);
@@ -186,14 +185,6 @@
             });
         }
 
-        // Add a new pricing row
-        function addPricingRow() {
-            products[currentIndex].product_prices.push({ quantity: '', price: 0 });
-            saveToLocalStorage();
-            populatePriceTable(products[currentIndex].product_prices);
-        }
-
-        // Add a new category
         async function addCategory() {
             const categoryId = document.getElementById('availableCategories').value;
             const productId = products[currentIndex].id;
@@ -213,7 +204,6 @@
             }
         }
 
-        // Save record to database
         async function saveRecord() {
             const product = collectFormData();
             saveToLocalStorage();
@@ -230,7 +220,6 @@
             }
         }
 
-        // Save a new record to the database
         async function saveNewRecord() {
             const product = collectFormData();
             try {
@@ -248,7 +237,6 @@
             }
         }
 
-        // Collect data from form fields
         function collectFormData() {
             return {
                 name: document.getElementById('name').value,
@@ -259,7 +247,6 @@
             };
         }
 
-        // Restore data from local storage
         function restoreFromLocalStorage() {
             const savedProduct = localStorage.getItem('currentProduct');
             if (savedProduct) {
@@ -267,14 +254,12 @@
             }
         }
 
-        // Save data to local storage
         function saveToLocalStorage() {
             const product = collectFormData();
             localStorage.setItem('currentProduct', JSON.stringify(product));
             localStorage.setItem('useLocalStorage', true);
         }
 
-        // Navigate to the previous record
         function showPreviousRecord() {
             if (currentIndex > 0) {
                 currentIndex--;
@@ -284,7 +269,6 @@
             }
         }
 
-        // Navigate to the next record
         function showNextRecord() {
             if (currentIndex < products.length - 1) {
                 currentIndex++;
