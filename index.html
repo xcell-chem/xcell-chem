@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"></script>
+
+  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XCell Chem</title>
@@ -31,7 +32,16 @@
     <footer>
         <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
     </footer>
+    <!-- 1) Load the global Supabase library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <!-- 2) Load db_access.js (where we use window.supabase to create the client and define window.loadproduct, etc.) -->
+  <script src="db_access.js"></script>
+
+  <!-- 3) Load user_interactions.js (which calls window.loadproduct, window.saveProductToDB, etc.) -->
+  <script src="user_interactions.js"></script>
     <script>
+        
         document.addEventListener('DOMContentLoaded', () => {
             const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
@@ -60,5 +70,6 @@
             loadCategories();
         });
     </script>
+
 </body>
 </html>

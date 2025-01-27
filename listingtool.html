@@ -59,8 +59,14 @@
         </div>
     </div>
 
-    <!-- Load Supabase library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"></script>
+    <!-- 1) Load the global Supabase library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+    <!-- 2) Load db_access.js (where we use window.supabase to create the client and define window.loadproduct, etc.) -->
+    <script src="db_access.js"></script>
+  
+    <!-- 3) Load user_interactions.js (which calls window.loadproduct, window.saveProductToDB, etc.) -->
+    <script src="user_interactions.js"></script>
     <script>
         const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
         const supabaseKey = 'YOUR_SUPABASE_KEY';
