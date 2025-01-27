@@ -1,28 +1,18 @@
-<!-- products.html: Add page description here -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-     const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-     const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-</script>
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7SR5YRK9J"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-G7SR5YRK9J');
+        // Supabase credentials
+        const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
     </script>
+
     <meta charset="UTF-8">
-	
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XCell Chem</title>
-	 <link rel="stylesheet" href="css/main.css">
-    
+    <title>XCell Chem - Products</title>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
     <header>
@@ -37,13 +27,13 @@
             <li><a href="/feedback">Contact</a></li>
         </ul>
     </nav>
-<div class="content">
-       <h1>Products</h1>
 
-    <div class="container">
-        <!-- Products will be dynamically loaded here -->
+    <div class="content">
+        <h1>Products</h1>
+        <div class="container">
+            <!-- Products will be dynamically loaded here -->
+        </div>
     </div>
-</div>
 
     <script>
         async function loadProducts() {
@@ -51,14 +41,20 @@
             const category = params.get("category") || "all";
 
             try {
-                const response = await fetch("data/products.json");
-                const data = await response.json();
-                const products = data.products;
+                // Fetch products from Supabase
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*');
 
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                // Filter products based on category
                 const filteredProducts = category === "all"
                     ? products
-                    : products.filter(product =>
-                        product.categories.some(cat =>
+                    : products.filter(product => 
+                        product.categories && product.categories.some(cat => 
                             cat.toLowerCase() === category.toLowerCase()
                         )
                     );
@@ -82,7 +78,7 @@
                     container.innerHTML = "<p>No products found for this category.</p>";
                 }
             } catch (error) {
-                console.error("Error loading product data:", error);
+                console.error("Error loading products:", error);
                 document.querySelector(".container").innerHTML =
                     "<p>Failed to load products. Please try again later.</p>";
             }
@@ -90,7 +86,8 @@
 
         document.addEventListener("DOMContentLoaded", loadProducts);
     </script>
-	 <footer>
+
+    <footer>
         <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
     </footer>
 </body>
