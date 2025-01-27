@@ -37,77 +37,82 @@
 
     <script>
         async function loadProducts() {
-            console.log("[Debug] Starting loadProducts()");
+    console.log("[Debug] Starting loadProducts()");
 
-            // Get category from URL
-            const params = new URLSearchParams(window.location.search);
-            const category = params.get("category") || "all";
-            console.log("[Debug] Category parameter:", category);
+    // Get category from URL
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get("category") || "all";
+    console.log("[Debug] Category parameter:", category);
 
-            try {
-                console.log("[Debug] Fetching products from Supabase...");
+    try {
+        console.log("[Debug] Fetching products from Supabase...");
 
-                // Fetch products from Supabase
-                const { data: products, error } = await supabaseClient
-                    .from('products')
-                    .select('*');
+        // Fetch products along with their categories from Supabase
+        const { data: products, error } = await supabaseClient
+            .from('products')
+            .select(`
+                *,
+                product_category (
+                    category_id,
+                    categories (name, image)
+                )
+            `);
 
-                if (error) {
-                    console.error("[Error] Supabase error:", error.message);
-                    throw new Error(error.message);
-                }
-
-                console.log("[Debug] Fetched products:", products);
-
-                // Filter products based on category
-                console.log("[Debug] Filtering products...");
-                const filteredProducts = category === "all"
-                    ? products
-                    : products.filter(product =>
-                        product.categories &&
-                        product.categories.some(cat =>
-                            cat.toLowerCase() === category.toLowerCase()
-                        )
-                    );
-
-                console.log("[Debug] Filtered products:", filteredProducts);
-
-                // Render products
-                const container = document.querySelector(".container");
-                container.innerHTML = ""; // Clear existing content
-
-                if (filteredProducts.length > 0) {
-                    console.log("[Debug] Rendering products...");
-                    filteredProducts.forEach((product, index) => {
-                        console.log(`[Debug] Rendering product ${index + 1}:`, product);
-
-                        const productImage = product.img || 'default-image.jpg';
-                        const productName = product.name || 'Unnamed Product';
-
-                        const box = document.createElement("div");
-                        box.className = "box";
-                        box.innerHTML = `
-                            <a href="item.html?productid=${product.id}">
-                                <img src="${productImage}" alt="${productName}">
-                                <p>${productName}</p>
-                            </a>
-                        `;
-                        container.appendChild(box);
-                        console.log("[Debug] Rendered HTML:", box.innerHTML);
-                    });
-                } else {
-                    console.warn("[Warning] No products found for the selected category.");
-                    container.innerHTML = "<p>No products found for this category.</p>";
-                }
-            } catch (error) {
-                console.error("[Error] Failed to load products:", error);
-                document.querySelector(".container").innerHTML =
-                    "<p>Failed to load products. Please try again later.</p>";
-            }
-
-            console.log("[Debug] Completed loadProducts()");
+        if (error) {
+            console.error("[Error] Supabase error:", error.message);
+            throw new Error(error.message);
         }
 
+        console.log("[Debug] Fetched products:", products);
+
+        // Filter products based on category
+        console.log("[Debug] Filtering products...");
+        const filteredProducts = category === "all"
+            ? products
+            : products.filter(product =>
+                product.product_category && 
+                product.product_category.some(pc => 
+                    pc.categories.name.toLowerCase() === category.toLowerCase()
+                )
+            );
+
+        console.log("[Debug] Filtered products:", filteredProducts);
+
+        // Render products
+        const container = document.querySelector(".container");
+        container.innerHTML = ""; // Clear existing content
+
+        if (filteredProducts.length > 0) {
+            console.log("[Debug] Rendering products...");
+            filteredProducts.forEach((product, index) => {
+                console.log(`[Debug] Rendering product ${index + 1}:`, product);
+
+                const productImage = product.img || 'default-image.jpg';
+                const productName = product.name || 'Unnamed Product';
+
+                const box = document.createElement("div");
+                box.className = "box";
+                box.innerHTML = `
+                    <a href="item.html?productid=${product.id}">
+                        <img src="${productImage}" alt="${productName}">
+                        <p>${productName}</p>
+                    </a>
+                `;
+                container.appendChild(box);
+                console.log("[Debug] Rendered HTML:", box.innerHTML);
+            });
+        } else {
+            console.warn("[Warning] No products found for the selected category.");
+            container.innerHTML = "<p>No products found for this category.</p>";
+        }
+    } catch (error) {
+        console.error("[Error] Failed to load products:", error);
+        document.querySelector(".container").innerHTML =
+            "<p>Failed to load products. Please try again later.</p>";
+    }
+
+    console.log("[Debug] Completed loadProducts()");
+}
         document.addEventListener("DOMContentLoaded", loadProducts);
     </script>
 
