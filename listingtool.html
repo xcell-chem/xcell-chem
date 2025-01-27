@@ -28,7 +28,7 @@
 
             try {
                 // Initialize Supabase
-                supabase = supabase.createClient(supabaseUrl, supabaseKey);
+                const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
                 console.log('[Supabase Initialized Successfully]', supabase);
 
                 // Fetch initial data
