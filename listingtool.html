@@ -6,149 +6,44 @@
     <title>Listing Tool</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        const supabaseUrl = 'https://your-supabase-url.supabase.co';
-        const supabaseKey = 'your-anon-key';
+        const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function loadListings() {
+            try {
+                const { data: listings, error } = await supabase
+                    .from('listings')
+                    .select('*');
+
+                if (error) {
+                    console.error('Error loading listings:', error);
+                    return;
+                }
+
+                const container = document.getElementById('listing-container');
+                container.innerHTML = '';
+
+                listings.forEach(listing => {
+                    const listingElement = document.createElement('div');
+                    listingElement.className = 'listing';
+                    listingElement.innerHTML = `
+                        <h3>${listing.title}</h3>
+                        <p>${listing.description}</p>
+                        <img src="${listing.image}" alt="${listing.title}" style="max-width: 200px;">
+                    `;
+                    container.appendChild(listingElement);
+                });
+            } catch (error) {
+                console.error('Unexpected error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadListings);
     </script>
 </head>
 <body>
-    <h1>Product Listing Tool</h1>
-
-    <!-- Form for adding new products -->
-    <form id="listing-form">
-        <label for="product-name">Product Name:</label>
-        <input type="text" id="product-name" required><br><br>
-
-        <label for="product-description">Description:</label>
-        <textarea id="product-description" required></textarea><br><br>
-
-        <label for="product-short-description">Short Description:</label>
-        <textarea id="product-short-description" required></textarea><br><br>
-
-        <label for="category">Category:</label>
-        <input type="text" id="category" required><br><br>
-
-        <label for="product-image">Product Image:</label>
-        <input type="file" id="product-image" accept="image/*" required><br><br>
-
-        <label for="product-prices">Prices (JSON format):</label>
-        <textarea id="product-prices" required placeholder='[{"quantity": "100g", "price": 8.75}]'></textarea><br><br>
-
-        <button type="submit">Add Product</button>
-    </form>
-
-    <h2>Existing Products</h2>
-    <div id="product-list"></div>
-
-    <script>
-        // Form submission for adding a product
-        document.getElementById('listing-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const name = document.getElementById('product-name').value;
-            const description = document.getElementById('product-description').value;
-            const shortDescription = document.getElementById('product-short-description').value;
-            const categoryId = document.getElementById('category').value;
-            const imageFile = document.getElementById('product-image').files[0];
-            const prices = JSON.parse(document.getElementById('product-prices').value);
-
-            try {
-                // Upload image to Supabase Storage
-                const { data: imageData, error: imageError } = await supabase.storage
-                    .from('product-images')
-                    .upload(`public/${imageFile.name}`, imageFile);
-                if (imageError) throw imageError;
-
-                const imageUrl = `${supabaseUrl}/storage/v1/object/public/product-images/${imageData.path}`;
-
-                // Insert product into the database
-                const { data: product, error: productError } = await supabase
-                    .from('products')
-                    .insert([{ name, description, shortDescription, category_id: categoryId, img: imageUrl, active: true, archived: false }])
-                    .select('*')
-                    .single();
-                if (productError) throw productError;
-
-                // Insert prices into the product_prices table
-                const priceInserts = prices.map((price) => ({
-                    product_id: product.id,
-                    quantity: price.quantity,
-                    price: price.price,
-                }));
-
-                const { error: pricesError } = await supabase.from('product_prices').insert(priceInserts);
-                if (pricesError) throw pricesError;
-
-                alert('Product added successfully!');
-                loadProducts();
-            } catch (error) {
-                console.error('Error adding product:', error);
-                alert('Failed to add the product. Please try again.');
-            }
-        });
-
-        // Load existing products
-        async function loadProducts() {
-            try {
-                const { data: products, error } = await supabase
-                    .from('products')
-                    .select('*, product_prices(quantity, price)');
-                if (error) throw error;
-
-                const container = document.getElementById('product-list');
-                container.innerHTML = '';
-
-                products.forEach((product) => {
-                    const productElement = document.createElement('div');
-                    productElement.className = 'product';
-                    productElement.innerHTML = `
-                        <h3>${product.name}</h3>
-                        <img src="${product.img}" alt="${product.name}" style="max-width: 200px;">
-                        <p>${product.shortDescription}</p>
-                        <p>Prices:</p>
-                        <ul>
-                            ${product.product_prices
-                                .map((price) => `<li>${price.quantity}: £${price.price.toFixed(2)}</li>`)
-                                .join('')}
-                        </ul>
-                        <button onclick="deleteProduct(${product.id})">Delete</button>
-                    `;
-                    container.appendChild(productElement);
-                });
-            } catch (error) {
-                console.error('Error loading products:', error);
-            }
-        }
-
-        // Delete a product
-        async function deleteProduct(productId) {
-            if (!confirm('Are you sure you want to delete this product?')) return;
-
-            try {
-                // Delete product prices first
-                const { error: priceError } = await supabase
-                    .from('product_prices')
-                    .delete()
-                    .eq('product_id', productId);
-                if (priceError) throw priceError;
-
-                // Delete the product
-                const { error: productError } = await supabase
-                    .from('products')
-                    .delete()
-                    .eq('id', productId);
-                if (productError) throw productError;
-
-                alert('Product deleted successfully!');
-                loadProducts();
-            } catch (error) {
-                console.error('Error deleting product:', error);
-                alert('Failed to delete the product.');
-            }
-        }
-
-        // Load products on page load
-        loadProducts();
-    </script>
+    <h1>Listing Tool</h1>
+    <div id="listing-container"></div>
 </body>
 </html>
