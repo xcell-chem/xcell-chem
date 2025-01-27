@@ -73,22 +73,22 @@ console.log('[DEBUG] window.loadProducts:', window.loadProducts);
  */
 async function initializePage() {
     console.log('[DEBUG] initializePage called');
-  
-    if (typeof window.loadProducts !== 'function') {
-        console.error('[ERROR] window.loadProducts is not defined!');
-        return;
-    }
 
     const products = await window.loadProducts();
-  
+
     if (products) {
         console.log('[DEBUG] products found:', products);
-        // TODO: display them in the DOM if desired
+        // Example: Render products in a list
+        const productListElement = document.getElementById('product-list');
+        productListElement.innerHTML = products
+            .map(product => `<li>${product.name} - $${product.price}</li>`)
+            .join('');
     } else {
         console.warn('[WARN] No products or an error occurred while loading.');
     }
 }
 
+attachEventListeners();
   
   // Listen for the DOM to finish loading before calling initializePage
   document.addEventListener('DOMContentLoaded', () => {
@@ -96,7 +96,3 @@ async function initializePage() {
     initializePage();
   });
 
-
-// Initialize the page and attach event listeners
-attachEventListeners();
-initializePage();
