@@ -118,59 +118,16 @@
         }
 
         function populateProductDetails(product) {
-            const savedProducts = localStorage.getItem('products');
-            if (savedProducts) {
-                products = JSON.parse(savedProducts);
-            }
-
             document.getElementById('name').value = product.name || '';
             document.getElementById('img').value = product.img || '';
             document.getElementById('imagePreview').src = product.img || '';
             document.getElementById('imagePreview').style.display = product.img ? 'block' : 'none';
-            document.getElementById('description').value = products[currentIndex]?.description || product.description || '';
+            document.getElementById('description').value = product.description || '';
             document.getElementById('shortdescription').value = product.shortdescription || '';
             document.getElementById('active').checked = product.active || false;
 
             populateCategoryList(product.product_category || []);
             populatePriceTable(product.product_prices || []);
-        }
-
-        function populateCategoryList(categories) {
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = '';
-            categories.forEach(category => {
-                const li = document.createElement('li');
-                li.textContent = category.categories.name; // Access the name of the category
-                li.addEventListener('click', () => removeCategory(category.categories.name));
-                categoryList.appendChild(li);
-            });
-        }
-
-        function populatePriceTable(prices) {
-            const priceTableContainer = document.getElementById('priceTableContainer');
-            priceTableContainer.innerHTML = createPriceTable(prices);
-        }
-
-        function createPriceTable(prices) {
-            let tableHtml = '<table><tr><th>Quantity</th><th>Price</th><th>Actions</th></tr>';
-            prices.forEach((price, index) => {
-                tableHtml += `
-                    <tr>
-                        <td><input type="text" value="${price.quantity}" /></td>
-                        <td><input type="number" value="${price.price}" /></td>
-                        <td><button onclick="deletePriceRow(${index})">Delete</button></td>
-                    </tr>
-                `;
-            });
-            tableHtml += '</table>';
-            return tableHtml;
-        }
-
-        function deletePriceRow(index) {
-            console.log(`[deletePriceRow] Deleting price row at index: ${index}`);
-            products[currentIndex].product_prices.splice(index, 1);
-            saveToLocalStorage();
-            populatePriceTable(products[currentIndex].product_prices);
         }
 
         function attachEventListeners() {
@@ -211,42 +168,29 @@
             document.getElementById('imageInput').addEventListener('change', previewImage);
         }
 
-        function saveToLocalStorage() {
-            const product = products[currentIndex];
-            product.name = document.getElementById('name').value;
-            product.img = document.getElementById('img').value;
-            product.description = document.getElementById('description').value;
-            product.shortdescription = document.getElementById('shortdescription').value;
-            product.active = document.getElementById('active').checked;
-            localStorage.setItem('products', JSON.stringify(products));
-        }
-
-        function restoreFromLocalStorage() {
-            const savedProducts = localStorage.getItem('products');
-            if (savedProducts) {
-                products = JSON.parse(savedProducts);
-                if (products[currentIndex]) {
-                    populateProductDetails(products[currentIndex]);
-                }
-            }
-        }
-
-        async function addCategory() {
-            const categoryId = document.getElementById('availableCategories').value;
-            const productId = products[currentIndex].id;
+        async function saveNewRecord() {
+            const product = {
+                name: document.getElementById('name').value,
+                img: document.getElementById('img').value,
+                description: document.getElementById('description').value,
+                shortdescription: document.getElementById('shortdescription').value,
+                active: document.getElementById('active').checked,
+                product_prices: [],
+                product_category: [],
+            };
 
             try {
-                const { error } = await supabaseClient
-                    .from('product_category')
-                    .insert([{ product_id: productId, category_id: categoryId }]);
+                const { data, error } = await supabaseClient.from('products').insert(product);
 
                 if (error) throw error;
 
+                products.push(data[0]);
+                currentIndex = products.length - 1;
                 saveToLocalStorage();
-                await loadProducts();
-                populateProductDetails(products[currentIndex]);
+                alert('New record saved successfully!');
+                populateProductDetails(data[0]);
             } catch (error) {
-                console.error('[addCategory] Failed to add category:', error);
+                console.error('[saveNewRecord] Failed to save new record:', error);
             }
         }
 
@@ -271,6 +215,39 @@
                 alert('Record saved successfully!');
             } catch (error) {
                 console.error('[saveRecord] Failed to save record:', error);
+            }
+        }
+
+        function saveToLocalStorage() {
+            const product = products[currentIndex];
+            product.name = document.getElementById('name').value;
+            product.img = document.getElementById('img').value;
+            product.description = document.getElementById('description').value;
+            product.shortdescription = document.getElementById('shortdescription').value;
+            product.active = document.getElementById('active').checked;
+            localStorage.setItem('products', JSON.stringify(products));
+        }
+
+        function restoreFromLocalStorage() {
+            const savedProducts = localStorage.getItem('products');
+            if (savedProducts) {
+                products = JSON.parse(savedProducts);
+                if (products[currentIndex]) {
+                    populateProductDetails(products[currentIndex]);
+                }
+            }
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const imagePreview = document.getElementById('imagePreview');
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
             }
         }
     </script>
