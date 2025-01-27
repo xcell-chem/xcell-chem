@@ -20,6 +20,7 @@
             <div class="left-column">
                 <label for="name">Product Name</label>
                 <input type="text" id="name" />
+
                 <label for="img">Image URL</label>
                 <input type="text" id="img" />
                 <button id="changeImageButton">Change Image</button>
@@ -44,6 +45,7 @@
             <div class="middle-column">
                 <label for="shortdescription">Short Description</label>
                 <textarea id="shortdescription" rows="4"></textarea>
+
                 <label for="description">Description</label>
                 <textarea id="description" rows="4"></textarea>
             </div>
@@ -51,6 +53,7 @@
             <div class="right-column">
                 <h3>Selected Categories</h3>
                 <ul class="category-list" id="categoryList"></ul>
+
                 <h3>All Categories</h3>
                 <select id="availableCategories"></select>
                 <button id="addCategoryButton" type="button">Add Category</button>
@@ -81,7 +84,11 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('products')
-                    .select(`*, product_prices (quantity, price), product_categories (category_name)`);
+                    .select(`
+                        *,
+                        product_prices (quantity, price),
+                        product_category (category_name) -- Adjusted table name for categories
+                    `);
 
                 if (error) throw error;
 
@@ -93,7 +100,7 @@
                 }
             } catch (error) {
                 console.error('[Error] Failed to load products:', error);
-                alert('Failed to load products. Check console for details.');
+                alert('Failed to load products. Check the console for details.');
             }
         }
 
@@ -125,7 +132,7 @@
             document.getElementById('shortdescription').value = product.shortdescription || '';
             document.getElementById('active').checked = product.active || false;
 
-            populateCategoryList(product.product_categories || []);
+            populateCategoryList(product.product_category || []);
             populatePriceTable(product.product_prices || []);
         }
 
@@ -162,36 +169,51 @@
 
         async function addCategory() {
             const categoryName = document.getElementById('availableCategories').value;
-            // Logic to add category to the product
             console.log('[addCategory] Adding category:', categoryName);
+            // Add logic to update categories in the database
         }
 
         async function deletePriceRow(index) {
-            // Logic to delete a price row
             console.log('[deletePriceRow] Deleting price row at index:', index);
+            // Add logic to delete the price row from the database
         }
 
         function attachEventListeners() {
             document.getElementById('addPricingRowButton').addEventListener('click', () => {
                 console.log('[addPricingRowButton] Adding a price row...');
+                // Add logic to add a new price row
             });
 
             document.getElementById('addCategoryButton').addEventListener('click', addCategory);
             document.getElementById('saveRecordButton').addEventListener('click', () => {
                 console.log('[saveRecordButton] Saving record...');
+                // Add logic to save the current record
             });
 
             document.getElementById('saveNewRecordButton').addEventListener('click', () => {
                 console.log('[saveNewRecordButton] Saving a new record...');
+                // Add logic to save a new record
             });
 
             document.getElementById('previousRecordButton').addEventListener('click', () => {
-                console.log('[previousRecordButton] Navigating to the previous product...');
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    populateProductDetails(products[currentIndex]);
+                } else {
+                    alert('Already at the first record.');
+                }
             });
 
             document.getElementById('nextRecordButton').addEventListener('click', () => {
-                console.log('[nextRecordButton] Navigating to the next product...');
+                if (currentIndex < products.length - 1) {
+                    currentIndex++;
+                    populateProductDetails(products[currentIndex]);
+                } else {
+                    alert('Already at the last record.');
+                }
             });
+
+            document.getElementById('imageInput').addEventListener('change', previewImage);
         }
 
         function previewImage(event) {
