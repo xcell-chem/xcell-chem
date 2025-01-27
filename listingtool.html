@@ -121,6 +121,26 @@
             });
         }
 
+        function populatePriceTable(prices) {
+            const priceTableContainer = document.getElementById('priceTableContainer');
+            priceTableContainer.innerHTML = createPriceTable(prices);
+        }
+
+        function createPriceTable(prices) {
+            let tableHtml = '<table><tr><th>Quantity</th><th>Price</th><th>Actions</th></tr>';
+            prices.forEach((price, index) => {
+                tableHtml += `
+                    <tr>
+                        <td><input type="text" value="${price.quantity}" /></td>
+                        <td><input type="number" value="${price.price}" /></td>
+                        <td><button onclick="deletePriceRow(${index})">Delete</button></td>
+                    </tr>
+                `;
+            });
+            tableHtml += '</table>';
+            return tableHtml;
+        }
+
         function saveToLocalStorage() {
             const product = products[currentIndex];
             product.name = document.getElementById('name').value;
@@ -140,23 +160,6 @@
                 }
             }
         }
-
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const imagePreview = document.getElementById('imagePreview');
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        document.getElementById('changeImageButton').addEventListener('click', () => {
-            document.getElementById('imageInput').click();
-        });
 
         async function removeCategory(categoryName) {
             const productId = products[currentIndex].id;
