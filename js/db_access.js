@@ -6,15 +6,20 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 /**
  * Load products from the database
  */
-window.loadProducts = async function loadProducts() {
+// db_access.js
+const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
+const supabaseKey = 'YOUR_SUPABASE_KEY';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+/**
+ * Load products from the database
+ */
+window.loadProducts = async function () {
     console.log('[DEBUG] Attempting to load products from the database...');
     try {
         const { data, error } = await supabaseClient
-            .from('product_category')
-            .select(`
-                *,
-                products (name)
-            `);
+            .from('products') // Replace with your actual table name
+            .select('*');
 
         if (error) {
             console.error('[ERROR] Failed to load products:', error);
@@ -26,5 +31,29 @@ window.loadProducts = async function loadProducts() {
     } catch (err) {
         console.error('[ERROR] Unexpected error while loading products:', err);
         return [];
+    }
+};
+
+/**
+ * Save a product to the database
+ * @param {Object} productData - The product data to save
+ */
+window.saveProductToDB = async function (productData) {
+    console.log('[DEBUG] Attempting to save product to the database...');
+    try {
+        const { data, error } = await supabaseClient
+            .from('products')
+            .insert([productData]);
+
+        if (error) {
+            console.error('[ERROR] Failed to save product:', error);
+            throw error;
+        }
+
+        console.log('[DEBUG] Product saved successfully:', data);
+        return data;
+    } catch (err) {
+        console.error('[ERROR] Unexpected error while saving product:', err);
+        throw err;
     }
 };
