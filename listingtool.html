@@ -70,14 +70,18 @@
         let products = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
-            try {
+            const useLocalStorage = localStorage.getItem('useLocalStorage');
+
+            if (useLocalStorage) {
+                console.log('[DOMContentLoaded] Loading data from local storage...');
                 restoreFromLocalStorage();
+            } else {
+                console.log('[DOMContentLoaded] Loading data from the database...');
                 await loadProducts();
                 await loadCategories();
-                attachEventListeners(); // Ensuring this function exists and is called
-            } catch (error) {
-                console.error('[DOMContentLoaded] Error initializing the page:', error);
             }
+
+            attachEventListeners();
         });
 
         async function loadProducts() {
@@ -139,7 +143,7 @@
             categoryList.innerHTML = '';
             categories.forEach(category => {
                 const li = document.createElement('li');
-                li.textContent = category.categories.name; // Access the name of the category
+                li.textContent = category.categories.name;
                 li.addEventListener('click', () => removeCategory(category.categories.name));
                 categoryList.appendChild(li);
             });
@@ -165,25 +169,9 @@
             return tableHtml;
         }
 
-        function deletePriceRow(index) {
-            products[currentIndex].product_prices.splice(index, 1);
-            saveToLocalStorage();
-            populatePriceTable(products[currentIndex].product_prices);
-        }
-
         function attachEventListeners() {
-            document.getElementById('addPricingRowButton').addEventListener('click', () => {
-                products[currentIndex].product_prices.push({ quantity: '', price: 0 });
-                saveToLocalStorage();
-                populatePriceTable(products[currentIndex].product_prices);
-            });
-
-            document.getElementById('addCategoryButton').addEventListener('click', addCategory);
-
             document.getElementById('saveRecordButton').addEventListener('click', saveRecord);
-
             document.getElementById('saveNewRecordButton').addEventListener('click', saveNewRecord);
-
             document.getElementById('previousRecordButton').addEventListener('click', () => {
                 if (currentIndex > 0) {
                     currentIndex--;
@@ -192,7 +180,6 @@
                     alert('Already at the first record.');
                 }
             });
-
             document.getElementById('nextRecordButton').addEventListener('click', () => {
                 if (currentIndex < products.length - 1) {
                     currentIndex++;
@@ -201,94 +188,36 @@
                     alert('Already at the last record.');
                 }
             });
-
-            document.getElementById('changeImageButton').addEventListener('click', () => {
-                document.getElementById('imageInput').click();
-            });
-
-            document.getElementById('imageInput').addEventListener('change', previewImage);
         }
 
-        async function saveNewRecord() {
-            const product = {
+        function saveRecord() {
+            const product = collectFormData();
+            localStorage.setItem('useLocalStorage', true);
+            localStorage.setItem('currentProduct', JSON.stringify(product));
+            alert('Record saved to local storage!');
+        }
+
+        function saveNewRecord() {
+            const product = collectFormData();
+            localStorage.setItem('useLocalStorage', true);
+            localStorage.setItem('currentProduct', JSON.stringify(product));
+            alert('New record saved to local storage!');
+        }
+
+        function collectFormData() {
+            return {
                 name: document.getElementById('name').value,
                 img: document.getElementById('img').value,
                 description: document.getElementById('description').value,
                 shortdescription: document.getElementById('shortdescription').value,
                 active: document.getElementById('active').checked,
-                product_prices: [],
-                product_category: [],
             };
-
-            try {
-                const { data, error } = await supabaseClient.from('products').insert(product);
-
-                if (error) throw error;
-
-                products.push(data[0]);
-                currentIndex = products.length - 1;
-                saveToLocalStorage();
-                alert('New record saved successfully!');
-                populateProductDetails(data[0]);
-            } catch (error) {
-                console.error('[saveNewRecord] Failed to save new record:', error);
-            }
-        }
-
-        async function saveRecord() {
-            saveToLocalStorage();
-            const product = products[currentIndex];
-
-            try {
-                const { error } = await supabaseClient
-                    .from('products')
-                    .update({
-                        name: product.name,
-                        img: product.img,
-                        description: product.description,
-                        shortdescription: product.shortdescription,
-                        active: product.active,
-                    })
-                    .eq('id', product.id);
-
-                if (error) throw error;
-
-                alert('Record saved successfully!');
-            } catch (error) {
-                console.error('[saveRecord] Failed to save record:', error);
-            }
-        }
-
-        function saveToLocalStorage() {
-            const product = products[currentIndex];
-            product.name = document.getElementById('name').value;
-            product.img = document.getElementById('img').value;
-            product.description = document.getElementById('description').value;
-            product.shortdescription = document.getElementById('shortdescription').value;
-            product.active = document.getElementById('active').checked;
-            localStorage.setItem('products', JSON.stringify(products));
         }
 
         function restoreFromLocalStorage() {
-            const savedProducts = localStorage.getItem('products');
-            if (savedProducts) {
-                products = JSON.parse(savedProducts);
-                if (products[currentIndex]) {
-                    populateProductDetails(products[currentIndex]);
-                }
-            }
-        }
-
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const imagePreview = document.getElementById('imagePreview');
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+            const product = JSON.parse(localStorage.getItem('currentProduct'));
+            if (product) {
+                populateProductDetails(product);
             }
         }
     </script>
