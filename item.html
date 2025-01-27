@@ -1,24 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-    const supabaseUrl = 'https://your-supabase-url.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"></script>
+    <script>
+        // Supabase credentials
+        const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Selection</title>
-    <!-- Link to the main stylesheet -->
     <link rel="stylesheet" href="css/main.css">
-    <style>
-
-    </style>
 </head>
-
 <body>
     <header>
         <nav>
@@ -56,60 +51,65 @@
     </div>
 
     <script>
-        async function getProductById(productId) {
+        async function loadProductById(productId) {
             try {
-                const response = await fetch("data/products.json");
-                const data = await response.json();
-                const product = data.products.find(item => item.id === parseInt(productId, 10));
-                if (product) {
-                    return product;
-                } else {
-                    console.log("No product found with ID:", productId);
+                const { data: product, error } = await supabaseClient
+                    .from('products')
+                    .select(`
+                        *,
+                        product_prices (quantity, price)
+                    `)
+                    .eq('id', productId)
+                    .single(); // Fetch a single product
+
+                if (error) {
+                    console.error("[Error] Supabase error:", error.message);
                     return null;
                 }
+
+                return product;
             } catch (error) {
-                console.error("Error fetching products.json:", error);
+                console.error("Error fetching product:", error);
                 return null;
             }
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
             const params = new URLSearchParams(window.location.search);
             const productId = params.get("productid");
 
             if (productId) {
-                getProductById(productId).then(product => {
-                    if (product) {
-                        document.getElementById('product-name').innerHTML = product.name;
-                        document.getElementById('product-image').src = product.img;
-                        document.getElementById('product-image').alt = product.name;
+                const product = await loadProductById(productId);
+                if (product) {
+                    document.getElementById('product-name').innerHTML = product.name;
+                    document.getElementById('product-image').src = product.img;
+                    document.getElementById('product-image').alt = product.name;
 
-                        document.getElementById('product-short-description').innerText = product.shortdescription;
-                        document.getElementById('product-description').innerText = product.description;
+                    document.getElementById('product-short-description').innerText = product.shortdescription;
+                    document.getElementById('product-description').innerText = product.description;
 
-                        const variantSelect = document.getElementById('variant');
-                        product.prices.forEach(priceInfo => {
-                            const option = document.createElement('option');
-                            option.value = priceInfo.quantity;  // Pack size (e.g., "100g")
-                            option.setAttribute('data-price', priceInfo.price);
-                            option.textContent = `${priceInfo.quantity} - £${priceInfo.price.toFixed(2)}`;
-                            variantSelect.appendChild(option);
-                        });
+                    const variantSelect = document.getElementById('variant');
+                    product.product_prices.forEach(priceInfo => {
+                        const option = document.createElement('option');
+                        option.value = priceInfo.quantity;  // Pack size (e.g., "100g")
+                        option.setAttribute('data-price', priceInfo.price);
+                        option.textContent = `${priceInfo.quantity} - £${priceInfo.price.toFixed(2)}`;
+                        variantSelect.appendChild(option);
+                    });
 
-                        // Add quantity dropdown
-                        const quantitySelect = document.getElementById('quantity');
-                        for (let i = 1; i <= 10; i++) {  // You can modify this range
-                            const option = document.createElement('option');
-                            option.value = i;
-                            option.textContent = i;
-                            quantitySelect.appendChild(option);
-                        }
-
-                        updatePrice();
-                    } else {
-                        document.getElementById('product-info').innerHTML = `<p>Product not found.</p>`;
+                    // Add quantity dropdown
+                    const quantitySelect = document.getElementById('quantity');
+                    for (let i = 1; i <= 10; i++) {  // You can modify this range
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = i;
+                        quantitySelect.appendChild(option);
                     }
-                });
+
+                    updatePrice();
+                } else {
+                    document.getElementById('product-info').innerHTML = `<p>Product not found.</p>`;
+                }
             } else {
                 document.getElementById('product-info').innerHTML = `<p>No product ID provided in the query string.</p>`;
             }
@@ -164,6 +164,9 @@
             alert('Basket emptied!');
         }
     </script>
-</body>
 
+    <footer>
+        <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
+    </footer>
+</body>
 </html>
