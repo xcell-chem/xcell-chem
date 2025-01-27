@@ -8,27 +8,36 @@
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
+        // Supabase initialization
         const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
     
+        console.log('[Supabase Initialized]', supabase);
+    
+        // Global variables
         let currentIndex = 0;
         let data = { products: [] };
     
-        window.addEventListener('DOMContentLoaded', async () => {
-            console.log('[DOMContentLoaded] Page loaded.');
+        // Wait for the DOM to load before interacting with elements
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('[DOMContentLoaded] DOM fully loaded.');
     
             try {
+                // Fetch products from Supabase
                 await fetchProducts();
                 if (data.products.length > 0) {
-                    console.log('[DOMContentLoaded] Fetched products loaded into memory:', data);
+                    console.log('[DOMContentLoaded] Products loaded into memory:', data.products);
                     loadProductFromMemory();
                 } else {
-                    console.warn('[DOMContentLoaded] No products fetched. Initializing default data.');
+                    console.warn('[DOMContentLoaded] No products found. Initializing with default data.');
                     initializeDefaultData();
                 }
     
+                // Fetch categories
                 await fetchCategories();
+    
+                // Attach event listeners
                 attachEventListeners();
             } catch (error) {
                 console.error('[DOMContentLoaded] Error during initialization:', error);
@@ -48,7 +57,7 @@
                     categories: product.categories.map(category => category.name) || [],
                 }));
     
-                console.log('[fetchProducts] Fetched products:', data.products);
+                console.log('[fetchProducts] Products fetched:', data.products);
             } catch (error) {
                 console.error('[fetchProducts] Error fetching products:', error);
             }
@@ -68,21 +77,21 @@
                     categoryDropdown.appendChild(option);
                 });
     
-                console.log('[fetchCategories] Fetched categories:', categories);
+                console.log('[fetchCategories] Categories fetched:', categories);
             } catch (error) {
                 console.error('[fetchCategories] Error fetching categories:', error);
             }
         }
     
         function attachEventListeners() {
-            console.log('[attachEventListeners] Attaching event listeners...');
+            console.log('[attachEventListeners] Adding event listeners...');
             document.getElementById('addPricingRowButton').addEventListener('click', addPricingRow);
             document.getElementById('addCategoryButton').addEventListener('click', addCategory);
             document.getElementById('saveRecordButton').addEventListener('click', saveRecord);
             document.getElementById('saveNewRecordButton').addEventListener('click', saveNewRecord);
             document.getElementById('previousRecordButton').addEventListener('click', previousRecord);
             document.getElementById('nextRecordButton').addEventListener('click', nextRecord);
-            console.log('[attachEventListeners] Event listeners attached.');
+            console.log('[attachEventListeners] Event listeners added.');
         }
     
         function loadProductFromMemory() {
@@ -176,7 +185,7 @@
     
                 alert('Record saved successfully!');
             } catch (error) {
-                console.error('Error saving record:', error);
+                console.error('[saveRecord] Error saving record:', error);
                 alert('Failed to save record.');
             }
         }
@@ -191,7 +200,7 @@
                 active: document.getElementById('active').checked,
                 archived: false,
                 prices: [],
-                categories: []
+                categories: [],
             };
     
             data.products.push(newProduct);
@@ -213,6 +222,7 @@
             }
         }
     </script>
+    
     
 </head>
 
