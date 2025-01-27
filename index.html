@@ -8,16 +8,22 @@
     <title>XCell Chem</title>
     <link rel="stylesheet" href="css/main.css">
     <script>
-        // Function to load categories dynamically
+        const supabase = supabase.createClient(
+            'https://your-supabase-url.supabase.co',
+            'your-anon-key'
+        );
+    
         async function loadCategories() {
             try {
-                const response = await fetch('data/categories.json');
-                const categories = await response.json();
-                const container = document.querySelector(".container");
-
+                const { data: categories, error } = await supabase.from('categories').select('*');
+                if (error) throw error;
+    
+                const container = document.querySelector('.container');
+                container.innerHTML = ''; // Clear existing content
+    
                 categories.forEach(category => {
-                    const box = document.createElement("div");
-                    box.className = "box";
+                    const box = document.createElement('div');
+                    box.className = 'box';
                     box.innerHTML = `
                         <a href="/products.html?category=${encodeURIComponent(category.name)}">
                             <img src="${category.image}" alt="${category.name}">
@@ -28,13 +34,15 @@
                 });
             } catch (error) {
                 console.error('Error loading categories:', error);
-                document.querySelector(".container").innerHTML =
-                    "<p>Failed to load categories. Please try again later.</p>";
+                document.querySelector('.container').innerHTML = `
+                    <p>Failed to load categories. Please try again later.</p>
+                `;
             }
         }
-
+    
         document.addEventListener('DOMContentLoaded', loadCategories);
     </script>
+    
 </head>
 <body>
     <header>

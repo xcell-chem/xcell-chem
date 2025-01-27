@@ -38,51 +38,59 @@
     </div>
 </div>
 
-    <script>
-        async function loadProducts() {
-            const params = new URLSearchParams(window.location.search);
-            const category = params.get("category") || "all";
+<script>
+    const supabase = supabase.createClient(
+        'https://your-supabase-url.supabase.co',
+        'your-anon-key'
+    );
 
-            try {
-                const response = await fetch("data/products.json");
-                const data = await response.json();
-                const products = data.products;
+    async function loadProducts() {
+        const params = new URLSearchParams(window.location.search);
+        const category = params.get('category') || 'all';
 
-                const filteredProducts = category === "all"
-                    ? products
-                    : products.filter(product =>
-                        product.categories.some(cat =>
-                            cat.toLowerCase() === category.toLowerCase()
-                        )
-                    );
+        try {
+            const { data: products, error } = await supabase
+                .from('products')
+                .select('id, name, img, category_id, categories(name)')
+                .eq('active', true);
 
-                const container = document.querySelector(".container");
-                container.innerHTML = "";
+            if (error) throw error;
 
-                if (filteredProducts.length > 0) {
-                    filteredProducts.forEach(product => {
-                        const box = document.createElement("div");
-                        box.className = "box";
-                        box.innerHTML = `
-                            <a href="item.html?productid=${product.id}">
-                                <img src="${product.img}" alt="${product.name}">
-                                <p>${product.name}</p>
-                            </a>
-                        `;
-                        container.appendChild(box);
-                    });
-                } else {
-                    container.innerHTML = "<p>No products found for this category.</p>";
-                }
-            } catch (error) {
-                console.error("Error loading product data:", error);
-                document.querySelector(".container").innerHTML =
-                    "<p>Failed to load products. Please try again later.</p>";
+            const filteredProducts = category === 'all'
+                ? products
+                : products.filter(product =>
+                    product.categories.name.toLowerCase() === category.toLowerCase()
+                );
+
+            const container = document.querySelector('.container');
+            container.innerHTML = ''; // Clear existing content
+
+            if (filteredProducts.length > 0) {
+                filteredProducts.forEach(product => {
+                    const box = document.createElement('div');
+                    box.className = 'box';
+                    box.innerHTML = `
+                        <a href="item.html?productid=${product.id}">
+                            <img src="${product.img}" alt="${product.name}">
+                            <p>${product.name}</p>
+                        </a>
+                    `;
+                    container.appendChild(box);
+                });
+            } else {
+                container.innerHTML = '<p>No products found for this category.</p>';
             }
+        } catch (error) {
+            console.error('Error loading products:', error);
+            document.querySelector('.container').innerHTML = `
+                <p>Failed to load products. Please try again later.</p>
+            `;
         }
+    }
 
-        document.addEventListener("DOMContentLoaded", loadProducts);
-    </script>
+    document.addEventListener('DOMContentLoaded', loadProducts);
+</script>
+
 	 <footer>
         <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
     </footer>

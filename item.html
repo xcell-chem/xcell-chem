@@ -47,116 +47,81 @@
             </div>
         </div>
     </div>
-
     <script>
+        const supabase = supabase.createClient(
+            'https://your-supabase-url.supabase.co',
+            'your-anon-key'
+        );
+    
         async function getProductById(productId) {
             try {
-                const response = await fetch("data/products.json");
-                const data = await response.json();
-                const product = data.products.find(item => item.id === parseInt(productId, 10));
-                if (product) {
-                    return product;
-                } else {
-                    console.log("No product found with ID:", productId);
-                    return null;
-                }
+                const { data: product, error } = await supabase
+                    .from('products')
+                    .select('id, name, img, description, shortdescription, prices:product_prices(quantity, price)')
+                    .eq('id', productId)
+                    .single();
+    
+                if (error) throw error;
+                return product;
             } catch (error) {
-                console.error("Error fetching products.json:", error);
+                console.error('Error fetching product:', error);
                 return null;
             }
         }
-
-        document.addEventListener("DOMContentLoaded", () => {
+    
+        document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
-            const productId = params.get("productid");
-
+            const productId = params.get('productid');
+    
             if (productId) {
-                getProductById(productId).then(product => {
-                    if (product) {
-                        document.getElementById('product-name').innerHTML = product.name;
-                        document.getElementById('product-image').src = product.img;
-                        document.getElementById('product-image').alt = product.name;
-
-                        document.getElementById('product-short-description').innerText = product.shortdescription;
-                        document.getElementById('product-description').innerText = product.description;
-
-                        const variantSelect = document.getElementById('variant');
-                        product.prices.forEach(priceInfo => {
-                            const option = document.createElement('option');
-                            option.value = priceInfo.quantity;  // Pack size (e.g., "100g")
-                            option.setAttribute('data-price', priceInfo.price);
-                            option.textContent = `${priceInfo.quantity} - £${priceInfo.price.toFixed(2)}`;
-                            variantSelect.appendChild(option);
-                        });
-
-                        // Add quantity dropdown
-                        const quantitySelect = document.getElementById('quantity');
-                        for (let i = 1; i <= 10; i++) {  // You can modify this range
-                            const option = document.createElement('option');
-                            option.value = i;
-                            option.textContent = i;
-                            quantitySelect.appendChild(option);
-                        }
-
-                        updatePrice();
-                    } else {
-                        document.getElementById('product-info').innerHTML = `<p>Product not found.</p>`;
+                const product = await getProductById(productId);
+                if (product) {
+                    document.getElementById('product-name').innerText = product.name;
+                    document.getElementById('product-image').src = product.img;
+                    document.getElementById('product-image').alt = product.name;
+                    document.getElementById('product-short-description').innerText = product.shortdescription;
+                    document.getElementById('product-description').innerText = product.description;
+    
+                    const variantSelect = document.getElementById('variant');
+                    product.prices.forEach(priceInfo => {
+                        const option = document.createElement('option');
+                        option.value = priceInfo.quantity;
+                        option.setAttribute('data-price', priceInfo.price);
+                        option.textContent = `${priceInfo.quantity} - £${priceInfo.price.toFixed(2)}`;
+                        variantSelect.appendChild(option);
+                    });
+    
+                    // Add quantity dropdown
+                    const quantitySelect = document.getElementById('quantity');
+                    for (let i = 1; i <= 10; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = i;
+                        quantitySelect.appendChild(option);
                     }
-                });
+    
+                    updatePrice();
+                } else {
+                    document.getElementById('product-info').innerHTML = '<p>Product not found.</p>';
+                }
             } else {
-                document.getElementById('product-info').innerHTML = `<p>No product ID provided in the query string.</p>`;
+                document.getElementById('product-info').innerHTML = '<p>No product ID provided in the query string.</p>';
             }
-
-            document.getElementById('variant').addEventListener('change', updatePrice);
-            document.getElementById('quantity').addEventListener('change', updatePrice);
         });
-
+    
         function updatePrice() {
             const variantSelect = document.getElementById('variant');
             const quantitySelect = document.getElementById('quantity');
-
+    
             const selectedVariant = variantSelect.options[variantSelect.selectedIndex];
             const price = parseFloat(selectedVariant.getAttribute('data-price'));
             const quantity = parseInt(quantitySelect.value, 10);
-
+    
             const totalPrice = (price * quantity).toFixed(2);
             document.getElementById('price').innerText = `Total Price: £${totalPrice}`;
         }
-
-        function addToBasket() {
-            const params = new URLSearchParams(window.location.search);
-            const productId = params.get("productid");
-            if (!productId) {
-                alert("Product ID is missing.");
-                return;
-            }
-
-            const variantSelect = document.getElementById('variant');
-            const selectedVariant = variantSelect.value; // Pack size (e.g., "100g")
-            const quantitySelect = document.getElementById('quantity');
-            const selectedQuantity = quantitySelect.value;
-
-            const basketItem = {
-                id: parseInt(productId, 10), // Store the product ID
-                variant: selectedVariant,   // Store the selected pack size
-                quantity: parseInt(selectedQuantity, 10) // Store the order quantity
-            };
-
-            let basket = JSON.parse(localStorage.getItem('basket')) || [];
-            basket.push(basketItem);
-            localStorage.setItem('basket', JSON.stringify(basket));
-            alert('Added to basket!');
-        }
-
-        function goToCheckout() {
-            window.location.href = 'checkout.html';
-        }
-
-        function emptyBasket() {
-            localStorage.removeItem('basket');
-            alert('Basket emptied!');
-        }
     </script>
+    
 </body>
 
 </html>
