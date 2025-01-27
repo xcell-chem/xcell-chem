@@ -2,7 +2,40 @@
 
 // Remove any ES import statements. 
 // We'll rely on the global window.createproduct, window.loadproduct, etc.
+// db_access.js
 
+// 1) Your actual Supabase project credentials
+const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // truncated for brevity
+
+// 2) Extract createClient from the global supabase object (loaded by the CDN <script>)
+const { createClient } = window.supabase;
+
+// 3) Create a single Supabase client instance
+const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+/**
+ * Example: load all products from the "products" table.
+ * Named "loadProducts" with a capital 'P' to match your usage in user_interactions.js.
+ */
+window.loadProducts = async function () {
+  try {
+    const { data, error } = await supabaseClient
+      .from('products')
+      .select('*');
+
+    if (error) {
+      console.error('[ERROR] loading products:', error);
+      return null;
+    }
+
+    console.log('[DEBUG] loaded products:', data);
+    return data; // Return so callers can use it
+  } catch (err) {
+    console.error('[ERROR] unexpected load error:', err);
+    return null;
+  }
+};
 document.addEventListener('DOMContentLoaded', () => {
     // Example: button for creating a product
     const createButton = document.getElementById('createProd');

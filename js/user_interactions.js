@@ -23,7 +23,7 @@ function onLoadProducts() {
   
   // Suppose you bind to a button click:
  // document.getElementById('load-button').addEventListener('click', onLoadProducts)
-  
+
 /**
  * Display a single product on the page
  * @param {Object} product - The product object to display
@@ -66,25 +66,30 @@ function showPreviousProduct() {
  * Initialize the page by loading products and setting up event listeners
  */
 console.log('[DEBUG] window.loadProducts:', window.loadProducts);
+// user_interactions.js
+
+/**
+ * Called after the DOM is ready, to load and display all products.
+ */
 async function initializePage() {
-    console.log('[DEBUG] Initializing page...');
-    try {
-        const products = await window.loadProducts(); // Ensure this function is accessible
-
-        if (!products || !Array.isArray(products)) {
-            console.warn('[WARN] Failed to load products or products is not an array.');
-            return;
-        }
-
-        if (products.length === 0) {
-            console.warn('[WARN] No products found in the database.');
-        } else {
-            renderProducts(products); // Ensure renderProducts is defined correctly
-        }
-    } catch (error) {
-        console.error('[ERROR] An error occurred while initializing the page:', error);
+    console.log('[DEBUG] initializePage called');
+  
+    // Make sure the function name matches exactly what you defined in db_access.js
+    const products = await window.loadProducts();
+  
+    if (products) {
+      console.log('[DEBUG] products found:', products);
+      // TODO: display them in the DOM if desired
+    } else {
+      console.warn('[WARN] No products or an error occurred while loading.');
     }
-}
+  }
+  
+  // Listen for the DOM to finish loading before calling initializePage
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('[DEBUG] DOMContentLoaded, calling initializePage()...');
+    initializePage();
+  });
 
 
 // Initialize the page and attach event listeners
