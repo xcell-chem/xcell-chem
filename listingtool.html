@@ -8,12 +8,7 @@
     <link rel="stylesheet" href="css/styles.css">
 
     <!-- Load Supabase library -->
-    <script>
-        console.log('[Debug] Attempting to load Supabase library from CDN...');
-    </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1">
-   
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"
         onload="console.log('[Debug] Supabase library loaded successfully.')"
         onerror="console.error('[Error] Failed to load Supabase library. Check your network or CDN URL.'); alert('Failed to load Supabase library. Check console for details.');">
     </script>
@@ -70,58 +65,54 @@
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
 
             console.log('[Debug] Initializing Supabase client...');
-            let supabaseClient;
-            try {
-                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-                console.log('[Debug] Supabase client initialized:', supabaseClient);
-            } catch (error) {
-                console.error('[Error] Failed to initialize Supabase client:', error);
-                alert('Failed to initialize Supabase client. Check your configuration.');
-                return;
-            }
+            const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-            // Fetch initial data
             try {
-                const productId = new URLSearchParams(window.location.search).get('productid');
-                if (!productId) {
-                    console.warn('[Warning] No product ID provided in the query string.');
-                    alert('No product ID found in the URL. Please provide a valid product ID.');
-                    return;
-                }
-
-                console.log(`[Debug] Fetching product with ID: ${productId}`);
-                await fetchProductById(supabaseClient, productId);
-                await fetchCategories(supabaseClient);
-            } catch (error) {
-                console.error('[Error] Failed during data fetching:', error);
-                alert('An error occurred while fetching data. Check the console for details.');
-            }
-        });
-
-        // Fetch product by ID
-        async function fetchProductById(client, productId) {
-            try {
-                console.log('[Debug] Fetching product details...');
-                const { data: product, error } = await client
+                console.log('[Debug] Fetching all product data...');
+                const { data: products, error } = await supabaseClient
                     .from('products')
                     .select(`
                         *,
                         product_prices (quantity, price)
-                    `)
-                    .eq('id', productId)
-                    .single();
+                    `);
 
                 if (error) throw error;
 
-                console.log('[Debug] Product fetched successfully:', product);
-                populateProduct(product);
+                console.log('[Debug] Products fetched successfully:', products);
+
+                if (products.length > 0) {
+                    // Load the first product into the editor as an example
+                    populateProduct(products[0]);
+
+                    // Debugging: List all products in the console
+                    console.log('[Debug] All products available:', products);
+                } else {
+                    alert('No products found in the database.');
+                }
+
+                // Fetch and populate categories
+                await fetchCategories(supabaseClient);
             } catch (error) {
-                console.error('[Error] Failed to fetch product:', error);
-                alert('Failed to fetch product details. Check the console for more information.');
+                console.error('[Error] Failed to fetch product data:', error);
+                alert('Failed to fetch product data. Check the console for more information.');
             }
+        });
+
+        // Populate product details into the editor
+        function populateProduct(product) {
+            console.log('[Debug] Populating product details:', product);
+            document.getElementById('name').value = product.name || '';
+            document.getElementById('img').value = product.img || '';
+            document.getElementById('shortdescription').value = product.shortdescription || '';
+            document.getElementById('description').value = product.description || '';
+            document.getElementById('active').checked = product.active || false;
+
+            // Populate price table
+            const priceTableContainer = document.getElementById('priceTableContainer');
+            priceTableContainer.innerHTML = createPriceTable(product.product_prices || []);
         }
 
-        // Fetch categories
+        // Fetch categories from the Supabase database
         async function fetchCategories(client) {
             try {
                 console.log('[Debug] Fetching categories...');
@@ -137,20 +128,7 @@
             }
         }
 
-        // Populate product details into the editor
-        function populateProduct(product) {
-            document.getElementById('name').value = product.name || '';
-            document.getElementById('img').value = product.img || '';
-            document.getElementById('shortdescription').value = product.shortdescription || '';
-            document.getElementById('description').value = product.description || '';
-            document.getElementById('active').checked = product.active || false;
-
-            // Populate price table
-            const priceTableContainer = document.getElementById('priceTableContainer');
-            priceTableContainer.innerHTML = createPriceTable(product.product_prices || []);
-        }
-
-        // Populate categories
+        // Populate categories into the dropdown
         function populateCategories(categories) {
             const dropdown = document.getElementById('availableCategories');
             dropdown.innerHTML = '';
@@ -161,9 +139,11 @@
                 option.textContent = category.name;
                 dropdown.appendChild(option);
             });
+
+            console.log('[Debug] Categories dropdown populated successfully.');
         }
 
-        // Create price table
+        // Create price table HTML
         function createPriceTable(prices) {
             let table = '<table><tr><th>Quantity</th><th>Price</th></tr>';
             prices.forEach(({ quantity, price }) => {
