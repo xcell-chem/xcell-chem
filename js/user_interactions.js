@@ -39,9 +39,12 @@ function renderProducts(products) {
 /**
  * Initialize the page by loading products and setting up event listeners
  */
+/**
+ * Initialize the page by loading products and setting up event listeners
+ */
 async function initializePage() {
     console.log('[DEBUG] Initializing page...');
-    const products = await loadProducts();
+    const products = await window.loadProducts();
 
     if (!products || !Array.isArray(products)) {
         console.warn('[WARN] Failed to load products or products is not an array.');

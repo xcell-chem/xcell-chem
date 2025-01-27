@@ -1,7 +1,4 @@
-
 // db_access.js
-// Functions to access the database
-
 const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -9,14 +6,14 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 /**
  * Load products from the database
  */
-export async function loadProducts() {
+window.loadProducts = async function loadProducts() {
     console.log('[DEBUG] Attempting to load products from the database...');
     try {
         const { data, error } = await supabaseClient
             .from('product_category')
             .select(`
                 *,
-                products (name) -- Fetch the name field from the related products table
+                products (name)
             `);
 
         if (error) {
@@ -30,4 +27,4 @@ export async function loadProducts() {
         console.error('[ERROR] Unexpected error while loading products:', err);
         return [];
     }
-}
+};
