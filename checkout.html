@@ -3,6 +3,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+    const supabaseUrl = 'https://your-supabase-url.supabase.co';
+    const supabaseKey = 'your-anon-key';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Shiny Flakes</title>

@@ -3,29 +3,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+    const supabaseUrl = 'https://your-supabase-url.supabase.co';
+    const supabaseKey = 'your-anon-key';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XCell Chem</title>
     <link rel="stylesheet" href="css/main.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest/dist/umd/supabase.min.js"></script>
     <script>
-        
-        const supabase = supabase.createClient(
-            'https://tjbcucdewwczndkeypey.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ'
-        );
-    
+        // Function to load categories dynamically
         async function loadCategories() {
             try {
-                const { data: categories, error } = await supabase.from('categories').select('*');
-                if (error) throw error;
-    
-                const container = document.querySelector('.container');
-                container.innerHTML = ''; // Clear existing content
-    
+                const response = await fetch('data/categories.json');
+                const categories = await response.json();
+                const container = document.querySelector(".container");
+
                 categories.forEach(category => {
-                    const box = document.createElement('div');
-                    box.className = 'box';
+                    const box = document.createElement("div");
+                    box.className = "box";
                     box.innerHTML = `
                         <a href="/products.html?category=${encodeURIComponent(category.name)}">
                             <img src="${category.image}" alt="${category.name}">
@@ -36,15 +35,13 @@
                 });
             } catch (error) {
                 console.error('Error loading categories:', error);
-                document.querySelector('.container').innerHTML = `
-                    <p>Failed to load categories. Please try again later.</p>
-                `;
+                document.querySelector(".container").innerHTML =
+                    "<p>Failed to load categories. Please try again later.</p>";
             }
         }
-    
+
         document.addEventListener('DOMContentLoaded', loadCategories);
     </script>
-    
 </head>
 <body>
     <header>

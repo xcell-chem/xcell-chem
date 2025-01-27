@@ -3,7 +3,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+    const supabaseUrl = 'https://your-supabase-url.supabase.co';
+    const supabaseKey = 'your-anon-key';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+</script>
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7SR5YRK9J"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -39,59 +45,51 @@
     </div>
 </div>
 
-<script>
-    const supabase = supabase.createClient(
-        'https://tjbcucdewwczndkeypey.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ'
-    );
+    <script>
+        async function loadProducts() {
+            const params = new URLSearchParams(window.location.search);
+            const category = params.get("category") || "all";
 
-    async function loadProducts() {
-        const params = new URLSearchParams(window.location.search);
-        const category = params.get('category') || 'all';
+            try {
+                const response = await fetch("data/products.json");
+                const data = await response.json();
+                const products = data.products;
 
-        try {
-            const { data: products, error } = await supabase
-                .from('products')
-                .select('id, name, img, category_id, categories(name)')
-                .eq('active', true);
+                const filteredProducts = category === "all"
+                    ? products
+                    : products.filter(product =>
+                        product.categories.some(cat =>
+                            cat.toLowerCase() === category.toLowerCase()
+                        )
+                    );
 
-            if (error) throw error;
+                const container = document.querySelector(".container");
+                container.innerHTML = "";
 
-            const filteredProducts = category === 'all'
-                ? products
-                : products.filter(product =>
-                    product.categories.name.toLowerCase() === category.toLowerCase()
-                );
-
-            const container = document.querySelector('.container');
-            container.innerHTML = ''; // Clear existing content
-
-            if (filteredProducts.length > 0) {
-                filteredProducts.forEach(product => {
-                    const box = document.createElement('div');
-                    box.className = 'box';
-                    box.innerHTML = `
-                        <a href="item.html?productid=${product.id}">
-                            <img src="${product.img}" alt="${product.name}">
-                            <p>${product.name}</p>
-                        </a>
-                    `;
-                    container.appendChild(box);
-                });
-            } else {
-                container.innerHTML = '<p>No products found for this category.</p>';
+                if (filteredProducts.length > 0) {
+                    filteredProducts.forEach(product => {
+                        const box = document.createElement("div");
+                        box.className = "box";
+                        box.innerHTML = `
+                            <a href="item.html?productid=${product.id}">
+                                <img src="${product.img}" alt="${product.name}">
+                                <p>${product.name}</p>
+                            </a>
+                        `;
+                        container.appendChild(box);
+                    });
+                } else {
+                    container.innerHTML = "<p>No products found for this category.</p>";
+                }
+            } catch (error) {
+                console.error("Error loading product data:", error);
+                document.querySelector(".container").innerHTML =
+                    "<p>Failed to load products. Please try again later.</p>";
             }
-        } catch (error) {
-            console.error('Error loading products:', error);
-            document.querySelector('.container').innerHTML = `
-                <p>Failed to load products. Please try again later.</p>
-            `;
         }
-    }
 
-    document.addEventListener('DOMContentLoaded', loadProducts);
-</script>
-
+        document.addEventListener("DOMContentLoaded", loadProducts);
+    </script>
 	 <footer>
         <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
     </footer>
