@@ -74,16 +74,21 @@ console.log('[DEBUG] window.loadProducts:', window.loadProducts);
 async function initializePage() {
     console.log('[DEBUG] initializePage called');
   
-    // Make sure the function name matches exactly what you defined in db_access.js
+    if (typeof window.loadProducts !== 'function') {
+        console.error('[ERROR] window.loadProducts is not defined!');
+        return;
+    }
+
     const products = await window.loadProducts();
   
     if (products) {
-      console.log('[DEBUG] products found:', products);
-      // TODO: display them in the DOM if desired
+        console.log('[DEBUG] products found:', products);
+        // TODO: display them in the DOM if desired
     } else {
-      console.warn('[WARN] No products or an error occurred while loading.');
+        console.warn('[WARN] No products or an error occurred while loading.');
     }
-  }
+}
+
   
   // Listen for the DOM to finish loading before calling initializePage
   document.addEventListener('DOMContentLoaded', () => {
