@@ -10,6 +10,11 @@
     <!-- Load Supabase library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.6.4/dist/supabase.js"></script>
     <script>
+        // Supabase configuration
+        const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
         // Wait for the entire window to load before running Supabase initialization
         window.onload = async function () {
             console.log('[Debug] Checking Supabase library:', typeof supabase);
@@ -21,51 +26,46 @@
                 return;
             }
 
-            // Supabase configuration
-            const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
-            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-            let supabase;
-
             try {
-                // Initialize Supabase
-                const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-                console.log('[Supabase Initialized Successfully]', supabase);
-
                 // Fetch initial data
-                await fetchProducts(supabaseClient);
-                await fetchCategories(supabaseClient);
+                const productId = new URLSearchParams(window.location.search).get("productid");
+                if (productId) {
+                    await fetchProductById(productId);
+                } else {
+                    alert('No product ID provided in the query string.');
+                }
+                await fetchCategories();
             } catch (error) {
                 console.error('[Supabase Initialization Failed]', error);
                 alert('Failed to initialize Supabase. Please check your configuration.');
-                return;
             }
         };
 
-        // Fetch products from the Supabase database
-        async function fetchProducts(supabaseClient) {
+        // Fetch product by ID from the Supabase database
+        async function fetchProductById(productId) {
             try {
-                console.log('[fetchProducts] Fetching products...');
-                const { data: products, error } = await supabaseClient
+                console.log('[fetchProductById] Fetching product...');
+                const { data: product, error } = await supabaseClient
                     .from('products')
-                    .select('*, product_prices(quantity, price), categories(name)');
+                    .select(`
+                        *,
+                        product_prices (quantity, price)
+                    `)
+                    .eq('id', productId)
+                    .single(); // Fetch a single product
 
                 if (error) throw error;
 
-                console.log('[fetchProducts] Products fetched:', products);
-
-                if (products && products.length > 0) {
-                    populateProducts(products);
-                } else {
-                    console.warn('[fetchProducts] No products found.');
-                }
+                console.log('[fetchProductById] Product fetched:', product);
+                populateProduct(product);
             } catch (error) {
-                console.error('[fetchProducts] Error fetching products:', error);
-                alert('Failed to fetch products. Check the console for details.');
+                console.error('[fetchProductById] Error fetching product:', error);
+                alert('Failed to fetch product. Check the console for details.');
             }
         }
 
         // Fetch categories from the Supabase database
-        async function fetchCategories(supabaseClient) {
+        async function fetchCategories() {
             try {
                 console.log('[fetchCategories] Fetching categories...');
                 const { data: categories, error } = await supabaseClient.from('categories').select('*');
@@ -73,38 +73,25 @@
                 if (error) throw error;
 
                 console.log('[fetchCategories] Categories fetched:', categories);
-
-                if (categories && categories.length > 0) {
-                    populateCategories(categories);
-                } else {
-                    console.warn('[fetchCategories] No categories found.');
-                }
+                populateCategories(categories);
             } catch (error) {
                 console.error('[fetchCategories] Error fetching categories:', error);
                 alert('Failed to fetch categories. Check the console for details.');
             }
         }
 
-        // Populate products into the editor
-        function populateProducts(products) {
-            console.log('[populateProducts] Populating product details:', products);
-            const firstProduct = products[0]; // Load the first product as an example
+        // Populate product details into the editor
+        function populateProduct(product) {
+            console.log('[populateProduct] Populating product details:', product);
+            document.getElementById('name').value = product.name || '';
+            document.getElementById('img').value = product.img || '';
+            document.getElementById('description').value = product.description || '';
+            document.getElementById('shortdescription').value = product.shortdescription || '';
+            document.getElementById('active').checked = product.active || false;
 
-            if (firstProduct) {
-                document.getElementById('name').value = firstProduct.name || '';
-                document.getElementById('img').value = firstProduct.img || '';
-                document.getElementById('description').value = firstProduct.description || '';
-                document.getElementById('shortdescription').value = firstProduct.shortdescription || '';
-                document.getElementById('active').checked = firstProduct.active || false;
-
-                // Populate price table
-                const priceTableContainer = document.getElementById('priceTableContainer');
-                priceTableContainer.innerHTML = createPriceTable(firstProduct.product_prices || []);
-
-                console.log('[populateProducts] Product populated successfully.');
-            } else {
-                console.warn('[populateProducts] No product to populate.');
-            }
+            // Populate price table
+            const priceTableContainer = document.getElementById('priceTableContainer');
+            priceTableContainer.innerHTML = createPriceTable(product.product_prices || []);
         }
 
         // Populate categories into the dropdown
