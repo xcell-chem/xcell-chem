@@ -6,15 +6,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Editor</title>
     <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+    <!-- Load Supabase library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.6.4"></script>
     <script>
-        // Ensure Supabase is defined globally
+        // Supabase configuration
         const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        let supabase;
 
-        console.log('[Supabase Initialized]', supabase);
+        // Initialize Supabase
+        try {
+            supabase = supabase.createClient(supabaseUrl, supabaseKey);
+            console.log('[Supabase Initialized Successfully]', supabase);
+        } catch (error) {
+            console.error('[Supabase Initialization Failed]', error);
+            alert('Failed to initialize Supabase. Please check your configuration.');
+        }
+    </script>
+</head>
 
+<body>
+    <div id="editor">
+        <div class="container">
+            <div class="left-column">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" />
+                <label for="img">Image URL</label>
+                <input type="text" id="img" />
+                <button id="changeImageButton">Change Image</button>
+                <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="previewImage(event)" />
+                <img id="imagePreview" src="" alt="Product Image" style="display:none;" />
+
+                <label for="active">Active</label>
+                <input type="checkbox" id="active" />
+                <label for="archived">Archived</label>
+                <input type="checkbox" id="archived" disabled />
+
+                <div>
+                    <button id="saveRecordButton" type="button">Save Record</button>
+                    <button id="saveNewRecordButton" type="button">Save New Record</button>
+                </div>
+                <div>
+                    <button id="previousRecordButton" type="button">Previous</button>
+                    <button id="nextRecordButton" type="button">Next</button>
+                </div>
+            </div>
+
+            <div class="middle-column">
+                <label for="shortdescription">Short Description</label>
+                <textarea id="shortdescription" rows="4" cols="30"></textarea>
+                <label for="description">Description</label>
+                <textarea id="description" rows="4" cols="30"></textarea>
+            </div>
+
+            <div class="right-column">
+                <h3>Categories</h3>
+                <ul class="category-list" id="categoryList"></ul>
+                <select id="availableCategories"></select>
+                <button id="addCategoryButton" type="button">Add Category</button>
+
+                <h3>Prices</h3>
+                <div id="priceTableContainer"></div>
+                <button id="addPricingRowButton" type="button">Add Price</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
         // Global variables
         let currentIndex = 0;
         let data = { products: [] };
@@ -23,12 +82,12 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('[DOMContentLoaded] DOM fully loaded.');
 
-            try {
-                // Ensure Supabase client is functional
-                if (!supabase) {
-                    throw new Error('Supabase client not initialized!');
-                }
+            if (!supabase) {
+                alert('Supabase client is not initialized. Cannot proceed.');
+                return;
+            }
 
+            try {
                 // Fetch products and categories
                 await fetchProducts();
                 await fetchCategories();
@@ -49,34 +108,31 @@
                 alert('Initialization failed. Check the console for details.');
             }
         });
+
         async function fetchProducts() {
-    try {
-        console.log('[fetchProducts] Fetching products...');
-        const { data: products, error } = await supabase
-            .from('products')
-            .select('*, product_prices(quantity, price), categories(name)');
+            try {
+                console.log('[fetchProducts] Fetching products...');
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*, product_prices(quantity, price), categories(name)');
+                if (error) throw error;
 
-        if (error) {
-            console.error('[fetchProducts] Supabase query error:', error);
-            alert('Failed to fetch products. Check the console for details.');
-            return;
+                data.products = products.map(product => ({
+                    ...product,
+                    prices: product.product_prices || [],
+                    categories: product.categories.map(category => category.name) || [],
+                }));
+
+                console.log('[fetchProducts] Products fetched:', data.products);
+            } catch (error) {
+                console.error('[fetchProducts] Error fetching products:', error);
+                alert('Failed to fetch products. Check the console for details.');
+            }
         }
-
-        data.products = products.map(product => ({
-            ...product,
-            prices: product.product_prices || [],
-            categories: product.categories.map(category => category.name) || [],
-        }));
-
-        console.log('[fetchProducts] Products fetched:', data.products);
-    } catch (error) {
-        console.error('[fetchProducts] Unexpected error:', error);
-        alert('An unexpected error occurred while fetching products. Check the console for details.');
-    }
-}
 
         async function fetchCategories() {
             try {
+                console.log('[fetchCategories] Fetching categories...');
                 const { data: categories, error } = await supabase.from('categories').select('*');
                 if (error) throw error;
 
