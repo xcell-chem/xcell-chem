@@ -6,9 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Editor</title>
     <link rel="stylesheet" href="css/styles.css">
-
-    
-    
 </head>
 
 <body>
@@ -57,23 +54,35 @@
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
         // Supabase initialization
         const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-    
-        console.log('[Supabase Initialized]', supabase);
-    
+
+        let supabase;
+        try {
+            supabase = supabase.createClient(supabaseUrl, supabaseKey);
+            console.log('[Supabase Initialized]', supabase);
+        } catch (error) {
+            console.error('[Supabase Initialization Failed]', error);
+            alert('Failed to initialize Supabase. Check the console for details.');
+        }
+
         // Global variables
         let currentIndex = 0;
         let data = { products: [] };
-    
+
         // Wait for the DOM to load before interacting with elements
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('[DOMContentLoaded] DOM fully loaded.');
-    
+
+            if (!supabase) {
+                alert('Supabase client is not initialized. Cannot proceed.');
+                return;
+            }
+
             try {
                 // Fetch products from Supabase
                 await fetchProducts();
@@ -84,41 +93,43 @@
                     console.warn('[DOMContentLoaded] No products found. Initializing with default data.');
                     initializeDefaultData();
                 }
-    
+
                 // Fetch categories
                 await fetchCategories();
-    
+
                 // Attach event listeners
                 attachEventListeners();
             } catch (error) {
                 console.error('[DOMContentLoaded] Error during initialization:', error);
+                alert('Error during initialization. Check the console for details.');
             }
         });
-    
+
         async function fetchProducts() {
             try {
                 const { data: products, error } = await supabase
                     .from('products')
                     .select('*, product_prices(quantity, price), categories(name)');
                 if (error) throw error;
-    
+
                 data.products = products.map(product => ({
                     ...product,
                     prices: product.product_prices || [],
                     categories: product.categories.map(category => category.name) || [],
                 }));
-    
+
                 console.log('[fetchProducts] Products fetched:', data.products);
             } catch (error) {
                 console.error('[fetchProducts] Error fetching products:', error);
+                alert('Failed to fetch products. Check the console for details.');
             }
         }
-    
+
         async function fetchCategories() {
             try {
                 const { data: categories, error } = await supabase.from('categories').select('*');
                 if (error) throw error;
-    
+
                 const categoryDropdown = document.getElementById('availableCategories');
                 categoryDropdown.innerHTML = '';
                 categories.forEach(category => {
@@ -127,13 +138,14 @@
                     option.textContent = category.name;
                     categoryDropdown.appendChild(option);
                 });
-    
+
                 console.log('[fetchCategories] Categories fetched:', categories);
             } catch (error) {
                 console.error('[fetchCategories] Error fetching categories:', error);
+                alert('Failed to fetch categories. Check the console for details.');
             }
         }
-    
+
         function attachEventListeners() {
             console.log('[attachEventListeners] Adding event listeners...');
             document.getElementById('addPricingRowButton').addEventListener('click', addPricingRow);
@@ -144,7 +156,7 @@
             document.getElementById('nextRecordButton').addEventListener('click', nextRecord);
             console.log('[attachEventListeners] Event listeners added.');
         }
-    
+
         function loadProductFromMemory() {
             const product = data.products[currentIndex];
             if (product) {
@@ -153,19 +165,19 @@
                 console.error('[loadProductFromMemory] No product found at current index.');
             }
         }
-    
+
         function populateProductDetails(product) {
             document.getElementById('name').value = product.name || '';
             document.getElementById('img').value = product.img || '';
             document.getElementById('description').value = product.description || '';
             document.getElementById('shortdescription').value = product.shortdescription || '';
             document.getElementById('active').checked = product.active || false;
-    
+
             const priceTableContainer = document.getElementById('priceTableContainer');
             priceTableContainer.innerHTML = '';
             const table = createPriceTable(product.prices || []);
             priceTableContainer.appendChild(table);
-    
+
             const categoryList = document.getElementById('categoryList');
             categoryList.innerHTML = '';
             (product.categories || []).forEach(category => {
@@ -174,14 +186,14 @@
                 categoryList.appendChild(li);
             });
         }
-    
+
         function createPriceTable(prices = []) {
             const table = document.createElement('table');
             const headerRow = table.insertRow();
             headerRow.insertCell().textContent = 'Quantity';
             headerRow.insertCell().textContent = 'Price';
             headerRow.insertCell().textContent = 'Actions';
-    
+
             prices.forEach((price, index) => {
                 const row = table.insertRow();
                 row.insertCell().innerHTML = `<input type="text" value="${price.quantity}" />`;
@@ -191,10 +203,10 @@
                 deleteButton.addEventListener('click', () => deletePriceRow(index));
                 row.insertCell().appendChild(deleteButton);
             });
-    
+
             return table;
         }
-    
+
         function deletePriceRow(index) {
             const product = data.products[currentIndex];
             if (product && Array.isArray(product.prices)) {
@@ -202,7 +214,7 @@
                 populateProductDetails(product);
             }
         }
-    
+
         function addPricingRow() {
             const product = data.products[currentIndex];
             if (!product.prices) {
@@ -211,17 +223,17 @@
             product.prices.push({ quantity: '', price: 0 });
             populateProductDetails(product);
         }
-    
+
         function addCategory() {
             const category = document.getElementById('availableCategories').value;
             const product = data.products[currentIndex];
-    
+
             if (!product.categories.includes(category)) {
                 product.categories.push(category);
                 populateProductDetails(product);
             }
         }
-    
+
         async function saveRecord() {
             const product = data.products[currentIndex];
             product.name = document.getElementById('name').value;
@@ -229,18 +241,18 @@
             product.description = document.getElementById('description').value;
             product.shortdescription = document.getElementById('shortdescription').value;
             product.active = document.getElementById('active').checked;
-    
+
             try {
                 const { error } = await supabase.from('products').update(product).eq('id', product.id);
                 if (error) throw error;
-    
+
                 alert('Record saved successfully!');
             } catch (error) {
                 console.error('[saveRecord] Error saving record:', error);
                 alert('Failed to save record.');
             }
         }
-    
+
         function saveNewRecord() {
             const newProduct = {
                 id: data.products.length + 1,
@@ -253,19 +265,19 @@
                 prices: [],
                 categories: [],
             };
-    
+
             data.products.push(newProduct);
             currentIndex = data.products.length - 1;
             populateProductDetails(newProduct);
         }
-    
+
         function previousRecord() {
             if (currentIndex > 0) {
                 currentIndex--;
                 loadProductFromMemory();
             }
         }
-    
+
         function nextRecord() {
             if (currentIndex < data.products.length - 1) {
                 currentIndex++;
