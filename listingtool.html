@@ -73,10 +73,8 @@
             const useLocalStorage = localStorage.getItem('useLocalStorage');
 
             if (useLocalStorage) {
-                console.log('[DOMContentLoaded] Loading data from local storage...');
                 restoreFromLocalStorage();
             } else {
-                console.log('[DOMContentLoaded] Loading data from the database...');
                 await loadProducts();
                 await loadCategories();
             }
@@ -84,6 +82,7 @@
             attachEventListeners();
         });
 
+        // Load products from database
         async function loadProducts() {
             try {
                 const { data, error } = await supabaseClient
@@ -105,6 +104,7 @@
             }
         }
 
+        // Load categories from database
         async function loadCategories() {
             try {
                 const { data: categories, error } = await supabaseClient.from('categories').select('*');
@@ -125,6 +125,7 @@
             }
         }
 
+        // Populate product details into the form
         function populateProductDetails(product) {
             document.getElementById('name').value = product.name || '';
             document.getElementById('img').value = product.img || '';
@@ -138,6 +139,7 @@
             populatePriceTable(product.product_prices || []);
         }
 
+        // Populate selected categories
         function populateCategoryList(categories) {
             const categoryList = document.getElementById('categoryList');
             categoryList.innerHTML = '';
@@ -149,11 +151,13 @@
             });
         }
 
+        // Populate product prices
         function populatePriceTable(prices) {
             const priceTableContainer = document.getElementById('priceTableContainer');
             priceTableContainer.innerHTML = createPriceTable(prices);
         }
 
+        // Create price table
         function createPriceTable(prices) {
             let tableHtml = '<table><tr><th>Quantity</th><th>Price</th><th>Actions</th></tr>';
             prices.forEach((price, index) => {
@@ -169,41 +173,82 @@
             return tableHtml;
         }
 
+        // Add event listeners
         function attachEventListeners() {
             document.getElementById('saveRecordButton').addEventListener('click', saveRecord);
             document.getElementById('saveNewRecordButton').addEventListener('click', saveNewRecord);
-            document.getElementById('previousRecordButton').addEventListener('click', () => {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    populateProductDetails(products[currentIndex]);
-                } else {
-                    alert('Already at the first record.');
-                }
-            });
-            document.getElementById('nextRecordButton').addEventListener('click', () => {
-                if (currentIndex < products.length - 1) {
-                    currentIndex++;
-                    populateProductDetails(products[currentIndex]);
-                } else {
-                    alert('Already at the last record.');
-                }
+            document.getElementById('addCategoryButton').addEventListener('click', addCategory);
+            document.getElementById('addPricingRowButton').addEventListener('click', addPricingRow);
+            document.getElementById('previousRecordButton').addEventListener('click', showPreviousRecord);
+            document.getElementById('nextRecordButton').addEventListener('click', showNextRecord);
+            document.getElementById('changeImageButton').addEventListener('click', () => {
+                document.getElementById('imageInput').click();
             });
         }
 
-        function saveRecord() {
-            const product = collectFormData();
-            localStorage.setItem('useLocalStorage', true);
-            localStorage.setItem('currentProduct', JSON.stringify(product));
-            alert('Record saved to local storage!');
+        // Add a new pricing row
+        function addPricingRow() {
+            products[currentIndex].product_prices.push({ quantity: '', price: 0 });
+            saveToLocalStorage();
+            populatePriceTable(products[currentIndex].product_prices);
         }
 
-        function saveNewRecord() {
-            const product = collectFormData();
-            localStorage.setItem('useLocalStorage', true);
-            localStorage.setItem('currentProduct', JSON.stringify(product));
-            alert('New record saved to local storage!');
+        // Add a new category
+        async function addCategory() {
+            const categoryId = document.getElementById('availableCategories').value;
+            const productId = products[currentIndex].id;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('product_category')
+                    .insert([{ product_id: productId, category_id: categoryId }]);
+
+                if (error) throw error;
+
+                saveToLocalStorage();
+                await loadProducts();
+                populateProductDetails(products[currentIndex]);
+            } catch (error) {
+                console.error('[addCategory] Failed to add category:', error);
+            }
         }
 
+        // Save record to database
+        async function saveRecord() {
+            const product = collectFormData();
+            saveToLocalStorage();
+            try {
+                const { error } = await supabaseClient
+                    .from('products')
+                    .update(product)
+                    .eq('id', products[currentIndex].id);
+
+                if (error) throw error;
+                alert('Record saved successfully!');
+            } catch (error) {
+                console.error('[saveRecord] Failed to save record:', error);
+            }
+        }
+
+        // Save a new record to the database
+        async function saveNewRecord() {
+            const product = collectFormData();
+            try {
+                const { data, error } = await supabaseClient.from('products').insert(product);
+
+                if (error) throw error;
+
+                products.push(data[0]);
+                currentIndex = products.length - 1;
+                saveToLocalStorage();
+                populateProductDetails(data[0]);
+                alert('New record saved successfully!');
+            } catch (error) {
+                console.error('[saveNewRecord] Failed to save new record:', error);
+            }
+        }
+
+        // Collect data from form fields
         function collectFormData() {
             return {
                 name: document.getElementById('name').value,
@@ -214,10 +259,38 @@
             };
         }
 
+        // Restore data from local storage
         function restoreFromLocalStorage() {
-            const product = JSON.parse(localStorage.getItem('currentProduct'));
-            if (product) {
-                populateProductDetails(product);
+            const savedProduct = localStorage.getItem('currentProduct');
+            if (savedProduct) {
+                populateProductDetails(JSON.parse(savedProduct));
+            }
+        }
+
+        // Save data to local storage
+        function saveToLocalStorage() {
+            const product = collectFormData();
+            localStorage.setItem('currentProduct', JSON.stringify(product));
+            localStorage.setItem('useLocalStorage', true);
+        }
+
+        // Navigate to the previous record
+        function showPreviousRecord() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                populateProductDetails(products[currentIndex]);
+            } else {
+                alert('Already at the first record.');
+            }
+        }
+
+        // Navigate to the next record
+        function showNextRecord() {
+            if (currentIndex < products.length - 1) {
+                currentIndex++;
+                populateProductDetails(products[currentIndex]);
+            } else {
+                alert('Already at the last record.');
             }
         }
     </script>
