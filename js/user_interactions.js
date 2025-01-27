@@ -6,93 +6,54 @@ let currentIndex = 0; // Index of the currently displayed product
  */
 function attachEventListeners() {
     console.log('[DEBUG] Attaching event listeners...');
-    document.getElementById('nextButton')?.addEventListener('click', showNextProduct);
-    document.getElementById('prevButton')?.addEventListener('click', showPreviousProduct);
-}
-// user_interactions.js
+    document.getElementById('previousRecordButton')?.addEventListener('click', () => {
+        if (productList.length === 0) return;
 
-/**
- * Example function that triggers loadproduct
- * when a user clicks a button or some event occurs.
- */
-function onLoadProducts() {
-    // Simply call loadproduct (or window.loadproduct)
-    // Ensure db_access.js was loaded first in your HTML
-    window.loadproduct()
-  }
-  
-  // Suppose you bind to a button click:
- // document.getElementById('load-button').addEventListener('click', onLoadProducts)
+        currentIndex = (currentIndex - 1 + productList.length) % productList.length;
+        populateProductDetails(productList[currentIndex]);
+    });
 
-/**
- * Display a single product on the page
- * @param {Object} product - The product object to display
- */
-function displayProduct(product) {
-    console.log('[DEBUG] Displaying product:', product);
+    document.getElementById('nextRecordButton')?.addEventListener('click', () => {
+        if (productList.length === 0) return;
 
-    // Update the page elements with product details
-    document.getElementById('product-name').textContent = product.name || 'No Name';
-    document.getElementById('product-description').textContent = product.description || 'No Description';
-}
+        currentIndex = (currentIndex + 1) % productList.length;
+        populateProductDetails(productList[currentIndex]);
+    });
 
-/**
- * Show the next product
- */
-function showNextProduct() {
-    if (productList.length === 0) {
-        console.warn('[WARN] No products to display.');
-        return;
-    }
-
-    currentIndex = (currentIndex + 1) % productList.length; // Cycle through the list
-    displayProduct(productList[currentIndex]);
-}
-
-/**
- * Show the previous product
- */
-function showPreviousProduct() {
-    if (productList.length === 0) {
-        console.warn('[WARN] No products to display.');
-        return;
-    }
-
-    currentIndex = (currentIndex - 1 + productList.length) % productList.length; // Cycle backward
-    displayProduct(productList[currentIndex]);
+    document.getElementById('saveRecordButton')?.addEventListener('click', saveToLocalStorage);
+    document.getElementById('addPricingRowButton')?.addEventListener('click', addPriceRow);
 }
 
 /**
  * Initialize the page by loading products and setting up event listeners
  */
-console.log('[DEBUG] window.loadProducts:', window.loadProducts);
-// user_interactions.js
-
-/**
- * Called after the DOM is ready, to load and display all products.
- */
 async function initializePage() {
     console.log('[DEBUG] initializePage called');
+
+    const reloadFlag = localStorage.getItem('reloadFlag');
+    if (reloadFlag) {
+        console.log(`[DEBUG] Page reloaded due to: ${reloadFlag}`);
+        restoreFromLocalStorage();
+        localStorage.removeItem('reloadFlag');
+        return;
+    }
 
     const products = await window.loadProducts();
 
     if (products) {
         console.log('[DEBUG] products found:', products);
-        // Example: Render products in a list
-        const productListElement = document.getElementById('product-list');
-        productListElement.innerHTML = products
-            .map(product => `<li>${product.name} - $${product.price}</li>`)
-            .join('');
+        productList = products;
+
+        if (products.length > 0) {
+            populateProductDetails(products[0]);
+        }
     } else {
         console.warn('[WARN] No products or an error occurred while loading.');
     }
 }
 
-attachEventListeners();
-  
-  // Listen for the DOM to finish loading before calling initializePage
-  document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     console.log('[DEBUG] DOMContentLoaded, calling initializePage()...');
+    attachEventListeners();
     initializePage();
-  });
-
+});

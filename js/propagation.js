@@ -70,3 +70,24 @@ function createPriceTable(prices) {
     tableHtml += '</table>';
     return tableHtml;
 }
+
+/**
+ * Add a new price row and reload
+ */
+function addPriceRow() {
+    saveToLocalStorage();
+    localStorage.setItem('reloadFlag', 'addPriceRow');
+    window.location.reload();
+}
+
+/**
+ * Delete a price row and reload
+ * @param {number} index - Index of the row to delete
+ */
+function deletePriceRow(index) {
+    const product = JSON.parse(localStorage.getItem('currentProduct'));
+    product.product_prices.splice(index, 1);
+    localStorage.setItem('currentProduct', JSON.stringify(product));
+    localStorage.setItem('reloadFlag', 'deletePriceRow');
+    window.location.reload();
+}
