@@ -11,56 +11,96 @@
 
         let isLoggedIn = false;
 
+        /**
+         * Check if the user is logged in and update the UI accordingly.
+         */
         async function checkLoginStatus() {
-            const { data: session, error } = await supabase.auth.getSession();
-            const loginButton = document.getElementById('loginButton');
-            
-            if (error || !session || !session.user) {
-                isLoggedIn = false;
-                loginButton.textContent = "Login";
-                loginButton.onclick = openLoginPopup;
-            } else {
-                isLoggedIn = true;
-                loginButton.textContent = "Logout";
-                loginButton.onclick = logout;
+            console.log('[DEBUG] Starting login status check...');
+            try {
+                const { data: session, error } = await supabase.auth.getSession();
+                const loginButton = document.getElementById('loginButton');
+
+                if (error) {
+                    console.error('[DEBUG] Error fetching session:', error);
+                }
+
+                if (!session || !session.user) {
+                    console.log('[DEBUG] No session or user detected.');
+                    isLoggedIn = false;
+                    loginButton.textContent = "Login";
+                    loginButton.onclick = openLoginPopup;
+                } else {
+                    console.log('[DEBUG] User session found:', session.user);
+                    isLoggedIn = true;
+                    loginButton.textContent = "Logout";
+                    loginButton.onclick = logout;
+                }
+            } catch (err) {
+                console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
             }
         }
 
+        /**
+         * Open the OAuth popup for logging in with Google.
+         */
         async function openLoginPopup() {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: window.location.origin }
-            });
-            if (error) {
-                console.error('Login error:', error);
-                alert('Login failed. Please try again.');
+            console.log('[DEBUG] Opening login popup for Google OAuth...');
+            try {
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: window.location.origin }
+                });
+                if (error) {
+                    console.error('[DEBUG] OAuth login error:', error);
+                    alert('Login failed. Please try again.');
+                } else {
+                    console.log('[DEBUG] OAuth login initiated successfully.');
+                }
+            } catch (err) {
+                console.error('[DEBUG] Unexpected error during OAuth login:', err);
             }
         }
 
+        /**
+         * Log out the current user.
+         */
         async function logout() {
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-                console.error('Logout error:', error);
-                alert('Failed to log out. Please try again.');
-            } else {
-                alert('Logged out successfully!');
-                location.reload();
+            console.log('[DEBUG] Logging out the user...');
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    console.error('[DEBUG] Logout error:', error);
+                    alert('Failed to log out. Please try again.');
+                } else {
+                    console.log('[DEBUG] User logged out successfully.');
+                    alert('Logged out successfully!');
+                    location.reload();
+                }
+            } catch (err) {
+                console.error('[DEBUG] Unexpected error during logout:', err);
             }
         }
 
+        /**
+         * Require login before performing an action.
+         * @param {Function} action - The action to execute after login.
+         */
         function requireLogin(action) {
             if (!isLoggedIn) {
+                console.log('[DEBUG] User not logged in. Prompting for login...');
                 alert('You must log in first!');
                 openLoginPopup();
             } else {
+                console.log('[DEBUG] User is logged in. Proceeding with action...');
                 action();
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('[DEBUG] Document loaded. Initializing...');
             checkLoginStatus();
 
-            // Attach click events to other buttons
+            // Attach click events to buttons
             document.getElementById('createShopButton').onclick = () => requireLogin(() => location.href = '/createshop.html');
             document.getElementById('myShopsButton').onclick = () => requireLogin(() => location.href = '/myshops.html');
             document.getElementById('myAccountButton').onclick = () => requireLogin(() => location.href = '/myaccount.html');
