@@ -49,6 +49,7 @@ async function openLoginPopup() {
 }
 export async function registerUserInDatabase(user) {
     try {
+        // Validate required user fields
         if (!user?.id || !user?.email) {
             console.error('[DEBUG] User object is missing required fields:', user);
             alert('Error: Missing user information. Please try logging in again.');
@@ -78,17 +79,17 @@ export async function registerUserInDatabase(user) {
 
         console.log('[DEBUG] User not found. Creating a new record.');
 
-        // Step 2: Create a new user record
-        const name = user?.user_metadata?.full_name || 'Anonymous';
-        const email = user?.email;
-        const passwordHash = 'placeholder_hash'; // Placeholder for `password_hash`
+        // Step 2: Insert a new user record
+        const name = user?.user_metadata?.full_name || 'Anonymous'; // Extract user's name
+        const email = user?.email; // Extract user's email
+        const passwordHash = 'placeholder_hash'; // Use a placeholder if password_hash is irrelevant
 
         const { data, error } = await supabase
             .from('users')
             .insert({
-                id: user.id,
-                name: name,
+                id: user.id, // Supabase user ID
                 email: email,
+                name: name,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 password_hash: passwordHash,
@@ -105,6 +106,7 @@ export async function registerUserInDatabase(user) {
         alert('An unexpected error occurred. Please try again.');
     }
 }
+
 
 
 
