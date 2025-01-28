@@ -1,63 +1,94 @@
-// auth.js
+
 import { supabase } from './supabaseClient.js'; // Import the centralized client
 
 // Check login status
 async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');
-    console.log('[DEBUG] Current URL:', window.location.href);
+    const loginButton = document.getElementById('loginButton');
 
     try {
+        // Step 1: Check if the session exists
         const { data: session, error } = await supabase.auth.getSession();
 
         if (error) {
             console.error('[DEBUG] Error fetching session:', error);
+            loginButton.textContent = "Login";
+            loginButton.onclick = openLoginPopup;
+            return;
         }
 
         if (!session || !session.user) {
             console.log('[DEBUG] No session or user detected.');
-            return false;
+            loginButton.textContent = "Login";
+            loginButton.onclick = openLoginPopup;
+            return;
         }
 
         console.log('[DEBUG] User session found:', session.user);
-        return true;
+
+        // Step 2: Query the `users` table for additional user info
+        const userId = session.user.id;
+        const { data: userInfo, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('auth_user_id', userId)
+            .single();
+
+        if (userError) {
+            console.error('[DEBUG] Error fetching user info from users table:', userError);
+        } else {
+            console.log('[DEBUG] User info from users table:', userInfo);
+        }
+
+        loginButton.textContent = "Logout";
+        loginButton.onclick = logout;
+
     } catch (err) {
         console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
-        return false;
-    }
-}
-// Clean up the URL after OAuth
-if (window.location.search) {
-    const url = new URL(window.location.href);
-    url.search = ''; // Remove query parameters
-    window.history.replaceState({}, document.title, url.toString());
-}
-async function debugSession() {
-    const { data: user, error } = await supabase.auth.getUser();
-    console.log('[DEBUG] Retrieved user data:', user);
-    if (error) {
-        console.error('[DEBUG] Error fetching user data:', error);
     }
 }
 
-document.addEventListener('DOMContentLoaded', debugSession);
-
+// Listen for authentication state changes
 supabase.auth.onAuthStateChange(async (event, session) => {
     console.log('[DEBUG] Auth state changed:', event);
-    if (event === 'SIGNED_IN') {
-        console.log('[DEBUG] User signed in:', session.user);
-        await registerUserInDatabase(session.user);
-        window.location.href = '/'; // Redirect back to index
-    } else if (event === 'SIGNED_OUT') {
-        console.log('[DEBUG] User signed out.');
+    if (event === 'SIGNED_IN' && session) {
+        const user = session.user;
+
+        // Check if user exists in the `users` table
+        const { data: existingUser, error: checkError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('auth_user_id', user.id)
+            .single();
+
+        if (!existingUser) {
+            console.log('[DEBUG] User not found in users table. Inserting...');
+            const { error: insertError } = await supabase
+                .from('users')
+                .insert({
+                    auth_user_id: user.id,
+                    email: user.email,
+                    name: user.user_metadata.full_name || 'Anonymous',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                });
+
+            if (insertError) {
+                console.error('[DEBUG] Error inserting user into users table:', insertError);
+            } else {
+                console.log('[DEBUG] User successfully inserted into users table.');
+            }
+        } else {
+            console.log('[DEBUG] User already exists in users table.');
+        }
     }
 });
-
 
 // Open login popup for Google OAuth
 async function openLoginPopup() {
     console.log('[DEBUG] Initiating Google OAuth login...');
     try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
                 redirectTo: window.location.origin,
@@ -68,108 +99,34 @@ async function openLoginPopup() {
             console.error('[DEBUG] Login error:', error);
             alert('Failed to log in. Please try again.');
         } else {
-            console.log('[DEBUG] OAuth login successful:', data);
+            console.log('[DEBUG] OAuth login initiated successfully.');
         }
     } catch (error) {
         console.error('[DEBUG] Error during login:', error);
     }
 }
-export async function registerUserInDatabase(user) {
+
+// Log out the current user
+async function logout() {
+    console.log('[DEBUG] Logging out the user...');
     try {
-        // Validate required user fields
-        if (!user?.email) {
-            console.error('[DEBUG] User object is missing required fields:', user);
-            alert('Error: Missing user information. Please try logging in again.');
-            return;
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error('[DEBUG] Logout error:', error);
+            alert('Failed to log out. Please try again.');
+        } else {
+            console.log('[DEBUG] User logged out successfully.');
+            alert('Logged out successfully!');
+            location.reload();
         }
-
-        const userId = user.id; // Use the ID from the auth.users table
-
-        console.log('[DEBUG] Checking if user exists in the database:', {
-            userId,
-            userObject: user,
-        });
-
-        // Step 1: Check if the user already exists in the `users` table
-        const { data: existingUser, error: checkError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('auth_user_id', userId) // Check by the new foreign key
-            .single();
-
-        console.log('[DEBUG] Database query result:', { existingUser, checkError });
-
-        if (checkError && checkError.code !== 'PGRST116') {
-            console.error('[DEBUG] Error checking user in the database:', checkError);
-            alert('Failed to check user in the database. Please try again.');
-            return;
-        }
-
-        if (existingUser) {
-            console.log('[DEBUG] User already exists in the database:', existingUser);
-            return; // Exit if the user already exists
-        }
-
-        console.log('[DEBUG] User not found. Preparing to insert a new record.');
-
-        // Step 2: Prepare the user data for insertion
-        const name = user?.user_metadata?.full_name || 'Anonymous'; // Extract user's name
-        const email = user?.email; // Extract user's email
-        const createdAt = new Date().toISOString();
-        const updatedAt = new Date().toISOString();
-        const passwordHash = null; // Leave as null since password_hash allows null
-
-        console.log('[DEBUG] Data to insert into the database:', {
-            auth_user_id: userId, // Link to the auth user ID
-            email,
-            name,
-            created_at: createdAt,
-            updated_at: updatedAt,
-            password_hash: passwordHash,
-        });
-
-        // Step 3: Insert a new user record
-        const { data: insertData, error: insertError } = await supabase
-            .from('users')
-            .insert({
-                auth_user_id: userId, // Use the auth user ID
-                email: email,
-                name: name,
-                created_at: createdAt,
-                updated_at: updatedAt,
-                password_hash: passwordHash,
-            });
-
-        console.log('[DEBUG] Insert query result:', { insertData, insertError });
-
-        // Handle insert errors
-        if (insertError) {
-            console.error('[DEBUG] Error creating user in the database:', insertError);
-            alert('Failed to create user in the database. Please try again.');
-            return;
-        }
-
-        console.log('[DEBUG] User successfully created in the database:', insertData);
     } catch (err) {
-        console.error('[DEBUG] Unexpected error during user registration:', err);
-        alert('An unexpected error occurred. Please try again.');
+        console.error('[DEBUG] Unexpected error during logout:', err);
     }
 }
 
-
-// Listen for authentication state changes
-supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log('[DEBUG] Auth state changed:', event, session);
-
-    if (session) {
-        const user = session.user;
-        console.log('[DEBUG] User session detected:', user);
-        await registerUserInDatabase(user);
-    } else {
-        console.log('[DEBUG] No session detected. User logged out.');
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('[DEBUG] Document loaded. Initializing...');
+    checkLoginStatus();
 });
 
-// Expose functions globally for use in inline scripts (if needed)
-window.checkLoginStatus = checkLoginStatus;
-window.openLoginPopup = openLoginPopup;
+export { checkLoginStatus, openLoginPopup, logout };
