@@ -1,59 +1,59 @@
-<!-- Create Shop Page -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Shop</title>
+    <title>Createshop</title>
     <link rel="stylesheet" href="css/main.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <script>
-        const SUPABASE_URL = 'https://tjbcucdewwczndkeypey.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        async function createShop(event) {
-            event.preventDefault();
-
-            const shopName = document.getElementById('shop-name').value;
-
-            if (!shopName) {
-                alert('Please enter a shop name.');
-                return;
-            }
-
-            try {
-                const { data, error } = await supabase
-                    .from('shops')
-                    .insert([{ name: shopName }]);
-
-                if (error) {
-                    console.error('Error creating shop:', error);
-                    alert('Failed to create shop. Please try again.');
-                } else {
-                    alert('Shop created successfully!');
-                    console.log('Shop created:', data);
-                }
-            } catch (err) {
-                console.error('Unexpected error:', err);
-                alert('An unexpected error occurred.');
-            }
-        }
-    </script>
+    <script type="module" src="js/createshop.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Create Shop</h1>
-    </header>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/uses">Uses</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/feedback">Contact</a></li>
+        </ul>
+    </nav>
 
-    <form id="create-shop-form" onsubmit="createShop(event)">
-        <label for="shop-name">Shop Name:</label>
-        <input type="text" id="shop-name" name="shop-name" required>
-        <button type="submit">Create Shop</button>
-    </form>
+    <div class="content">
+        <h1 class="content-title">Createshop</h1>
+        <div class="container">
+            
+    <div class="form-container">
+        <form id="create-shop-form">
+            <label for="shopName">Shop Name:</label>
+            <input type="text" id="shopName" placeholder="Enter your shop name" required>
+            <button type="submit">Create Shop</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('create-shop-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const shopName = document.getElementById('shopName').value;
+            const { data: session } = await supabase.auth.getSession();
+            if (!session) {
+                alert('Please log in first.');
+                return;
+            }
+            const userId = session.user.id;
+            const { error } = await supabase.from('shops').insert({ name: shopName, owner_id: userId });
+            if (error) {
+                alert('Error creating shop: ' + error.message);
+            } else {
+                alert('Shop created successfully!');
+                window.location.href = '/myshops.html';
+            }
+        });
+    </script>
+    
+        </div>
+    </div>
 
     <footer>
-        <p>&copy; 2025 Let's See Bay. All rights reserved.</p>
+        <p class="footer">&copy; 2025 Let's See Bay. All rights reserved.</p>
     </footer>
 </body>
 </html>
