@@ -47,26 +47,33 @@ async function openLoginPopup() {
         console.error('[DEBUG] Error during login:', error);
     }
 }
+
+import { v4 as uuidv4 } from 'https://cdn.jsdelivr.net/npm/uuid/+esm'; // Import UUID generator
+
 export async function registerUserInDatabase(user) {
     try {
         // Validate required user fields
-        if (!user?.id || !user?.email) {
+        if (!user?.email) {
             console.error('[DEBUG] User object is missing required fields:', user);
             alert('Error: Missing user information. Please try logging in again.');
             return;
         }
 
-        console.log('[DEBUG] Checking if user exists in the database:', user);
+        // Use provided user ID or generate a new UUID if necessary
+        const userId = user?.id || uuidv4();
+
+        console.log('[DEBUG] Checking if user exists in the database:', { id: userId, ...user });
 
         // Step 1: Check if the user already exists in the `users` table
         const { data: existingUser, error: checkError } = await supabase
             .from('users')
             .select('*')
-            .eq('id', user.id)
+            .eq('id', userId)
             .single();
 
+        console.log('[DEBUG] Check result:', { existingUser, checkError });
+
         if (checkError && checkError.code !== 'PGRST116') {
-            // Ignore "No rows found" error, handle other errors
             console.error('[DEBUG] Error checking user in the database:', checkError);
             alert('Failed to check user in the database. Please try again.');
             return;
@@ -77,23 +84,34 @@ export async function registerUserInDatabase(user) {
             return; // Exit if the user already exists
         }
 
-        console.log('[DEBUG] User not found. Creating a new record.');
+        console.log('[DEBUG] User not found. Preparing to insert a new record.');
 
         // Step 2: Insert a new user record
         const name = user?.user_metadata?.full_name || 'Anonymous'; // Extract user's name
         const email = user?.email; // Extract user's email
-        const passwordHash = 'placeholder_hash'; // Use a placeholder if password_hash is irrelevant
+        const passwordHash = null; // Leave as null since password_hash allows null
+
+        console.log('[DEBUG] Data to insert:', {
+            id: userId,
+            email: email,
+            name: name,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            password_hash: passwordHash,
+        });
 
         const { data, error } = await supabase
             .from('users')
             .insert({
-                id: user.id, // Supabase user ID
+                id: userId,
                 email: email,
                 name: name,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 password_hash: passwordHash,
             });
+
+        console.log('[DEBUG] Insert result:', { data, error });
 
         if (error) {
             console.error('[DEBUG] Error creating user in the database:', error);
@@ -106,10 +124,6 @@ export async function registerUserInDatabase(user) {
         alert('An unexpected error occurred. Please try again.');
     }
 }
-
-
-
-
 
 // Listen for authentication state changes
 supabase.auth.onAuthStateChange(async (event, session) => {
