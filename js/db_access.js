@@ -25,6 +25,26 @@ async function loadProducts() {
         return [];
     }
 }
+/**
+ * Load all categories from the database
+ */
+async function loadCategories() {
+    try {
+        console.log('[loadCategories] Fetching categories...');
+        const { data: categories, error } = await supabaseClient.from('categories').select('*');
+        if (error) throw error;
+
+        console.log('[loadCategories] Categories fetched:', categories);
+        return categories;
+    } catch (error) {
+        console.error('[Error] Failed to load categories:', error);
+        alert('Failed to load categories. Check the console for details.');
+        return [];
+    }
+}
+
+// Export or expose globally if needed
+window.loadCategories = loadCategories;
 
 
 /**
