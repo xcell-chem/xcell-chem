@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         if (window.location.search) {
-            console.log('[DEBUG] URL contains query parameters. Ensuring session is handled...');
+            console.log('[DEBUG] URL contains query parameters. Processing session from URL...');
             const { error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
             if (error) {
                 console.error('[DEBUG] Error processing session from URL:', error);
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (refreshError) {
                 console.error('[DEBUG] Failed to refresh session:', refreshError);
             } else {
-                console.log('[DEBUG] Session refreshed:', refreshedSession);
+                console.log('[DEBUG] Session refreshed successfully:', refreshedSession);
             }
         }
     } catch (err) {
