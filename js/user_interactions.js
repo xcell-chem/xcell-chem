@@ -5,7 +5,8 @@ let currentIndex = 0;
  * Attach event listeners to buttons and inputs
  */
 function attachEventListeners() {
-    document.getElementById('addCategoryButton')?.addEventListener('click', addCategory);
+    console.log('[DEBUG] Attaching event listeners...');
+    document.getElementById('addCategoryButton')?.addEventListener('click', addCategoryUI);
     document.getElementById('previousRecordButton')?.addEventListener('click', showPreviousProduct);
     document.getElementById('nextRecordButton')?.addEventListener('click', showNextProduct);
     document.getElementById('addPricingRowButton')?.addEventListener('click', addPriceRow);

@@ -8,6 +8,7 @@ function restoreFromLocalStorage() {
     }
 }
 
+
 /**
  * Populate product details into the form
  * @param {Object} product - Product data object

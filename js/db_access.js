@@ -47,7 +47,7 @@ async function loadCategories() {
  * @param {number} productId - Product ID
  * @param {number} categoryId - Category ID
  */
-async function addCategoryToProduct(productId, categoryId) {
+async function addCategory(productId, categoryId) {
     try {
         const { error } = await supabaseClient
             .from('product_category')
@@ -55,11 +55,43 @@ async function addCategoryToProduct(productId, categoryId) {
 
         if (error) throw error;
 
-        console.log('[addCategoryToProduct] Category added to product');
+        console.log('[addCategory] Category added to product');
     } catch (error) {
         console.error('[Error] Failed to add category:', error);
     }
 }
+
+/**
+ * Add a category to the product from the UI
+ */
+async function addCategoryUI() {
+    const categorySelect = document.getElementById('availableCategories');
+    const selectedCategoryId = categorySelect.options[categorySelect.selectedIndex]?.value;
+
+    if (!selectedCategoryId) return;
+
+    const currentProductId = productList[currentIndex]?.id;
+    if (!currentProductId) {
+        console.warn('[WARN] No product selected!');
+        return;
+    }
+
+    try {
+        // Use the addCategory function from db_access.js
+        await addCategory(currentProductId, selectedCategoryId);
+
+        console.log('[DEBUG] Category added successfully');
+        // Reload products and update the UI
+        const updatedProducts = await loadProducts();
+        productList = updatedProducts;
+        populateProductDetails(productList[currentIndex]);
+    } catch (err) {
+        console.error('[ERROR] Unexpected error in addCategoryUI:', err);
+    }
+}
+
+// Ensure the function is globally accessible (if needed)
+window.addCategoryUI = addCategoryUI;
 
 /**
  * Remove a category from a product
