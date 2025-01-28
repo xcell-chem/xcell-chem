@@ -1,8 +1,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const SUPABASE_URL = 'https://tjbcucdewwczndkeypey.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-
+const SUPABASE_KEY = 'your_supabase_key_here'; // Ensure this is kept secure
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function checkLoginStatus() {
@@ -35,7 +34,7 @@ async function openLoginPopup() {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin, // Automatically detects the current URL
+                redirectTo: window.location.origin,
             },
         });
 
@@ -50,8 +49,6 @@ async function openLoginPopup() {
     }
 }
 
-
-
 async function registerUserInDatabase(user) {
     try {
         if (!user?.id || !user?.email) {
@@ -60,7 +57,6 @@ async function registerUserInDatabase(user) {
             return;
         }
 
-        // Fallback for missing metadata
         const name = user?.user_metadata?.full_name || 'Anonymous';
 
         console.log('[DEBUG] Registering user in the database:', {
