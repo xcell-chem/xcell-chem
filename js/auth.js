@@ -7,30 +7,38 @@ async function checkLoginStatus() {
     const loginButton = document.getElementById('loginButton');
 
     try {
+        // Helper to update the login button UI
+        const updateLoginButton = (text, action) => {
+            loginButton.textContent = text;
+            loginButton.onclick = action;
+        };
+
         // Fetch the current session
-        const { data: session, error } = await supabase.auth.getSession();
+        let { data: session, error } = await supabase.auth.getSession();
 
         if (error || !session || !session.user) {
-            console.log('[DEBUG] No session or user detected.');
-            loginButton.textContent = "Login";
-            loginButton.onclick = openLoginPopup;
-            return false;
+            console.log('[DEBUG] No session or user detected. Attempting session refresh...');
+            const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession();
+            if (refreshError || !refreshedSession) {
+                console.log('[DEBUG] Session refresh failed or no user detected.');
+                updateLoginButton("Login", openLoginPopup);
+                return false;
+            }
+            session = refreshedSession;
         }
 
         console.log('[DEBUG] User session found:', session.user);
 
-        // Set login flag
+        // Set login flag and update UI
         window.isLoggedIn = true;
-
-        // Update UI
-        loginButton.textContent = "Logout";
-        loginButton.onclick = logout;
+        updateLoginButton("Logout", logout);
         return true;
     } catch (err) {
         console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
         return false;
     }
 }
+
 
 // Refresh session if needed
 async function refreshSessionIfNeeded() {
