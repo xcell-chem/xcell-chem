@@ -83,6 +83,10 @@ function changeImage() {
  * Populate product details into the form
  * @param {Object} product - Product data object
  */
+/**
+ * Populate product details into the form
+ * @param {Object} product - Product data object
+ */
 function populateProductDetails(product) {
     document.getElementById('name').value = product.name || '';
     document.getElementById('img').value = product.img || '';
@@ -92,7 +96,7 @@ function populateProductDetails(product) {
     document.getElementById('shortdescription').value = product.shortdescription || '';
     document.getElementById('active').checked = product.active || false;
 
-    // Save product to localStorage for temporary updates
+    // Save the product to localStorage for temporary changes
     const productWithPrices = {
         ...product,
         product_prices: product.product_prices || []
@@ -107,7 +111,24 @@ function populateProductDetails(product) {
     populatePriceTable(product.product_prices || []);
 }
 
+/**
+ * Populate the category dropdown
+ */
+async function populateCategoryDropdown() {
+    try {
+        const categories = await loadCategories(); // Call the function from db_access.js
+        const categorySelect = document.getElementById('availableCategories');
+        categorySelect.innerHTML = categories
+            .map(category => `<option value="${category.id}">${category.name}</option>`)
+            .join('');
+        console.log('[DEBUG] Category dropdown populated:', categories);
+    } catch (error) {
+        console.error('[ERROR] Failed to populate category dropdown:', error);
+    }
+}
 
+// Expose globally if needed
+window.populateCategoryDropdown = populateCategoryDropdown;
 
 /**
  * Populate selected categories
@@ -126,6 +147,7 @@ function populateCategoryList(categories) {
 
     console.log('[DEBUG] Populated selected categories:', categories);
 }
+
 
 
 /**

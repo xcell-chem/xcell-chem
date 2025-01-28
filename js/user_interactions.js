@@ -117,24 +117,19 @@ function showPreviousProduct() {
 }
 
 /**
- * Initialize the page by loading products and categories
+ * Initialize the page by loading products and populating the UI
  */
 async function initializePage() {
     try {
         console.log('[initializePage] Initializing...');
 
-        // Load products
+        // Load all products
         productList = await loadProducts();
         if (productList.length > 0) {
-            populateProductDetails(productList[0]);
+            populateProductDetails(productList[0]); // Populate details for the first product
+        } else {
+            console.warn('[WARN] No products found.');
         }
-
-        // Load categories for the dropdown
-        const categories = await loadCategories();
-        const categorySelect = document.getElementById('availableCategories');
-        categorySelect.innerHTML = categories
-            .map(category => `<option value="${category.id}">${category.name}</option>`)
-            .join('');
     } catch (error) {
         console.error('[ERROR] Failed to initialize page:', error);
     }
@@ -144,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     attachEventListeners();
     initializePage();
 });
+
 
 
 
