@@ -1,3 +1,5 @@
+let pendingCategories = []; // Array to track pending category changes
+
 /**
  * Restore data from local storage
  */
@@ -7,7 +9,6 @@ function restoreFromLocalStorage() {
         populateProductDetails(JSON.parse(savedProduct));
     }
 }
-
 
 /**
  * Populate product details into the form
@@ -28,17 +29,61 @@ function populateProductDetails(product) {
 
 /**
  * Populate selected categories
- * @param {Array} categories - Array of category objects (e.g., [{ id: 1, name: 'Category 1' }])
+ * @param {Array} categories - Array of category objects
  */
 function populateCategoryList(categories) {
     const categoryList = document.getElementById('categoryList');
     categoryList.innerHTML = '';
     categories.forEach(category => {
         const li = document.createElement('li');
-        li.textContent = category.name; // Display the category name
-        li.addEventListener('click', () => removeCategory(category.id)); // Remove category on click
+        li.textContent = category.name; // Display category name
+        li.dataset.id = category.id; // Store category ID
+        li.addEventListener('click', () => removeCategoryUI(li));
         categoryList.appendChild(li);
     });
+}
+
+/**
+ * Add a category to the UI (temporarily)
+ */
+function addCategoryUI() {
+    const categorySelect = document.getElementById('availableCategories');
+    const selectedCategoryId = categorySelect.options[categorySelect.selectedIndex]?.value;
+    const selectedCategoryName = categorySelect.options[categorySelect.selectedIndex]?.text;
+
+    if (!selectedCategoryId) return;
+
+    // Check if already in pendingCategories or UI
+    if (pendingCategories.find(cat => cat.id === parseInt(selectedCategoryId))) {
+        console.warn('[WARN] Category already added to the UI.');
+        return;
+    }
+
+    // Add to the UI
+    const categoryList = document.getElementById('categoryList');
+    const li = document.createElement('li');
+    li.textContent = selectedCategoryName;
+    li.dataset.id = selectedCategoryId;
+    li.addEventListener('click', () => removeCategoryUI(li));
+    categoryList.appendChild(li);
+
+    // Track as pending
+    pendingCategories.push({ id: parseInt(selectedCategoryId), name: selectedCategoryName });
+
+    console.log('[DEBUG] Pending categories:', pendingCategories);
+}
+
+/**
+ * Remove a category from the UI
+ * @param {HTMLElement} li - The list item element to remove
+ */
+function removeCategoryUI(li) {
+    const categoryId = parseInt(li.dataset.id);
+
+    pendingCategories = pendingCategories.filter(cat => cat.id !== categoryId);
+    li.remove();
+
+    console.log('[DEBUG] Updated pending categories:', pendingCategories);
 }
 
 /**
@@ -68,27 +113,4 @@ function createPriceTable(prices) {
     });
     tableHtml += '</table>';
     return tableHtml;
-}
-
-/**
- * Add a new price row dynamically
- */
-function addPriceRow() {
-    const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
-    product.product_prices = product.product_prices || [];
-
-    product.product_prices.push({ quantity: '', price: '' });
-    localStorage.setItem('currentProduct', JSON.stringify(product));
-    populatePriceTable(product.product_prices);
-}
-
-/**
- * Delete a price row dynamically
- * @param {number} index - Index of the row to delete
- */
-function deletePriceRow(index) {
-    const product = JSON.parse(localStorage.getItem('currentProduct'));
-    product.product_prices.splice(index, 1);
-    localStorage.setItem('currentProduct', JSON.stringify(product));
-    populatePriceTable(product.product_prices);
 }

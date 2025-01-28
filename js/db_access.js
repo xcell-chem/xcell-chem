@@ -1,7 +1,9 @@
 const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
+/**
+ * Load all products with prices and categories
+ */
 async function loadProducts() {
     try {
         console.log('[loadProducts] Fetching products...');
@@ -60,38 +62,6 @@ async function addCategory(productId, categoryId) {
         console.error('[Error] Failed to add category:', error);
     }
 }
-
-/**
- * Add a category to the product from the UI
- */
-async function addCategoryUI() {
-    const categorySelect = document.getElementById('availableCategories');
-    const selectedCategoryId = categorySelect.options[categorySelect.selectedIndex]?.value;
-
-    if (!selectedCategoryId) return;
-
-    const currentProductId = productList[currentIndex]?.id;
-    if (!currentProductId) {
-        console.warn('[WARN] No product selected!');
-        return;
-    }
-
-    try {
-        // Use the addCategory function from db_access.js
-        await addCategory(currentProductId, selectedCategoryId);
-
-        console.log('[DEBUG] Category added successfully');
-        // Reload products and update the UI
-        const updatedProducts = await loadProducts();
-        productList = updatedProducts;
-        populateProductDetails(productList[currentIndex]);
-    } catch (err) {
-        console.error('[ERROR] Unexpected error in addCategoryUI:', err);
-    }
-}
-
-// Ensure the function is globally accessible (if needed)
-window.addCategoryUI = addCategoryUI;
 
 /**
  * Remove a category from a product

@@ -5,11 +5,33 @@ let currentIndex = 0;
  * Attach event listeners to buttons and inputs
  */
 function attachEventListeners() {
-    console.log('[DEBUG] Attaching event listeners...');
     document.getElementById('addCategoryButton')?.addEventListener('click', addCategoryUI);
+    document.getElementById('saveRecordButton')?.addEventListener('click', saveCategories);
     document.getElementById('previousRecordButton')?.addEventListener('click', showPreviousProduct);
     document.getElementById('nextRecordButton')?.addEventListener('click', showNextProduct);
     document.getElementById('addPricingRowButton')?.addEventListener('click', addPriceRow);
+}
+
+/**
+ * Save all pending categories to the database
+ */
+async function saveCategories() {
+    const currentProductId = productList[currentIndex]?.id;
+    if (!currentProductId) {
+        console.warn('[WARN] No product selected!');
+        return;
+    }
+
+    try {
+        for (const category of pendingCategories) {
+            await addCategory(currentProductId, category.id);
+        }
+
+        console.log('[DEBUG] Categories saved successfully.');
+        pendingCategories = [];
+    } catch (error) {
+        console.error('[ERROR] Failed to save categories:', error);
+    }
 }
 
 /**
