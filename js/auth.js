@@ -3,7 +3,7 @@ import { supabase } from './supabaseConfig.js';
 
 // Check login status
 async function checkLoginStatus() {
-    console.log('[DEBUG] Checking login status...');
+    console.log('[DEBUG] Starting login status check...');
     const user = supabase.auth.user();
 
     if (!user) {
