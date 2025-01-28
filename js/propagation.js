@@ -13,13 +13,14 @@ function restoreFromLocalStorage() {
  * Add a new price row dynamically
  */
 function addPriceRow() {
+    // Retrieve the current product from localStorage
     const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
     product.product_prices = product.product_prices || [];
 
-    // Add a default price row
+    // Add a new empty price row
     product.product_prices.push({ quantity: '', price: '' });
 
-    // Save updated product to local storage
+    // Save updated product back to localStorage
     localStorage.setItem('currentProduct', JSON.stringify(product));
 
     // Update the UI with the new price row
@@ -28,8 +29,6 @@ function addPriceRow() {
     console.log('[DEBUG] Added new price row:', product.product_prices);
 }
 
-// Expose the function globally
-window.addPriceRow = addPriceRow;
 
 /**
  * Populate product details into the form
@@ -44,9 +43,18 @@ function populateProductDetails(product) {
     document.getElementById('shortdescription').value = product.shortdescription || '';
     document.getElementById('active').checked = product.active || false;
 
+    // Save initial price rows to localStorage
+    const productWithPrices = {
+        ...product,
+        product_prices: product.product_prices || []
+    };
+    localStorage.setItem('currentProduct', JSON.stringify(productWithPrices));
+
+    // Populate the UI
     populateCategoryList(product.product_category || []);
     populatePriceTable(product.product_prices || []);
 }
+
 
 /**
  * Populate selected categories
