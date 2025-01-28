@@ -6,6 +6,9 @@ let currentIndex = 0; // Index of the currently displayed product
  */
 function attachEventListeners() {
     console.log('[DEBUG] Attaching event listeners...');
+
+    document.getElementById('addCategoryButton')?.addEventListener('click', addCategory);
+
     document.getElementById('previousRecordButton')?.addEventListener('click', () => {
         if (productList.length === 0) return;
 
@@ -23,6 +26,7 @@ function attachEventListeners() {
     document.getElementById('saveRecordButton')?.addEventListener('click', saveToLocalStorage);
     document.getElementById('addPricingRowButton')?.addEventListener('click', addPriceRow);
 }
+
 
 /**
  * Initialize the page by loading products and setting up event listeners
