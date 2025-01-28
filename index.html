@@ -8,24 +8,31 @@
     <link rel="stylesheet" href="css/main.css">
     <script type="module">
         import { supabase } from './js/supabaseClient.js';
-
+    
+        async function openLoginPopup() {
+            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+            if (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+            }
+        }
+    
         async function checkLoginStatus() {
             const { data: session, error } = await supabase.auth.getSession();
             if (error || !session || !session.user) {
-                console.log('[DEBUG] No user session detected. Redirecting to login...');
                 document.getElementById('login-status').innerHTML = '<p>Please <a href="#" onclick="openLoginPopup()">log in</a>.</p>';
                 return;
             }
-
+    
             const user = session.user;
             document.getElementById('login-status').innerHTML = `
                 <p>Welcome, ${user.email}!</p>
                 <button id="logoutButton">Logout</button>
             `;
-
+    
             document.getElementById('logoutButton').addEventListener('click', logout);
         }
-
+    
         async function logout() {
             const { error } = await supabase.auth.signOut();
             if (error) {
@@ -36,17 +43,13 @@
                 location.reload();
             }
         }
-
-        async function openLoginPopup() {
-            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-            if (error) {
-                console.error('Login error:', error);
-                alert('Login failed. Please try again.');
-            }
-        }
-
+    
+        // Expose openLoginPopup globally
+        window.openLoginPopup = openLoginPopup;
+    
         document.addEventListener('DOMContentLoaded', checkLoginStatus);
     </script>
+    
 </head>
 <body>
     <nav>
