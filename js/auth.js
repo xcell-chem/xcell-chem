@@ -7,24 +7,27 @@ async function checkLoginStatus() {
 
     try {
         const { data: session, error } = await supabase.auth.getSession();
-        if (error || !session) {
-            console.log('[DEBUG] No session found. Redirecting to login...');
-            openLoginPopup();
-            return;
+
+        if (error) {
+            console.error('[DEBUG] Error fetching session:', error);
+            return false;
         }
 
-        const user = session.user;
-        if (!user) {
-            console.log('[DEBUG] No user detected. Opening login popup...');
-            openLoginPopup();
-        } else {
-            console.log('[DEBUG] User detected:', user);
-            await registerUserInDatabase(user);
+        if (!session || !session.user) {
+            console.log('[DEBUG] No session or user found.');
+            return false;
         }
-    } catch (error) {
-        console.error('[DEBUG] Error checking login status:', error);
+
+        console.log('[DEBUG] User session detected:', session.user);
+        await registerUserInDatabase(session.user);
+        return true;
+    } catch (err) {
+        console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
+        return false;
     }
 }
+
+
 
 // Open login popup for Google OAuth
 async function openLoginPopup() {
