@@ -28,6 +28,33 @@ function addPriceRow() {
 
     console.log('[DEBUG] Added new price row:', product.product_prices);
 }
+/**
+ * Delete a price row dynamically
+ * @param {number} index - Index of the row to delete
+ */
+function deletePriceRow(index) {
+    // Retrieve the current product from localStorage
+    const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
+    product.product_prices = product.product_prices || [];
+
+    // Remove the row at the specified index
+    if (index >= 0 && index < product.product_prices.length) {
+        product.product_prices.splice(index, 1);
+
+        // Save updated product back to localStorage
+        localStorage.setItem('currentProduct', JSON.stringify(product));
+
+        // Update the UI to reflect the change
+        populatePriceTable(product.product_prices);
+
+        console.log('[DEBUG] Deleted price row:', product.product_prices);
+    } else {
+        console.warn('[WARN] Invalid index for deleting price row:', index);
+    }
+}
+
+// Expose the function globally if needed
+window.deletePriceRow = deletePriceRow;
 
 
 /**
