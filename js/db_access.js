@@ -1,9 +1,6 @@
-const supabaseUrl = 'https://tjbcucdewwczndkeypey.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-/**
- * Load all products with prices and categories
- */
+// auth.js
+import { supabase } from './supabaseClient.js'; // Import the centralized client
+
 async function loadProducts() {
     try {
         console.log('[loadProducts] Fetching products...');

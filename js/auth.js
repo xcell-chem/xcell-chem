@@ -1,8 +1,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const SUPABASE_URL = 'https://tjbcucdewwczndkeypey.supabase.co';
-const SUPABASE_KEY = 'your_supabase_key_here'; // Ensure this is kept secure
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// auth.js
+import { supabase } from './supabaseClient.js'; // Import the centralized client
 
 async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');

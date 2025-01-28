@@ -82,13 +82,12 @@
             // Add additional fields here
         };
     }
+// auth.js
+import { supabase } from './supabaseClient.js'; // Import the centralized client
 
     // Function to upload an image to Supabase Storage
     async function uploadImageToSupabase(file) {
-        const SUPABASE_URL = 'https://tjbcucdewwczndkeypey.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
-
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+      
 
         const { data, error } = await supabase.storage
             .from('images') // Replace with your Supabase storage bucket name
