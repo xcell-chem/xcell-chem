@@ -7,9 +7,51 @@
     <link rel="stylesheet" href="css/main.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script type="module">
-        import { supabase } from './js/auth.js'; // Use your existing auth.js file
+        import { supabase } from './js/auth.js'; // Import your auth.js file with the Supabase client
+
+        async function registerUserInDatabase(user) {
+            try {
+                if (!user?.id || !user?.email) {
+                    console.error('[DEBUG] Missing required user fields:', user);
+                    alert('Error: User information is incomplete.');
+                    return;
+                }
+
+                const name = user?.user_metadata?.full_name || 'Anonymous';
+                const provider = user?.app_metadata?.provider || 'unknown';
+
+                console.log('[DEBUG] Registering user to DB:', {
+                    id: user.id,
+                    email: user.email,
+                    name,
+                    provider,
+                });
+
+                const { data, error } = await supabase
+                    .from('users')
+                    .upsert({
+                        id: user.id,
+                        email: user.email,
+                        name,
+                        oauth_provider: provider,
+                        last_login: new Date().toISOString(),
+                    });
+
+                if (error) {
+                    console.error('[DEBUG] Error saving user to database:', error);
+                    alert('Failed to save user to database. Please try again.');
+                } else {
+                    console.log('[DEBUG] User saved to database:', data);
+                }
+            } catch (err) {
+                console.error('[DEBUG] Unexpected error during user save:', err);
+                alert('An unexpected error occurred. Please try again.');
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
+            let user = null;
+
             try {
                 const { data: session, error } = await supabase.auth.getSession();
                 if (error || !session) {
@@ -18,13 +60,25 @@
                         <p>You are not logged in.</p>
                         <button onclick="openLoginPopup()">Login</button>
                     `;
-                } else {
-                    const user = session.user;
-                    document.getElementById('login-status').innerHTML = `
-                        <p>Welcome, ${user.user_metadata.full_name}!</p>
-                        <button onclick="logout()">Logout</button>
-                    `;
+                    return;
                 }
+
+                user = session.user;
+
+                // Log user details for debugging
+                console.log('[DEBUG] Full user object:', user);
+                console.log('[DEBUG] app_metadata:', user?.app_metadata);
+                console.log('[DEBUG] user_metadata:', user?.user_metadata);
+
+                // Update UI with user details
+                document.getElementById('login-status').innerHTML = `
+                    <p>Welcome, ${user.user_metadata.full_name}!</p>
+                    <button onclick="logout()">Logout</button>
+                `;
+
+                // Save the user to the database
+                await registerUserInDatabase(user);
+
             } catch (err) {
                 console.error('[DEBUG] Error checking session:', err);
                 alert('An error occurred. Please refresh the page.');
@@ -43,6 +97,19 @@
                 }
             } catch (err) {
                 console.error('[DEBUG] Error during logout:', err);
+            }
+        }
+
+        async function openLoginPopup() {
+            console.log('[DEBUG] Initiating login...');
+            try {
+                const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+                if (error) {
+                    console.error('[DEBUG] OAuth login error:', error);
+                    alert('Login failed. Please try again.');
+                }
+            } catch (err) {
+                console.error('[DEBUG] Unexpected error during login:', err);
             }
         }
     </script>

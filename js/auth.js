@@ -48,7 +48,6 @@ async function openLoginPopup() {
         console.error('[DEBUG] Error during login:', error);
     }
 }
-
 async function registerUserInDatabase(user) {
     try {
         if (!user?.id || !user?.email) {
@@ -57,21 +56,28 @@ async function registerUserInDatabase(user) {
             return;
         }
 
+        // Extract additional OAuth details
         const name = user?.user_metadata?.full_name || 'Anonymous';
+        const provider = user?.app_metadata?.provider || 'unknown'; // e.g., 'google'
+        const oauthId = user?.id || ''; // Supabase-generated unique ID for the user
 
         console.log('[DEBUG] Registering user in the database:', {
             id: user.id,
             email: user.email,
             name,
+            provider,
+            oauthId,
         });
 
         // Upsert user into the 'users' table
         const { data, error } = await supabase
             .from('users')
             .upsert({
-                id: user.id,
+                id: user.id, // Supabase user ID
                 email: user.email,
                 name: name,
+                oauth_provider: provider,
+                oauth_id: oauthId,
                 last_login: new Date().toISOString(),
             });
 
@@ -86,6 +92,7 @@ async function registerUserInDatabase(user) {
         alert('An unexpected error occurred. Please try again.');
     }
 }
+
 
 supabase.auth.onAuthStateChange(async (event, session) => {
     console.log('[DEBUG] Auth state changed:', event, session);
