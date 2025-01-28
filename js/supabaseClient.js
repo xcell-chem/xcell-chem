@@ -1,5 +1,5 @@
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1';
 
 
 export const SUPABASE_URL = 'https://tjbcucdewwczndkeypey.supabase.co';

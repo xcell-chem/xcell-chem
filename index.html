@@ -5,13 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome Page</title>
     <link rel="stylesheet" href="css/main.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script type="module">
-         import { supabase } from './js/supabaseClient.js'; // Use the centralized client
-    import { registerUserInDatabase } from './js/auth.js'; // Reuse your existing logic
-
-       
-
+        import { supabase } from './js/supabaseClient.js'; 
+        import { registerUserInDatabase } from './js/auth.js';
+    
+        async function checkLoginStatus() {
+            console.log('[DEBUG] Checking login status...');
+            try {
+                const { data: session, error } = await supabase.auth.getSession();
+                if (error || !session) {
+                    console.log('[DEBUG] No session found. Redirecting to login...');
+                    await openLoginPopup();
+                    return;
+                }
+    
+                const user = session.user;
+                if (!user) {
+                    console.log('[DEBUG] No user detected. Redirecting to login...');
+                    await openLoginPopup();
+                } else {
+                    console.log('[DEBUG] User session detected:', user);
+                    await registerUserInDatabase(user);
+                    document.getElementById('login-status').innerHTML = `<p>Welcome, ${user.email}!</p>`;
+                }
+            } catch (err) {
+                console.error('[DEBUG] Error during login status check:', err);
+            }
+        }
+    
+        checkLoginStatus(); // Call this function on page load
+    
         async function logout() {
             try {
                 const { error } = await supabase.auth.signOut();
@@ -26,7 +49,7 @@
                 console.error('[DEBUG] Error during logout:', err);
             }
         }
-
+    
         async function openLoginPopup() {
             console.log('[DEBUG] Initiating login...');
             try {
@@ -40,6 +63,7 @@
             }
         }
     </script>
+    
 </head>
 <body>
     <header>

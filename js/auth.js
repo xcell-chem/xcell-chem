@@ -55,43 +55,57 @@ export async function registerUserInDatabase(user) {
             return;
         }
 
-        // Extract additional details
+        console.log('[DEBUG] Checking if user exists in the database:', user);
+
+        // Step 1: Check if the user already exists in the `users` table
+        const { data: existingUser, error: checkError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (checkError && checkError.code !== 'PGRST116') {
+            // Ignore "No rows found" error, handle other errors
+            console.error('[DEBUG] Error checking user in the database:', checkError);
+            alert('Failed to check user in the database. Please try again.');
+            return;
+        }
+
+        if (existingUser) {
+            console.log('[DEBUG] User already exists in the database:', existingUser);
+            return; // Exit if the user already exists
+        }
+
+        console.log('[DEBUG] User not found. Creating a new record.');
+
+        // Step 2: Create a new user record
         const name = user?.user_metadata?.full_name || 'Anonymous';
         const email = user?.email;
-        const passwordHash = 'placeholder_hash'; // Use a placeholder if password_hash is not used
+        const passwordHash = 'placeholder_hash'; // Placeholder for `password_hash`
 
-        console.log('[DEBUG] Registering user in the database:', {
-            id: user.id,
-            name,
-            email,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            password_hash: passwordHash,
-        });
-
-        // Upsert user into the 'users' table
         const { data, error } = await supabase
             .from('users')
-            .upsert({
+            .insert({
                 id: user.id,
                 name: name,
                 email: email,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-                password_hash: passwordHash, // Mandatory per your schema
+                password_hash: passwordHash,
             });
 
         if (error) {
-            console.error('[DEBUG] Error registering user in the database:', error);
-            alert('Failed to register user in the database. Please try again.');
+            console.error('[DEBUG] Error creating user in the database:', error);
+            alert('Failed to create user in the database. Please try again.');
         } else {
-            console.log('[DEBUG] User successfully registered in the database:', data);
+            console.log('[DEBUG] User successfully created in the database:', data);
         }
     } catch (err) {
         console.error('[DEBUG] Unexpected error during user registration:', err);
         alert('An unexpected error occurred. Please try again.');
     }
 }
+
 
 
 
