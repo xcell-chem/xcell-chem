@@ -11,13 +11,19 @@
 
         async function checkLoginStatus() {
             const { data: session, error } = await supabase.auth.getSession();
-            if (!session) {
+            if (error || !session || !session.user) {
+                console.log('[DEBUG] No user session detected. Redirecting to login...');
                 document.getElementById('login-status').innerHTML = '<p>Please <a href="#" onclick="openLoginPopup()">log in</a>.</p>';
                 return;
             }
 
             const user = session.user;
-            document.getElementById('login-status').innerHTML = `<p>Welcome, ${user.email}! <button onclick="logout()">Logout</button></p>`;
+            document.getElementById('login-status').innerHTML = `
+                <p>Welcome, ${user.email}!</p>
+                <button id="logoutButton">Logout</button>
+            `;
+
+            document.getElementById('logoutButton').addEventListener('click', logout);
         }
 
         async function logout() {
@@ -39,7 +45,7 @@
             }
         }
 
-        checkLoginStatus();
+        document.addEventListener('DOMContentLoaded', checkLoginStatus);
     </script>
 </head>
 <body>
