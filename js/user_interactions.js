@@ -50,6 +50,25 @@ async function initializePage() {
     } else {
         console.warn('[WARN] No products or an error occurred while loading.');
     }
+
+    // Preload categories for the dropdown
+    preloadCategories();
+}
+
+/**
+ * Preload categories into the dropdown
+ */
+function preloadCategories() {
+    const categories = [
+        'Category 1',
+        'Category 2',
+        'Category 3' // Replace with categories fetched from the database if needed
+    ];
+
+    const categorySelect = document.getElementById('availableCategories');
+    categorySelect.innerHTML = categories
+        .map(category => `<option value="${category}">${category}</option>`)
+        .join('');
 }
 
 document.addEventListener('DOMContentLoaded', () => {

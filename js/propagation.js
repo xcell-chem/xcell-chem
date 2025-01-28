@@ -26,6 +26,39 @@ function populateProductDetails(product) {
     populateCategoryList(product.product_category || []);
     populatePriceTable(product.product_prices || []);
 }
+/**
+ * Add a category to the list
+ */
+function addCategory() {
+    const categorySelect = document.getElementById('availableCategories');
+    const selectedCategory = categorySelect.options[categorySelect.selectedIndex].text;
+
+    if (!selectedCategory) return;
+
+    // Add the category to the current product object
+    const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
+    product.product_category = product.product_category || [];
+    if (!product.product_category.some(c => c.categories.name === selectedCategory)) {
+        product.product_category.push({ categories: { name: selectedCategory } });
+    }
+
+    // Save back to localStorage and refresh the displayed categories
+    localStorage.setItem('currentProduct', JSON.stringify(product));
+    populateCategoryList(product.product_category);
+}
+
+/**
+ * Remove a category from the list
+ * @param {string} categoryName - Name of the category to remove
+ */
+function removeCategory(categoryName) {
+    const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
+    product.product_category = product.product_category.filter(c => c.categories.name !== categoryName);
+
+    // Save back to localStorage and refresh the displayed categories
+    localStorage.setItem('currentProduct', JSON.stringify(product));
+    populateCategoryList(product.product_category);
+}
 
 /**
  * Populate selected categories
