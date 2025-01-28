@@ -35,7 +35,7 @@ async function openLoginPopup() {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: 'https://tjbcucdewwczndkeypey.supabase.co/auth/v1/callback',
+                redirectTo: window.location.origin, // Automatically detects the current URL
             },
         });
 
@@ -49,6 +49,7 @@ async function openLoginPopup() {
         console.error('[DEBUG] Error during login:', error);
     }
 }
+
 
 
 async function registerUserInDatabase(user) {
