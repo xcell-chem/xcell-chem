@@ -1,0 +1,59 @@
+<!-- Create Shop Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Shop</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+        const SUPABASE_URL = 'https://tjbcucdewwczndkeypey.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function createShop(event) {
+            event.preventDefault();
+
+            const shopName = document.getElementById('shop-name').value;
+
+            if (!shopName) {
+                alert('Please enter a shop name.');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('shops')
+                    .insert([{ name: shopName }]);
+
+                if (error) {
+                    console.error('Error creating shop:', error);
+                    alert('Failed to create shop. Please try again.');
+                } else {
+                    alert('Shop created successfully!');
+                    console.log('Shop created:', data);
+                }
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                alert('An unexpected error occurred.');
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Create Shop</h1>
+    </header>
+
+    <form id="create-shop-form" onsubmit="createShop(event)">
+        <label for="shop-name">Shop Name:</label>
+        <input type="text" id="shop-name" name="shop-name" required>
+        <button type="submit">Create Shop</button>
+    </form>
+
+    <footer>
+        <p>&copy; 2025 Let's See Bay. All rights reserved.</p>
+    </footer>
+</body>
+</html>
