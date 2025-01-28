@@ -1,17 +1,46 @@
 
+<!-- My Account Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account</title>
-    <script type="module" src="./js/auth.js" defer></script>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        console.log('[DEBUG] myaccount.html loaded successfully.');
+        const supabase = supabase.createClient('https://tjbcucdewwczndkeypey.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: session } = await supabase.auth.getSession();
+            if (!session) {
+                alert('You must log in to view your account.');
+                window.location.href = '/';
+                return;
+            }
+
+            const user = session.user;
+
+            document.getElementById('account-info').innerHTML = `
+                <h3>Account Information</h3>
+                <p><strong>Name:</strong> ${user.user_metadata.full_name}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>Last Login:</strong> ${new Date(user.last_sign_in_at).toLocaleString()}</p>
+            `;
+        });
     </script>
 </head>
-<body onload="checkLoginStatus()">
-    <h1>My Account</h1>
-    <div id="accountDetails"></div>
+<body>
+    <header>
+        <h1>My Account</h1>
+    </header>
+
+    <div id="account-info">
+        <!-- User's account details will be populated here -->
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Let's See Bay. All rights reserved.</p>
+    </footer>
 </body>
 </html>

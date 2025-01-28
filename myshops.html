@@ -1,17 +1,62 @@
-
+<!-- My Shops Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Shops</title>
-    <script type="module" src="./js/auth.js" defer></script>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        console.log('[DEBUG] myshops.html loaded successfully.');
+        const supabase = supabase.createClient('https://tjbcucdewwczndkeypey.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: session } = await supabase.auth.getSession();
+            if (!session) {
+                alert('You must log in to view your shops.');
+                window.location.href = '/';
+                return;
+            }
+
+            const userId = session.user.id;
+
+            try {
+                const { data: shops, error } = await supabase
+                    .from('shops')
+                    .select('*')
+                    .eq('owner_id', userId);
+
+                if (error) {
+                    console.error('Error fetching shops:', error);
+                    alert('Failed to load your shops.');
+                    return;
+                }
+
+                const shopList = document.getElementById('shop-list');
+                shopList.innerHTML = shops.map(shop => `
+                    <div class="shop">
+                        <h3>${shop.name}</h3>
+                        <p>Created on: ${new Date(shop.created_at).toLocaleDateString()}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                alert('An error occurred while loading your shops.');
+            }
+        });
     </script>
 </head>
-<body onload="checkLoginStatus()">
-    <h1>My Shops</h1>
-    <div id="shopsContainer"></div>
+<body>
+    <header>
+        <h1>My Shops</h1>
+    </header>
+
+    <div id="shop-list">
+        <!-- User's shops will be populated here -->
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Let's See Bay. All rights reserved.</p>
+    </footer>
 </body>
 </html>
