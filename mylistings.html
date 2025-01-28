@@ -1,17 +1,23 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Listings</title>
-    <script type="module" src="./js/auth.js" defer></script>
-    <script>
-        console.log('[DEBUG] mylistings.html loaded successfully.');
-    </script>
-</head>
-<body onload="checkLoginStatus()">
-    <h1>My Listings</h1>
-    <div id="listingsContainer"></div>
+<!DO
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/uses">Uses</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/feedback">Contact</a></li>
+        </ul>
+    </nav>
+
+    <div class="content">
+        <h1 class="content-title">Page Title</h1>
+        <div class="container">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <footer>
+        <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
+    </footer>
 </body>
 </html>
