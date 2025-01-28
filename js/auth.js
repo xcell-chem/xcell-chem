@@ -1,6 +1,5 @@
 
-import { SUPABASE_URL, SUPABASE_KEY } from './supabaseConfig.js';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+import { supabase } from './supabaseConfig.js';
 
 // Check login status
 async function checkLoginStatus() {
