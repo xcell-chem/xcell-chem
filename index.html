@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,64 +7,40 @@
     <title>Welcome Page</title>
     <link rel="stylesheet" href="css/main.css">
     <script type="module">
-        import { supabase } from './js/supabaseClient.js'; 
-        import { registerUserInDatabase } from './js/auth.js';
-    
+        import { supabase } from './js/supabaseClient.js';
+
         async function checkLoginStatus() {
-            console.log('[DEBUG] Checking login status...');
-            try {
-                const { data: session, error } = await supabase.auth.getSession();
-                if (error || !session) {
-                    console.log('[DEBUG] No session found. Redirecting to login...');
-                    await openLoginPopup();
-                    return;
-                }
-    
-                const user = session.user;
-                if (!user) {
-                    console.log('[DEBUG] No user detected. Redirecting to login...');
-                    await openLoginPopup();
-                } else {
-                    console.log('[DEBUG] User session detected:', user);
-                    await registerUserInDatabase(user);
-                    document.getElementById('login-status').innerHTML = `<p>Welcome, ${user.email}!</p>`;
-                }
-            } catch (err) {
-                console.error('[DEBUG] Error during login status check:', err);
+            const { data: session, error } = await supabase.auth.getSession();
+            if (!session) {
+                document.getElementById('login-status').innerHTML = '<p>Please <a href="#" onclick="openLoginPopup()">log in</a>.</p>';
+                return;
             }
+
+            const user = session.user;
+            document.getElementById('login-status').innerHTML = `<p>Welcome, ${user.email}! <button onclick="logout()">Logout</button></p>`;
         }
-    
-        checkLoginStatus(); // Call this function on page load
-    
+
         async function logout() {
-            try {
-                const { error } = await supabase.auth.signOut();
-                if (error) {
-                    console.error('[DEBUG] Logout error:', error);
-                    alert('Failed to log out. Please try again.');
-                } else {
-                    alert('Logged out successfully!');
-                    location.reload();
-                }
-            } catch (err) {
-                console.error('[DEBUG] Error during logout:', err);
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                console.error('Logout error:', error);
+                alert('Failed to log out. Please try again.');
+            } else {
+                alert('Logged out successfully!');
+                location.reload();
             }
         }
-    
+
         async function openLoginPopup() {
-            console.log('[DEBUG] Initiating login...');
-            try {
-                const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-                if (error) {
-                    console.error('[DEBUG] OAuth login error:', error);
-                    alert('Login failed. Please try again.');
-                }
-            } catch (err) {
-                console.error('[DEBUG] Unexpected error during login:', err);
+            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+            if (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
             }
         }
+
+        checkLoginStatus();
     </script>
-    
 </head>
 <body>
     <nav>
@@ -76,14 +53,21 @@
     </nav>
 
     <div class="content">
-        <h1 class="content-title">Page Title</h1>
+        <h1 class="content-title">Welcome to Let's See Bay</h1>
         <div class="container">
-            <!-- Content will be dynamically loaded here -->
+            <div id="login-status">
+                <p>Checking login status...</p>
+            </div>
+            <div class="buttons">
+                <button onclick="location.href='/createshop.html'">Create Shop</button>
+                <button onclick="location.href='/myshops.html'">My Shops</button>
+                <button onclick="location.href='/myaccount.html'">My Account</button>
+            </div>
         </div>
     </div>
 
     <footer>
-        <p class="footer">&copy; 2025 XCell Chem. All rights reserved.</p>
+        <p class="footer">&copy; 2025 Let's See Bay. All rights reserved.</p>
     </footer>
 </body>
 </html>
