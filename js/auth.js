@@ -4,29 +4,53 @@ import { supabase } from './supabaseClient.js'; // Import the centralized client
 // Check login status
 async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');
+    console.log('[DEBUG] Current URL:', window.location.href);
 
     try {
         const { data: session, error } = await supabase.auth.getSession();
 
         if (error) {
             console.error('[DEBUG] Error fetching session:', error);
-            return false;
         }
 
         if (!session || !session.user) {
-            console.log('[DEBUG] No session or user found.');
+            console.log('[DEBUG] No session or user detected.');
             return false;
         }
 
-        console.log('[DEBUG] User session detected:', session.user);
-        await registerUserInDatabase(session.user);
+        console.log('[DEBUG] User session found:', session.user);
         return true;
     } catch (err) {
         console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
         return false;
     }
 }
+// Clean up the URL after OAuth
+if (window.location.search) {
+    const url = new URL(window.location.href);
+    url.search = ''; // Remove query parameters
+    window.history.replaceState({}, document.title, url.toString());
+}
+async function debugSession() {
+    const { data: user, error } = await supabase.auth.getUser();
+    console.log('[DEBUG] Retrieved user data:', user);
+    if (error) {
+        console.error('[DEBUG] Error fetching user data:', error);
+    }
+}
 
+document.addEventListener('DOMContentLoaded', debugSession);
+
+supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log('[DEBUG] Auth state changed:', event);
+    if (event === 'SIGNED_IN') {
+        console.log('[DEBUG] User signed in:', session.user);
+        await registerUserInDatabase(session.user);
+        window.location.href = '/'; // Redirect back to index
+    } else if (event === 'SIGNED_OUT') {
+        console.log('[DEBUG] User signed out.');
+    }
+});
 
 
 // Open login popup for Google OAuth
