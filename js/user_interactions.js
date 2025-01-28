@@ -1,145 +1,63 @@
-let productList = [];
-let currentIndex = 0;
 
-/**
- * Attach event listeners to buttons and inputs
- */
-function attachEventListeners() {
-    document.getElementById('addCategoryButton')?.addEventListener('click', addCategoryUI);
-    document.getElementById('saveRecordButton')?.addEventListener('click', saveChanges);
-    document.getElementById('previousRecordButton')?.addEventListener('click', showPreviousProduct);
-    document.getElementById('nextRecordButton')?.addEventListener('click', showNextProduct);
-    document.getElementById('addPricingRowButton')?.addEventListener('click', addPriceRow);
-    document.getElementById('changeImageButton')?.addEventListener('click', changeImage); // New event listener
-}
-/**
- * Save all changes to the database
- */
-async function saveChanges() {
-    const currentProductId = productList[currentIndex]?.id;
-    if (!currentProductId) {
-        console.warn('[WARN] No product selected!');
-        return;
-    }
+    // Updated user_interactions.js with correct save logic
 
-    const product = JSON.parse(localStorage.getItem('currentProduct'));
-
-    try {
-        // Update image and description in the products table
-        const { error: productError } = await supabaseClient
-            .from('products')
-            .update({
-                img: product.img,
-                description: product.description,
-                shortdescription: product.shortdescription,
-                active: product.active
-            })
-            .eq('id', currentProductId);
-
-        if (productError) throw productError;
-
-        console.log('[DEBUG] Product details updated successfully.');
-
-        // Save pending categories
-        for (const category of pendingCategories) {
-            await addCategory(currentProductId, category.id);
-        }
-
-        console.log('[DEBUG] Categories updated successfully.');
-
-        // Save price rows
-        await supabaseClient
-            .from('product_prices')
-            .delete()
-            .eq('product_id', currentProductId); // Remove existing prices
-
-        for (const price of product.product_prices) {
-            await supabaseClient
-                .from('product_prices')
-                .insert({
-                    product_id: currentProductId,
-                    quantity: price.quantity,
-                    price: price.price
+    // Function to save changes (update an existing record or insert a new one)
+    async function saveChanges() {
+        try {
+            const data = prepareDataForSave(); // Prepare the data to be saved (function to implement)
+            
+            if (data.id) {
+                // Update existing record
+                const response = await fetch('/update-record', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
                 });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('Record updated successfully!');
+                } else {
+                    alert(`Failed to update record: ${result.message}`);
+                }
+            } else {
+                // Insert new record
+                const response = await fetch('/add-record', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('New record added successfully!');
+                } else {
+                    alert(`Failed to add record: ${result.message}`);
+                }
+            }
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            alert('An error occurred while saving changes. Please check the console.');
         }
-
-        console.log('[DEBUG] Price rows updated successfully.');
-
-        alert('Changes saved successfully!');
-        pendingCategories = []; // Clear pending categories
-    } catch (error) {
-        console.error('[ERROR] Failed to save changes:', error);
-        alert('Failed to save changes. Check the console for details.');
-    }
-}
-
-
-/**
- * Save all pending categories to the database
- */
-async function saveCategories() {
-    const currentProductId = productList[currentIndex]?.id;
-    if (!currentProductId) {
-        console.warn('[WARN] No product selected!');
-        return;
     }
 
-    try {
-        for (const category of pendingCategories) {
-            await addCategory(currentProductId, category.id);
-        }
+    // Function to prepare data for saving
+    function prepareDataForSave() {
+        const id = document.getElementById('recordId')?.value; // Example of capturing a unique ID
+        const name = document.getElementById('recordName')?.value;
+        const description = document.getElementById('recordDescription')?.value;
 
-        console.log('[DEBUG] Categories saved successfully.');
-        pendingCategories = [];
-    } catch (error) {
-        console.error('[ERROR] Failed to save categories:', error);
+        // Add more fields as necessary based on your form
+
+        return {
+            id: id ? parseInt(id, 10) : null, // Convert to integer if present
+            name,
+            description,
+            // Add additional fields here
+        };
     }
-}
-
-/**
- * Show the next product
- */
-function showNextProduct() {
-    if (productList.length === 0) return;
-
-    currentIndex = (currentIndex + 1) % productList.length;
-    populateProductDetails(productList[currentIndex]);
-}
-
-/**
- * Show the previous product
- */
-function showPreviousProduct() {
-    if (productList.length === 0) return;
-
-    currentIndex = (currentIndex - 1 + productList.length) % productList.length;
-    populateProductDetails(productList[currentIndex]);
-}
-
-/**
- * Initialize the page by loading products and populating the UI
- */
-async function initializePage() {
-    try {
-        console.log('[initializePage] Initializing...');
-
-        // Load all products
-        productList = await loadProducts();
-        if (productList.length > 0) {
-            populateProductDetails(productList[0]); // Populate details for the first product
-        } else {
-            console.warn('[WARN] No products found.');
-        }
-    } catch (error) {
-        console.error('[ERROR] Failed to initialize page:', error);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    attachEventListeners();
-    initializePage();
-});
-
-
-
-
+    
