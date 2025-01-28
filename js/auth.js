@@ -6,18 +6,23 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Check login status
 async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');
-    const user = supabase.auth.user();
+    try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
 
-    if (!user) {
-        console.log('[DEBUG] No user detected. Opening login popup...');
-        openLoginPopup();
-    } else {
-        console.log('[DEBUG] User detected:', user);
+        if (!user) {
+            console.log('[DEBUG] No user detected. Opening login popup...');
+            openLoginPopup();
+        } else {
+            console.log('[DEBUG] User detected:', user);
+        }
+    } catch (error) {
+        console.error('[DEBUG] Error checking login status:', error);
     }
 }
+
 
 // Open login popup
 async function openLoginPopup() {
