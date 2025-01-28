@@ -7,28 +7,43 @@ async function checkLoginStatus() {
     const loginButton = document.getElementById('loginButton');
 
     try {
+        // Fetch the current session
         const { data: session, error } = await supabase.auth.getSession();
 
-        if (error) {
-            console.error('[DEBUG] Error fetching session:', error);
-            loginButton.textContent = "Login";
-            loginButton.onclick = openLoginPopup;
-            return;
-        }
-
-        if (!session || !session.user) {
+        if (error || !session || !session.user) {
             console.log('[DEBUG] No session or user detected.');
             loginButton.textContent = "Login";
             loginButton.onclick = openLoginPopup;
-            return;
+            return false;
         }
 
         console.log('[DEBUG] User session found:', session.user);
+
+        // Set login flag
+        window.isLoggedIn = true;
+
+        // Update UI
         loginButton.textContent = "Logout";
         loginButton.onclick = logout;
+        return true;
     } catch (err) {
         console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
+        return false;
     }
+}
+
+// Refresh session if needed
+async function refreshSessionIfNeeded() {
+    console.log('[DEBUG] Attempting to refresh session...');
+    const { data: refreshedSession, error } = await supabase.auth.refreshSession();
+
+    if (error) {
+        console.error('[DEBUG] Error refreshing session:', error);
+        return false;
+    }
+
+    console.log('[DEBUG] Session refreshed successfully:', refreshedSession);
+    return true;
 }
 
 // Handle session after OAuth redirect
@@ -36,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('[DEBUG] Document loaded. Initializing...');
 
     try {
+        // Check if the URL contains OAuth query parameters
         if (window.location.search) {
             console.log('[DEBUG] URL contains query parameters. Processing session from URL...');
             const { error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
@@ -45,28 +61,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log('[DEBUG] Session successfully processed from URL.');
             }
 
-            // Clean up the URL
+            // Clean up the URL to remove query parameters
             const url = new URL(window.location.href);
             url.search = '';
             window.history.replaceState({}, document.title, url.toString());
         }
 
-        // Attempt to refresh session if none exists
-        const { data: session, error } = await supabase.auth.getSession();
-        if (error || !session) {
-            console.log('[DEBUG] No session found. Attempting to refresh session...');
-            const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession();
-            if (refreshError) {
-                console.error('[DEBUG] Failed to refresh session:', refreshError);
-            } else {
-                console.log('[DEBUG] Session refreshed successfully:', refreshedSession);
-            }
+        // Check login status or refresh session
+        if (!(await checkLoginStatus())) {
+            await refreshSessionIfNeeded();
         }
     } catch (err) {
-        console.error('[DEBUG] Unexpected error while initializing session:', err);
+        console.error('[DEBUG] Unexpected error during initialization:', err);
     }
-
-    checkLoginStatus();
 });
 
 // Open login popup for Google OAuth
