@@ -32,37 +32,55 @@ async function checkLoginStatus() {
 // Open login popup
 async function openLoginPopup() {
     console.log('[DEBUG] Initiating Google OAuth login...');
-    const { user, error } = await supabase.auth.signIn({
-        provider: 'google',
-    });
-
-    if (error) {
-        console.error('[DEBUG] Login error:', error);
-        alert('Failed to log in. Please try again.');
-    } else {
-        console.log('[DEBUG] User successfully logged in:', user);
-        await registerUserInDatabase(user);
-    }
-}
-
-// Register user in database
-async function registerUserInDatabase(user) {
-    console.log('[DEBUG] Registering user in the database:', user);
-
-    const { data, error } = await supabase
-        .from('users')
-        .upsert({
-            id: user.id,
-            email: user.email,
-            name: user.user_metadata.full_name,
+    try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
         });
 
-    if (error) {
-        console.error('[DEBUG] Error registering user:', error);
-    } else {
-        console.log('[DEBUG] User successfully registered in the database:', data);
+        if (error) {
+            console.error('[DEBUG] Login error:', error);
+            alert('Failed to log in. Please try again.');
+        } else {
+            console.log('[DEBUG] OAuth login successful:', data);
+            await registerUserInDatabase(data.user); // Pass user data to register
+        }
+    } catch (error) {
+        console.error('[DEBUG] Error during login:', error);
     }
 }
+
+
+async function registerUserInDatabase(user) {
+    try {
+        if (!user?.id || !user?.email || !user?.user_metadata?.full_name) {
+            console.error('[DEBUG] User object is missing required fields:', user);
+            alert('Error: Missing user information. Please try logging in again.');
+            return;
+        }
+
+        console.log('[DEBUG] Registering user in the database:', user);
+
+        const { data, error } = await supabase
+            .from('users')
+            .upsert({
+                id: user.id,
+                email: user.email,
+                name: user.user_metadata.full_name,
+            });
+
+        if (error) {
+            console.error('[DEBUG] Error registering user:', error);
+            alert('Failed to register user in the database. Please try again.');
+        } else {
+            console.log('[DEBUG] User successfully registered in the database:', data);
+            return data;
+        }
+    } catch (error) {
+        console.error('[DEBUG] Unexpected error during user registration:', error);
+        alert('An unexpected error occurred. Please try again.');
+    }
+}
+
 
 // Attach functions to the global window object
 window.checkLoginStatus = checkLoginStatus;
