@@ -62,7 +62,10 @@ export async function registerUserInDatabase(user) {
         // Use provided user ID or generate a new UUID if necessary
         const userId = user?.id || uuidv4();
 
-        console.log('[DEBUG] Checking if user exists in the database:', { id: userId, ...user });
+        console.log('[DEBUG] Checking if user exists in the database:', {
+            userId,
+            userObject: user,
+        });
 
         // Step 1: Check if the user already exists in the `users` table
         const { data: existingUser, error: checkError } = await supabase
@@ -71,7 +74,7 @@ export async function registerUserInDatabase(user) {
             .eq('id', userId)
             .single();
 
-        console.log('[DEBUG] Check result:', { existingUser, checkError });
+        console.log('[DEBUG] Database query result:', { existingUser, checkError });
 
         if (checkError && checkError.code !== 'PGRST116') {
             console.error('[DEBUG] Error checking user in the database:', checkError);
@@ -86,44 +89,50 @@ export async function registerUserInDatabase(user) {
 
         console.log('[DEBUG] User not found. Preparing to insert a new record.');
 
-        // Step 2: Insert a new user record
+        // Step 2: Prepare the user data for insertion
         const name = user?.user_metadata?.full_name || 'Anonymous'; // Extract user's name
         const email = user?.email; // Extract user's email
+        const createdAt = new Date().toISOString();
+        const updatedAt = new Date().toISOString();
         const passwordHash = null; // Leave as null since password_hash allows null
 
-        console.log('[DEBUG] Data to insert:', {
+        console.log('[DEBUG] Data to insert into the database:', {
             id: userId,
-            email: email,
-            name: name,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            email,
+            name,
+            created_at: createdAt,
+            updated_at: updatedAt,
             password_hash: passwordHash,
         });
 
-        const { data, error } = await supabase
+        // Step 3: Insert a new user record
+        const { data: insertData, error: insertError } = await supabase
             .from('users')
             .insert({
                 id: userId,
                 email: email,
                 name: name,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
+                created_at: createdAt,
+                updated_at: updatedAt,
                 password_hash: passwordHash,
             });
 
-        console.log('[DEBUG] Insert result:', { data, error });
+        console.log('[DEBUG] Insert query result:', { insertData, insertError });
 
-        if (error) {
-            console.error('[DEBUG] Error creating user in the database:', error);
+        // Handle insert errors
+        if (insertError) {
+            console.error('[DEBUG] Error creating user in the database:', insertError);
             alert('Failed to create user in the database. Please try again.');
-        } else {
-            console.log('[DEBUG] User successfully created in the database:', data);
+            return;
         }
+
+        console.log('[DEBUG] User successfully created in the database:', insertData);
     } catch (err) {
         console.error('[DEBUG] Unexpected error during user registration:', err);
         alert('An unexpected error occurred. Please try again.');
     }
 }
+
 
 // Listen for authentication state changes
 supabase.auth.onAuthStateChange(async (event, session) => {
