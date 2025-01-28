@@ -54,31 +54,39 @@ async function openLoginPopup() {
 
 async function registerUserInDatabase(user) {
     try {
-        if (!user?.id || !user?.email || !user?.user_metadata?.full_name) {
+        if (!user?.id || !user?.email) {
             console.error('[DEBUG] User object is missing required fields:', user);
             alert('Error: Missing user information. Please try logging in again.');
             return;
         }
 
-        console.log('[DEBUG] Registering user in the database:', user);
+        // Fallback for missing metadata
+        const name = user?.user_metadata?.full_name || 'Anonymous';
 
+        console.log('[DEBUG] Registering user in the database:', {
+            id: user.id,
+            email: user.email,
+            name,
+        });
+
+        // Upsert user into the 'users' table
         const { data, error } = await supabase
             .from('users')
             .upsert({
                 id: user.id,
                 email: user.email,
-                name: user.user_metadata.full_name,
+                name: name,
                 last_login: new Date().toISOString(),
             });
 
         if (error) {
-            console.error('[DEBUG] Error registering user:', error);
+            console.error('[DEBUG] Error registering user in the database:', error);
             alert('Failed to register user in the database. Please try again.');
         } else {
             console.log('[DEBUG] User successfully registered in the database:', data);
         }
-    } catch (error) {
-        console.error('[DEBUG] Unexpected error during user registration:', error);
+    } catch (err) {
+        console.error('[DEBUG] Unexpected error during user registration:', err);
         alert('An unexpected error occurred. Please try again.');
     }
 }
