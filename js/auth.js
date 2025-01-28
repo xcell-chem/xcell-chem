@@ -48,7 +48,6 @@ async function openLoginPopup() {
     }
 }
 
-// Register user in the database
 export async function registerUserInDatabase(user) {
     try {
         if (!user?.id || !user?.email) {
@@ -57,17 +56,16 @@ export async function registerUserInDatabase(user) {
             return;
         }
 
-        // Extract additional OAuth details
+        // Extract additional details
         const name = user?.user_metadata?.full_name || 'Anonymous';
-        const provider = user?.app_metadata?.provider || 'unknown';
-        const oauthId = user?.id || '';
+        const passwordHash = 'placeholder_hash'; // Replace with actual logic if required
 
         console.log('[DEBUG] Registering user in the database:', {
             id: user.id,
-            email: user.email,
             name,
-            provider,
-            oauthId,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            password_hash: passwordHash,
         });
 
         // Upsert user into the 'users' table
@@ -75,11 +73,10 @@ export async function registerUserInDatabase(user) {
             .from('users')
             .upsert({
                 id: user.id,
-                email: user.email,
-                name,
-                oauth_provider: provider,
-                oauth_id: oauthId,
-                last_login: new Date().toISOString(),
+                name: name,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                password_hash: passwordHash, // This is mandatory per your schema
             });
 
         if (error) {
