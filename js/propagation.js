@@ -92,17 +92,21 @@ function populateProductDetails(product) {
     document.getElementById('shortdescription').value = product.shortdescription || '';
     document.getElementById('active').checked = product.active || false;
 
-    // Save initial price rows to localStorage
+    // Save product to localStorage for temporary updates
     const productWithPrices = {
         ...product,
         product_prices: product.product_prices || []
     };
     localStorage.setItem('currentProduct', JSON.stringify(productWithPrices));
 
-    // Populate the UI
-    populateCategoryList(product.product_category || []);
+    // Populate selected categories
+    const selectedCategories = product.product_category?.map(pc => pc.categories) || [];
+    populateCategoryList(selectedCategories);
+
+    // Populate price table
     populatePriceTable(product.product_prices || []);
 }
+
 
 
 /**
@@ -115,7 +119,7 @@ function populateCategoryList(categories) {
     categories.forEach(category => {
         const li = document.createElement('li');
         li.textContent = category.name; // Display category name
-        li.dataset.id = category.id; // Store category ID
+        li.dataset.id = category.id; // Store category ID for reference
         li.addEventListener('click', () => removeCategoryUI(li));
         categoryList.appendChild(li);
     });

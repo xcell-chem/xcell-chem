@@ -12,7 +12,7 @@ async function loadProducts() {
             .select(`
                 *,
                 product_prices (quantity, price),
-                product_category (category_id, categories (id, name))
+                product_category (categories (id, name))
             `);
 
         if (error) throw error;
@@ -25,6 +25,7 @@ async function loadProducts() {
         return [];
     }
 }
+
 
 /**
  * Remove a category from a product
