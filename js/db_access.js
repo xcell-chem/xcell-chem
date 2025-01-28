@@ -12,7 +12,7 @@ async function loadProducts() {
             .select(`
                 *,
                 product_prices (quantity, price),
-                product_category (category_id)
+                product_category (category_id, categories (id, name))
             `);
 
         if (error) throw error;
@@ -23,43 +23,6 @@ async function loadProducts() {
         console.error('[Error] Failed to load products:', error);
         alert('Failed to load products. Check the console for details.');
         return [];
-    }
-}
-
-/**
- * Load all categories from the database
- */
-async function loadCategories() {
-    try {
-        console.log('[loadCategories] Fetching categories...');
-        const { data: categories, error } = await supabaseClient.from('categories').select('*');
-        if (error) throw error;
-
-        console.log('[loadCategories] Categories fetched:', categories);
-        return categories;
-    } catch (error) {
-        console.error('[Error] Failed to load categories:', error);
-        alert('Failed to load categories. Check console for details.');
-        return [];
-    }
-}
-
-/**
- * Add a category to a product
- * @param {number} productId - Product ID
- * @param {number} categoryId - Category ID
- */
-async function addCategory(productId, categoryId) {
-    try {
-        const { error } = await supabaseClient
-            .from('product_category')
-            .insert({ product_id: productId, category_id: categoryId });
-
-        if (error) throw error;
-
-        console.log('[addCategory] Category added to product');
-    } catch (error) {
-        console.error('[Error] Failed to add category:', error);
     }
 }
 

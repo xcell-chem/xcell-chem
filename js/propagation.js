@@ -55,6 +55,28 @@ function deletePriceRow(index) {
 
 // Expose the function globally if needed
 window.deletePriceRow = deletePriceRow;
+/**
+ * Change the product image and save to localStorage
+ */
+function changeImage() {
+    const imageUrl = prompt('Enter the new image URL:');
+    if (!imageUrl) {
+        console.warn('[WARN] No image URL provided.');
+        return;
+    }
+
+    // Update localStorage
+    const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
+    product.img = imageUrl;
+    localStorage.setItem('currentProduct', JSON.stringify(product));
+
+    // Update the UI
+    const imagePreview = document.getElementById('imagePreview');
+    imagePreview.src = imageUrl;
+    imagePreview.style.display = 'block';
+
+    console.log('[DEBUG] Image updated and saved to localStorage:', imageUrl);
+}
 
 
 /**
@@ -85,7 +107,7 @@ function populateProductDetails(product) {
 
 /**
  * Populate selected categories
- * @param {Array} categories - Array of category objects
+ * @param {Array} categories - Array of category objects (e.g., [{ id: 1, name: 'Category 1' }])
  */
 function populateCategoryList(categories) {
     const categoryList = document.getElementById('categoryList');
@@ -97,7 +119,10 @@ function populateCategoryList(categories) {
         li.addEventListener('click', () => removeCategoryUI(li));
         categoryList.appendChild(li);
     });
+
+    console.log('[DEBUG] Populated selected categories:', categories);
 }
+
 
 /**
  * Add a category to the UI (temporarily)
