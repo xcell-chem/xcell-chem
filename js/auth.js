@@ -1,7 +1,7 @@
-
-
 // auth.js
 import { supabase } from './supabaseClient.js'; // Import the centralized client
+
+// Check login status
 async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');
 
@@ -26,6 +26,7 @@ async function checkLoginStatus() {
     }
 }
 
+// Open login popup for Google OAuth
 async function openLoginPopup() {
     console.log('[DEBUG] Initiating Google OAuth login...');
     try {
@@ -46,7 +47,9 @@ async function openLoginPopup() {
         console.error('[DEBUG] Error during login:', error);
     }
 }
-async function registerUserInDatabase(user) {
+
+// Register user in the database
+export async function registerUserInDatabase(user) {
     try {
         if (!user?.id || !user?.email) {
             console.error('[DEBUG] User object is missing required fields:', user);
@@ -91,7 +94,7 @@ async function registerUserInDatabase(user) {
     }
 }
 
-
+// Listen for authentication state changes
 supabase.auth.onAuthStateChange(async (event, session) => {
     console.log('[DEBUG] Auth state changed:', event, session);
 
@@ -104,5 +107,6 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     }
 });
 
+// Expose functions globally for use in inline scripts (if needed)
 window.checkLoginStatus = checkLoginStatus;
 window.openLoginPopup = openLoginPopup;
