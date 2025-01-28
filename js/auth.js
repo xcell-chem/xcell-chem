@@ -47,8 +47,6 @@ async function openLoginPopup() {
         console.error('[DEBUG] Error during login:', error);
     }
 }
-import { v4 as uuidv4 } from 'https://cdn.jsdelivr.net/npm/uuid/+esm'; // Import UUID generator
-
 export async function registerUserInDatabase(user) {
     try {
         // Validate required user fields
@@ -58,45 +56,78 @@ export async function registerUserInDatabase(user) {
             return;
         }
 
-        // Use provided user ID or generate a new UUID if necessary
-        const userId = user?.id || uuidv4();
+        const userId = user.id; // Use the ID from the auth.users table
 
-        console.log('[DEBUG] Preparing to upsert user into the database:', {
-            id: userId,
-            email: user.email,
-            name: user?.user_metadata?.full_name || 'Anonymous',
+        console.log('[DEBUG] Checking if user exists in the database:', {
+            userId,
+            userObject: user,
         });
 
-        // Step 1: Prepare user data
-        const userData = {
-            id: userId,
-            email: user.email,
-            name: user?.user_metadata?.full_name || 'Anonymous',
-            created_at: new Date().toISOString(), // Only relevant for new records
-            updated_at: new Date().toISOString(),
-            password_hash: null, // Use null since password_hash allows null
-        };
-
-        // Step 2: Perform upsert (insert or update)
-        const { data: upsertData, error: upsertError } = await supabase
+        // Step 1: Check if the user already exists in the `users` table
+        const { data: existingUser, error: checkError } = await supabase
             .from('users')
-            .upsert(userData, { onConflict: ['id'] }); // Ensure 'id' is the conflict key
+            .select('*')
+            .eq('auth_user_id', userId) // Check by the new foreign key
+            .single();
 
-        console.log('[DEBUG] Upsert query result:', { upsertData, upsertError });
+        console.log('[DEBUG] Database query result:', { existingUser, checkError });
 
-        if (upsertError) {
-            console.error('[DEBUG] Error upserting user in the database:', upsertError);
-            alert('Failed to update user in the database. Please try again.');
+        if (checkError && checkError.code !== 'PGRST116') {
+            console.error('[DEBUG] Error checking user in the database:', checkError);
+            alert('Failed to check user in the database. Please try again.');
             return;
         }
 
-        console.log('[DEBUG] User successfully upserted in the database:', upsertData);
+        if (existingUser) {
+            console.log('[DEBUG] User already exists in the database:', existingUser);
+            return; // Exit if the user already exists
+        }
+
+        console.log('[DEBUG] User not found. Preparing to insert a new record.');
+
+        // Step 2: Prepare the user data for insertion
+        const name = user?.user_metadata?.full_name || 'Anonymous'; // Extract user's name
+        const email = user?.email; // Extract user's email
+        const createdAt = new Date().toISOString();
+        const updatedAt = new Date().toISOString();
+        const passwordHash = null; // Leave as null since password_hash allows null
+
+        console.log('[DEBUG] Data to insert into the database:', {
+            auth_user_id: userId, // Link to the auth user ID
+            email,
+            name,
+            created_at: createdAt,
+            updated_at: updatedAt,
+            password_hash: passwordHash,
+        });
+
+        // Step 3: Insert a new user record
+        const { data: insertData, error: insertError } = await supabase
+            .from('users')
+            .insert({
+                auth_user_id: userId, // Use the auth user ID
+                email: email,
+                name: name,
+                created_at: createdAt,
+                updated_at: updatedAt,
+                password_hash: passwordHash,
+            });
+
+        console.log('[DEBUG] Insert query result:', { insertData, insertError });
+
+        // Handle insert errors
+        if (insertError) {
+            console.error('[DEBUG] Error creating user in the database:', insertError);
+            alert('Failed to create user in the database. Please try again.');
+            return;
+        }
+
+        console.log('[DEBUG] User successfully created in the database:', insertData);
     } catch (err) {
         console.error('[DEBUG] Unexpected error during user registration:', err);
         alert('An unexpected error occurred. Please try again.');
     }
 }
-
 
 
 // Listen for authentication state changes
