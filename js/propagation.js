@@ -89,9 +89,9 @@ async function removeCategory(categoryName) {
     }
 }
 
-
+/**
  * Populate selected categories
- * @param {Array} categories - Array of category objects (e.g., [{ name: 'Category 1' }])
+ * @param {Array} categories - Array of category objects (e.g., [{ id: 1, name: 'Category 1' }])
  */
 function populateCategoryList(categories) {
     const categoryList = document.getElementById('categoryList');
@@ -103,6 +103,7 @@ function populateCategoryList(categories) {
         categoryList.appendChild(li);
     });
 }
+
 
 
 /**
