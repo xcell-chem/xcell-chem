@@ -36,6 +36,55 @@ window.loadProducts = async function () {
     return null;
   }
 };
+/**
+ * Load all categories and selected categories for the current product
+ * @param {number} productId - The ID of the current product
+ */
+/**
+ * Load all categories and selected categories for the current product
+ * @param {number} productId - The ID of the current product
+ */
+async function loadCategories(productId) {
+    try {
+        // Fetch all categories for the dropdown
+        const { data: allCategories, error: categoryError } = await supabaseClient
+            .from('categories')
+            .select('id, name');
+        
+        if (categoryError) {
+            console.error('[ERROR] Loading all categories:', categoryError);
+            return;
+        }
+
+        // Populate the dropdown with all categories
+        const categorySelect = document.getElementById('availableCategories');
+        categorySelect.innerHTML = allCategories
+            .map(category => `<option value="${category.id}">${category.name}</option>`)
+            .join('');
+
+        // Fetch selected category IDs for the current product
+        const { data: selectedCategoryIds, error: selectedError } = await supabaseClient
+            .from('product_category')
+            .select('category_id')
+            .eq('product_id', productId);
+        
+        if (selectedError) {
+            console.error('[ERROR] Loading selected categories:', selectedError);
+            return;
+        }
+
+        // Map category IDs to category names
+        const selectedCategories = allCategories.filter(category =>
+            selectedCategoryIds.some(selected => selected.category_id === category.id)
+        );
+
+        // Populate the selected categories list
+        populateCategoryList(selectedCategories);
+    } catch (err) {
+        console.error('[ERROR] Unexpected error in loadCategories:', err);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Example: button for creating a product
     const createButton = document.getElementById('createProd');

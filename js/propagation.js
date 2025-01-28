@@ -29,51 +29,81 @@ function populateProductDetails(product) {
 /**
  * Add a category to the list
  */
-function addCategory() {
+/**
+ * Add a category to the product
+ */
+async function addCategory() {
     const categorySelect = document.getElementById('availableCategories');
-    const selectedCategory = categorySelect.options[categorySelect.selectedIndex].text;
+    const selectedCategoryId = categorySelect.options[categorySelect.selectedIndex].value;
 
-    if (!selectedCategory) return;
+    if (!selectedCategoryId) return;
 
-    // Add the category to the current product object
-    const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
-    product.product_category = product.product_category || [];
-    if (!product.product_category.some(c => c.categories.name === selectedCategory)) {
-        product.product_category.push({ categories: { name: selectedCategory } });
+    const currentProductId = productList[currentIndex]?.id;
+    if (!currentProductId) {
+        console.warn('[WARN] No product selected!');
+        return;
     }
 
-    // Save back to localStorage and refresh the displayed categories
-    localStorage.setItem('currentProduct', JSON.stringify(product));
-    populateCategoryList(product.product_category);
+    try {
+        // Insert the new category by ID into the product_category table
+        const { error } = await supabaseClient
+            .from('product_category')
+            .insert({ product_id: currentProductId, category_id: parseInt(selectedCategoryId, 10) });
+
+        if (error) {
+            console.error('[ERROR] Adding category:', error);
+            return;
+        }
+
+        // Refresh the selected categories list
+        await loadCategories(currentProductId);
+    } catch (err) {
+        console.error('[ERROR] Unexpected error in addCategory:', err);
+    }
 }
 
-/**
- * Remove a category from the list
- * @param {string} categoryName - Name of the category to remove
- */
-function removeCategory(categoryName) {
-    const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
-    product.product_category = product.product_category.filter(c => c.categories.name !== categoryName);
+async function removeCategory(categoryName) {
+    const currentProductId = productList[currentIndex]?.id;
+    if (!currentProductId) {
+        console.warn('[WARN] No product selected!');
+        return;
+    }
 
-    // Save back to localStorage and refresh the displayed categories
-    localStorage.setItem('currentProduct', JSON.stringify(product));
-    populateCategoryList(product.product_category);
+    try {
+        // Delete the category for the current product
+        const { error } = await supabaseClient
+            .from('product_category')
+            .delete()
+            .eq('product_id', currentProductId)
+            .eq('category_name', categoryName);
+
+        if (error) {
+            console.error('[ERROR] Removing category:', error);
+            return;
+        }
+
+        // Refresh the selected categories list
+        await loadCategories(currentProductId);
+    } catch (err) {
+        console.error('[ERROR] Unexpected error in removeCategory:', err);
+    }
 }
 
-/**
+
  * Populate selected categories
- * @param {Array} categories - Array of category objects
+ * @param {Array} categories - Array of category objects (e.g., [{ name: 'Category 1' }])
  */
 function populateCategoryList(categories) {
     const categoryList = document.getElementById('categoryList');
     categoryList.innerHTML = '';
     categories.forEach(category => {
         const li = document.createElement('li');
-        li.textContent = category.categories.name;
-        li.addEventListener('click', () => removeCategory(category.categories.name));
+        li.textContent = category.name;
+        li.addEventListener('click', () => removeCategory(category.name));
         categoryList.appendChild(li);
     });
 }
+
 
 /**
  * Populate product prices
@@ -104,15 +134,17 @@ function createPriceTable(prices) {
     return tableHtml;
 }
 
-/**
- * Add a new price row and reload
- */
 function addPriceRow() {
-    saveToLocalStorage();
-    localStorage.setItem('reloadFlag', 'addPriceRow');
-    window.location.reload();
-}
+    const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
+    product.product_prices = product.product_prices || [];
 
+    // Add a default price row
+    product.product_prices.push({ quantity: '', price: '' });
+
+    // Save to localStorage and update the DOM
+    localStorage.setItem('currentProduct', JSON.stringify(product));
+    populatePriceTable(product.product_prices);
+}
 /**
  * Delete a price row and reload
  * @param {number} index - Index of the row to delete
