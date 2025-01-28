@@ -3,7 +3,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 // auth.js
 import { supabase } from './supabaseClient.js'; // Import the centralized client
-
+import { registerUserInDatabase } from './auth.js'; // Reuse your existing logic
 async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');
 
