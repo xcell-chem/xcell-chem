@@ -9,6 +9,27 @@ function restoreFromLocalStorage() {
         populateProductDetails(JSON.parse(savedProduct));
     }
 }
+/**
+ * Add a new price row dynamically
+ */
+function addPriceRow() {
+    const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
+    product.product_prices = product.product_prices || [];
+
+    // Add a default price row
+    product.product_prices.push({ quantity: '', price: '' });
+
+    // Save updated product to local storage
+    localStorage.setItem('currentProduct', JSON.stringify(product));
+
+    // Update the UI with the new price row
+    populatePriceTable(product.product_prices);
+
+    console.log('[DEBUG] Added new price row:', product.product_prices);
+}
+
+// Expose the function globally
+window.addPriceRow = addPriceRow;
 
 /**
  * Populate product details into the form
