@@ -146,7 +146,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    attachEventListeners();
-    initializePage();
-});
+
