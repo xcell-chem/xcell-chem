@@ -47,7 +47,6 @@ async function openLoginPopup() {
         console.error('[DEBUG] Error during login:', error);
     }
 }
-
 export async function registerUserInDatabase(user) {
     try {
         if (!user?.id || !user?.email) {
@@ -58,11 +57,13 @@ export async function registerUserInDatabase(user) {
 
         // Extract additional details
         const name = user?.user_metadata?.full_name || 'Anonymous';
-        const passwordHash = 'placeholder_hash'; // Replace with actual logic if required
+        const email = user?.email;
+        const passwordHash = 'placeholder_hash'; // Use a placeholder if password_hash is not used
 
         console.log('[DEBUG] Registering user in the database:', {
             id: user.id,
             name,
+            email,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             password_hash: passwordHash,
@@ -74,9 +75,10 @@ export async function registerUserInDatabase(user) {
             .upsert({
                 id: user.id,
                 name: name,
+                email: email,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-                password_hash: passwordHash, // This is mandatory per your schema
+                password_hash: passwordHash, // Mandatory per your schema
             });
 
         if (error) {
@@ -90,6 +92,7 @@ export async function registerUserInDatabase(user) {
         alert('An unexpected error occurred. Please try again.');
     }
 }
+
 
 
 // Listen for authentication state changes
