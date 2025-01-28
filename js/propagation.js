@@ -1,5 +1,3 @@
-// Propagation functions for loading and restoring data
-
 /**
  * Restore data from local storage
  */
@@ -26,68 +24,6 @@ function populateProductDetails(product) {
     populateCategoryList(product.product_category || []);
     populatePriceTable(product.product_prices || []);
 }
-/**
- * Add a category to the list
- */
-/**
- * Add a category to the product
- */
-async function addCategory() {
-    const categorySelect = document.getElementById('availableCategories');
-    const selectedCategoryId = categorySelect.options[categorySelect.selectedIndex].value;
-
-    if (!selectedCategoryId) return;
-
-    const currentProductId = productList[currentIndex]?.id;
-    if (!currentProductId) {
-        console.warn('[WARN] No product selected!');
-        return;
-    }
-
-    try {
-        // Insert the new category by ID into the product_category table
-        const { error } = await supabaseClient
-            .from('product_category')
-            .insert({ product_id: currentProductId, category_id: parseInt(selectedCategoryId, 10) });
-
-        if (error) {
-            console.error('[ERROR] Adding category:', error);
-            return;
-        }
-
-        // Refresh the selected categories list
-        await loadCategories(currentProductId);
-    } catch (err) {
-        console.error('[ERROR] Unexpected error in addCategory:', err);
-    }
-}
-
-async function removeCategory(categoryName) {
-    const currentProductId = productList[currentIndex]?.id;
-    if (!currentProductId) {
-        console.warn('[WARN] No product selected!');
-        return;
-    }
-
-    try {
-        // Delete the category for the current product
-        const { error } = await supabaseClient
-            .from('product_category')
-            .delete()
-            .eq('product_id', currentProductId)
-            .eq('category_name', categoryName);
-
-        if (error) {
-            console.error('[ERROR] Removing category:', error);
-            return;
-        }
-
-        // Refresh the selected categories list
-        await loadCategories(currentProductId);
-    } catch (err) {
-        console.error('[ERROR] Unexpected error in removeCategory:', err);
-    }
-}
 
 /**
  * Populate selected categories
@@ -98,13 +34,11 @@ function populateCategoryList(categories) {
     categoryList.innerHTML = '';
     categories.forEach(category => {
         const li = document.createElement('li');
-        li.textContent = category.name;
-        li.addEventListener('click', () => removeCategory(category.name));
+        li.textContent = category.name; // Display the category name
+        li.addEventListener('click', () => removeCategory(category.id)); // Remove category on click
         categoryList.appendChild(li);
     });
 }
-
-
 
 /**
  * Populate product prices
@@ -135,25 +69,25 @@ function createPriceTable(prices) {
     return tableHtml;
 }
 
+/**
+ * Add a new price row dynamically
+ */
 function addPriceRow() {
     const product = JSON.parse(localStorage.getItem('currentProduct')) || {};
     product.product_prices = product.product_prices || [];
 
-    // Add a default price row
     product.product_prices.push({ quantity: '', price: '' });
-
-    // Save to localStorage and update the DOM
     localStorage.setItem('currentProduct', JSON.stringify(product));
     populatePriceTable(product.product_prices);
 }
+
 /**
- * Delete a price row and reload
+ * Delete a price row dynamically
  * @param {number} index - Index of the row to delete
  */
 function deletePriceRow(index) {
     const product = JSON.parse(localStorage.getItem('currentProduct'));
     product.product_prices.splice(index, 1);
     localStorage.setItem('currentProduct', JSON.stringify(product));
-    localStorage.setItem('reloadFlag', 'deletePriceRow');
-    window.location.reload();
+    populatePriceTable(product.product_prices);
 }
