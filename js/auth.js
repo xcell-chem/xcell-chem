@@ -59,8 +59,8 @@ export async function registerUserInDatabase(user) {
 
         // Extract additional OAuth details
         const name = user?.user_metadata?.full_name || 'Anonymous';
-        const provider = user?.app_metadata?.provider || 'unknown'; // e.g., 'google'
-        const oauthId = user?.id || ''; // Supabase-generated unique ID for the user
+        const provider = user?.app_metadata?.provider || 'unknown';
+        const oauthId = user?.id || '';
 
         console.log('[DEBUG] Registering user in the database:', {
             id: user.id,
@@ -74,9 +74,9 @@ export async function registerUserInDatabase(user) {
         const { data, error } = await supabase
             .from('users')
             .upsert({
-                id: user.id, // Supabase user ID
+                id: user.id,
                 email: user.email,
-                name: name,
+                name,
                 oauth_provider: provider,
                 oauth_id: oauthId,
                 last_login: new Date().toISOString(),
@@ -93,6 +93,7 @@ export async function registerUserInDatabase(user) {
         alert('An unexpected error occurred. Please try again.');
     }
 }
+
 
 // Listen for authentication state changes
 supabase.auth.onAuthStateChange(async (event, session) => {
