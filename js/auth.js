@@ -34,6 +34,9 @@ async function openLoginPopup() {
     try {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
+            options: {
+                redirectTo: 'https://tjbcucdewwczndkeypey.supabase.co/auth/v1/callback',
+            },
         });
 
         if (error) {
@@ -46,6 +49,7 @@ async function openLoginPopup() {
         console.error('[DEBUG] Error during login:', error);
     }
 }
+
 
 async function registerUserInDatabase(user) {
     try {
