@@ -5,13 +5,13 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
-        persistSession: true,  // ✅ Ensures session persists
-        autoRefreshToken: true, // ✅ Automatically refresh expired sessions
+        persistSession: true,  // ✅ Ensures session is stored in localStorage
+        autoRefreshToken: true, // ✅ Enables automatic token refresh
         detectSessionInUrl: true, // ✅ Handles OAuth redirects properly
     },
 });
 
-// ✅ Handle OAuth redirects properly
+// ✅ Handle OAuth session processing
 (async () => {
     console.log('[DEBUG] Checking for OAuth session...');
     const urlParams = new URLSearchParams(window.location.search);
@@ -25,16 +25,16 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
             console.log('[DEBUG] OAuth session exchanged successfully.');
         }
 
-        // ✅ Remove query params from URL to prevent login loops
+        // ✅ Remove query parameters to prevent login loops
         const newUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
     }
 
-    // ✅ Fetch the latest session after OAuth processing
+    // ✅ Fetch latest session after OAuth processing
     const { data: session, error } = await supabase.auth.getSession();
-    if (error || !session) {
+    if (error || !session || !session.session || !session.session.user) {
         console.warn('[DEBUG] No active session found after OAuth check.');
     } else {
-        console.log('[DEBUG] Active session found:', session);
+        console.log('[DEBUG] Active session restored:', session.session.user);
     }
 })();

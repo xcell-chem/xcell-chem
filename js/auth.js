@@ -1,25 +1,25 @@
 import { supabase } from './supabaseClient.js';
 
 /**
- * Check if the user is logged in without infinite refresh attempts.
+ * Check if the user is logged in.
  * @returns {Promise<boolean>} Returns true if logged in, false otherwise.
  */
 export async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');
     try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: session, error } = await supabase.auth.getSession();
 
         if (error) {
             console.warn('[DEBUG] Error fetching session:', error.message);
             return false;
         }
 
-        if (!user) {
+        if (!session || !session.session || !session.session.user) {
             console.warn('[DEBUG] No active user session.');
             return false;
         }
 
-        console.log('[DEBUG] User is logged in:', user);
+        console.log('[DEBUG] User is logged in:', session.session.user);
         return true;
     } catch (err) {
         console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
