@@ -1,5 +1,17 @@
 import { supabase } from './supabaseClient.js';
-
+/**
+ * Redirect to login page only if necessary.
+ */
+export async function requireLogin(callback) {
+    const isLoggedIn = await checkLoginStatus();
+    
+    if (!isLoggedIn) {
+        console.warn('[DEBUG] User is not logged in. Redirecting...');
+        window.location.href = '/login.html';  // Change this to your actual login page
+    } else if (typeof callback === 'function') {
+        callback();
+    }
+}
 /**
  * Ensure the user exists in public.users after login.
  * @param {Object} user - The logged-in user object.
@@ -13,7 +25,7 @@ export async function ensureUserExists(user) {
             .eq('auth_user_id', user.id)
             .single();
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 means no record found
+        if (error && error.code !== 'PGRST116') {
             console.error('[DEBUG] Error checking user existence:', error);
             return;
         }
@@ -40,7 +52,7 @@ export async function ensureUserExists(user) {
 }
 
 /**
- * Check if the user is logged in and sync with public.users.
+ * Check if the user is logged in and restore session if needed.
  */
 export async function checkLoginStatus() {
     console.log('[DEBUG] Checking login status...');
@@ -54,10 +66,16 @@ export async function checkLoginStatus() {
 
         if (!data.session || !data.session.user) {
             console.warn('[DEBUG] No active session found. Attempting to refresh...');
-            await supabase.auth.refreshSession();
-            data = await supabase.auth.getSession();
+            const { error: refreshError } = await supabase.auth.refreshSession();
 
+            if (refreshError) {
+                console.error('[DEBUG] Failed to refresh session:', refreshError);
+                return false;
+            }
+
+            data = await supabase.auth.getSession();
             if (!data.session || !data.session.user) {
+                console.warn('[DEBUG] No valid session after refresh.');
                 return false;
             }
         }
@@ -73,6 +91,19 @@ export async function checkLoginStatus() {
         return false;
     }
 }
+
+/**
+ * Listen for authentication state changes and store session in localStorage.
+ */
+supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+        console.log("[DEBUG] Saving session to localStorage...");
+        localStorage.setItem("supabaseSession", JSON.stringify(session));
+    } else {
+        console.log("[DEBUG] Clearing session from localStorage...");
+        localStorage.removeItem("supabaseSession");
+    }
+});
 
 /**
  * Open the OAuth popup for logging in with Google.
