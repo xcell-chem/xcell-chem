@@ -10,8 +10,8 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
         detectSessionInUrl: true, // ✅ Handles OAuth redirects properly
     },
 });
+import { ensureUserExists } from './auth.js';
 
-// ✅ Handle OAuth login processing
 (async () => {
     console.log('[DEBUG] Checking for OAuth session...');
     const urlParams = new URLSearchParams(window.location.search);
@@ -19,25 +19,21 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     if (urlParams.has('code')) {
         console.log('[DEBUG] Processing OAuth login...');
         const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        
         if (error) {
             console.error('[DEBUG] Error exchanging OAuth code:', error);
         } else {
             console.log('[DEBUG] OAuth session exchanged successfully.');
-
-            // ✅ Store session explicitly
             localStorage.setItem('supabaseSession', JSON.stringify(data.session));
+
+            // ✅ Ensure user exists in public.users
+            if (data.session?.user) {
+                await ensureUserExists(data.session.user);
+            }
         }
 
         // ✅ Remove query parameters to prevent login loops
         const newUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
-    }
-
-    // ✅ Fetch latest session after OAuth processing
-    const { data: session, error } = await supabase.auth.getSession();
-    if (error || !session || !session.session || !session.session.user) {
-        console.warn('[DEBUG] No active session found after OAuth check.');
-    } else {
-        console.log('[DEBUG] Active session restored:', session.session.user);
     }
 })();

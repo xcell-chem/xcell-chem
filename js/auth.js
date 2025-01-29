@@ -5,38 +5,35 @@ import { supabase } from './supabaseClient.js';
  * @returns {Promise<boolean>} Returns true if logged in, false otherwise.
  */
 export async function checkLoginStatus() {
-    console.log('[DEBUG] Starting login status check...');
+    console.log('[DEBUG] Checking login status...');
     try {
         let { data, error } = await supabase.auth.getSession();
-        const session = data?.session;
 
         if (error) {
             console.warn('[DEBUG] Error fetching session:', error.message);
             return false;
         }
 
-        if (!session || !session.user) {
-            console.warn('[DEBUG] No active user session. Trying stored session...');
+        // If no session found, attempt to restore it
+        if (!data.session || !data.session.user) {
+            console.warn('[DEBUG] No active session found. Attempting to refresh...');
             
-            // ✅ Try restoring session manually
-            const storedSession = localStorage.getItem('supabaseSession');
-            if (storedSession) {
-                session = JSON.parse(storedSession);
-                console.log('[DEBUG] Restored session from localStorage:', session);
-            }
-
-            if (!session || !session.user) {
+            await supabase.auth.refreshSession();
+            data = await supabase.auth.getSession();  // Try fetching session again
+            
+            if (!data.session || !data.session.user) {
                 return false;
             }
         }
 
-        console.log('[DEBUG] User is logged in:', session.user);
+        console.log('[DEBUG] User is logged in:', data.session.user);
         return true;
     } catch (err) {
         console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
         return false;
     }
 }
+
 
 /**
  * Redirect to login page only if necessary.
@@ -78,6 +75,41 @@ export async function openLoginPopup() {
         }
     } catch (err) {
         console.error('[DEBUG] Unexpected error during OAuth login:', err);
+    }
+}
+
+export async function ensureUserExists(user) {
+    console.log('[DEBUG] Checking if user exists in public.users...');
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .select('id')
+            .eq('auth_user_id', user.id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 means no record found
+            console.error('[DEBUG] Error checking user existence:', error);
+            return;
+        }
+
+        if (!data) {
+            console.log('[DEBUG] User not found in public.users, inserting...');
+            const { error: insertError } = await supabase.from('users').insert({
+                auth_user_id: user.id,
+                name: user.user_metadata.full_name || 'New User',
+                email: user.email
+            });
+
+            if (insertError) {
+                console.error('[DEBUG] Error inserting user into public.users:', insertError);
+            } else {
+                console.log('[DEBUG] User inserted successfully into public.users');
+            }
+        } else {
+            console.log('[DEBUG] User already exists in public.users');
+        }
+    } catch (err) {
+        console.error('[DEBUG] Unexpected error in ensureUserExists:', err);
     }
 }
 

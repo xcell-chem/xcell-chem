@@ -32,17 +32,15 @@
             document.getElementById('myAccountButton').onclick = () => requireLogin(() => location.href = '/myaccount.html');
         });
 
-        /**
-         * Open the OAuth popup for logging in with Google.
-         */
-         async function openLoginPopup() {
-    console.log('[DEBUG] Attempting to open login popup for Google OAuth...');
+       
+document.getElementById('loginButton').addEventListener('click', async () => {
+    console.log('[DEBUG] Opening login popup for Google OAuth...');
     try {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { 
                 redirectTo: window.location.origin,
-                skipBrowserRedirect: false // ✅ Forces proper OAuth flow
+                skipBrowserRedirect: false 
             }
         });
 
@@ -55,7 +53,7 @@
     } catch (err) {
         console.error('[DEBUG] Unexpected error during OAuth login:', err);
     }
-}
+});
 
 
         /**
