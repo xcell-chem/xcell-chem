@@ -26,4 +26,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 
         // ✅ Remove query params from URL to prevent infinite loops
         const newUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document
+        window.history.replaceState({}, document.title, newUrl);
+    }
+})();
