@@ -1,5 +1,5 @@
 // auth.js
-import { supabase } from './supabaseClient.js'; // Import the centralized client
+import { supabaseClient } from './supabaseClient.js'; // Import the centralized client
 
 async function loadProducts() {
     try {

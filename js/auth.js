@@ -40,7 +40,7 @@ export async function checkLoginStatus() {
 /**
  * Redirect to login page only if necessary.
  */
-export async function requireLogin() {
+export async function requireLogin(callback) {
     const isLoggedIn = await checkLoginStatus();
     
     if (!isLoggedIn) {
@@ -50,5 +50,52 @@ export async function requireLogin() {
         if (window.location.pathname !== '/' && !window.location.search.includes('error')) {
             window.location.href = '/';
         }
+    } else if (typeof callback === 'function') {
+        callback();
+    }
+}
+
+/**
+ * Open the OAuth popup for logging in with Google.
+ */
+export async function openLoginPopup() {
+    console.log('[DEBUG] Attempting to open login popup for Google OAuth...');
+    try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { 
+                redirectTo: window.location.origin,
+                skipBrowserRedirect: false // ✅ Forces proper OAuth flow
+            }
+        });
+
+        if (error) {
+            console.error('[DEBUG] OAuth login error:', error);
+            alert('Login failed. Please try again.');
+        } else {
+            console.log('[DEBUG] OAuth login initiated successfully.');
+        }
+    } catch (err) {
+        console.error('[DEBUG] Unexpected error during OAuth login:', err);
+    }
+}
+
+/**
+ * Log out the current user.
+ */
+export async function logout() {
+    console.log('[DEBUG] Logging out the user...');
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error('[DEBUG] Logout error:', error);
+            alert('Failed to log out. Please try again.');
+        } else {
+            console.log('[DEBUG] User logged out successfully.');
+            alert('Logged out successfully!');
+            location.reload();
+        }
+    } catch (err) {
+        console.error('[DEBUG] Unexpected error during logout:', err);
     }
 }
