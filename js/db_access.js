@@ -1,10 +1,10 @@
-// auth.js
-import { supabaseClient } from './supabaseClient.js'; // Import the centralized client
+// db_access.js
+import { supabase } from './supabaseClient.js'; // ✅ Ensure consistent import name
 
 async function loadProducts() {
     try {
         console.log('[loadProducts] Fetching products...');
-        const { data, error } = await supabaseClient
+        const { data, error } = await supabase
             .from('products')
             .select(`
                 *,
@@ -22,13 +22,14 @@ async function loadProducts() {
         return [];
     }
 }
+
 /**
  * Load all categories from the database
  */
 async function loadCategories() {
     try {
         console.log('[loadCategories] Fetching categories...');
-        const { data: categories, error } = await supabaseClient.from('categories').select('*');
+        const { data: categories, error } = await supabase.from('categories').select('*');
         if (error) throw error;
 
         console.log('[loadCategories] Categories fetched:', categories);
@@ -43,7 +44,6 @@ async function loadCategories() {
 // Export or expose globally if needed
 window.loadCategories = loadCategories;
 
-
 /**
  * Remove a category from a product
  * @param {number} productId - Product ID
@@ -51,7 +51,7 @@ window.loadCategories = loadCategories;
  */
 async function removeCategoryFromProduct(productId, categoryId) {
     try {
-        const { error } = await supabaseClient
+        const { error } = await supabase
             .from('product_category')
             .delete()
             .eq('product_id', productId)

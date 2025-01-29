@@ -7,14 +7,15 @@ import { supabase } from './supabaseClient.js';
 export async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');
     try {
-        let { data: session, error } = await supabase.auth.getSession();
+        let { data, error } = await supabase.auth.getSession();
+        const session = data?.session;
 
         if (error) {
             console.warn('[DEBUG] Error fetching session:', error.message);
             return false;
         }
 
-        if (!session || !session.session || !session.session.user) {
+        if (!session || !session.user) {
             console.warn('[DEBUG] No active user session. Trying stored session...');
             
             // ✅ Try restoring session manually
@@ -64,8 +65,8 @@ export async function openLoginPopup() {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { 
-                redirectTo: window.location.origin,
-                skipBrowserRedirect: false // ✅ Forces proper OAuth flow
+                redirectTo: window.location.origin,  // ✅ Ensure this matches your Supabase settings
+                skipBrowserRedirect: false
             }
         });
 
