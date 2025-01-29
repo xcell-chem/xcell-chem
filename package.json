@@ -1,0 +1,25 @@
+{
+  "name": "xcell-chem",
+  "version": "1.0.0",
+  "description": "xcellecom",
+  "main": "myaccount.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xcell-chem/xcell-chem.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xcell-chem/xcell-chem/issues"
+  },
+  "homepage": "https://github.com/xcell-chem/xcell-chem#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
+    "express": "^4.21.2"
+  }
+}

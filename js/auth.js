@@ -13,7 +13,7 @@ export async function ensureUserExists(user) {
             .eq('auth_user_id', user.id)
             .single();
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 means no record found
+        if (error && error.code !== 'PGRST116') {
             console.error('[DEBUG] Error checking user existence:', error);
             return;
         }
