@@ -1,43 +1,41 @@
 
 import { supabase } from './supabaseClient.js';
 
-// Check login status
-async function checkLoginStatus() {
-    console.log('[DEBUG] Starting login status check...');
-    const loginButton = document.getElementById('loginButton');
+/**
+ * Checks if the user is logged in and updates UI accordingly.
+ * @returns {Promise<boolean>} Returns true if logged in, false otherwise.
+ */
+export async function checkLoginStatus() {
+    console.log('[DEBUG] Checking login status...');
 
     try {
-        // Helper to update the login button UI
-        const updateLoginButton = (text, action) => {
-            loginButton.textContent = text;
-            loginButton.onclick = action;
-        };
+        // Get the currently logged-in user
+        const { data: { user }, error } = await supabase.auth.getUser();
 
-        // Fetch the current session
-        let { data: session, error } = await supabase.auth.getSession();
-
-        if (error || !session || !session.user) {
-            console.log('[DEBUG] No session or user detected. Attempting session refresh...');
-            const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession();
-            if (refreshError || !refreshedSession) {
-                console.log('[DEBUG] Session refresh failed or no user detected.');
-                updateLoginButton("Login", openLoginPopup);
-                return false;
-            }
-            session = refreshedSession;
+        if (error || !user) {
+            console.warn('[DEBUG] No active session found.');
+            return false;
         }
 
-        console.log('[DEBUG] User session found:', session.user);
-
-        // Set login flag and update UI
-        window.isLoggedIn = true;
-        updateLoginButton("Logout", logout);
+        console.log('[DEBUG] User is logged in:', user);
         return true;
     } catch (err) {
         console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
         return false;
     }
 }
+
+/**
+ * Redirects to login page if the user is not logged in.
+ */
+export async function requireLogin() {
+    const isLoggedIn = await checkLoginStatus();
+    if (!isLoggedIn) {
+        alert('You must log in to access this page.');
+        window.location.href = '/';
+    }
+}
+
 
 
 // Refresh session if needed
