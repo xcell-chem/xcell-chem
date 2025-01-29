@@ -1,11 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Createshop</title>
+    <title>Create Shop</title>
     <link rel="stylesheet" href="css/main.css">
+    <script type="module" src="js/supabaseClient.js"></script>
     <script type="module" src="js/createshop.js"></script>
 </head>
 <body>
@@ -19,36 +19,15 @@
     </nav>
 
     <div class="content">
-        <h1 class="content-title">Createshop</h1>
+        <h1 class="content-title">Create Shop</h1>
         <div class="container">
-            
-    <div class="form-container">
-        <form id="create-shop-form">
-            <label for="shopName">Shop Name:</label>
-            <input type="text" id="shopName" placeholder="Enter your shop name" required>
-            <button type="submit">Create Shop</button>
-        </form>
-    </div>
-    <script>
-        document.getElementById('create-shop-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const shopName = document.getElementById('shopName').value;
-            const { data: session } = await supabase.auth.getSession();
-            if (!session) {
-                alert('Please log in first.');
-                return;
-            }
-            const userId = session.user.id;
-            const { error } = await supabase.from('shops').insert({ name: shopName, owner_id: userId });
-            if (error) {
-                alert('Error creating shop: ' + error.message);
-            } else {
-                alert('Shop created successfully!');
-                window.location.href = '/myshops.html';
-            }
-        });
-    </script>
-    
+            <div class="form-container">
+                <form id="create-shop-form">
+                    <label for="shopName">Shop Name:</label>
+                    <input type="text" id="shopName" placeholder="Enter your shop name" required>
+                    <button type="submit">Create Shop</button>
+                </form>
+            </div>
         </div>
     </div>
 

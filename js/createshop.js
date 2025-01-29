@@ -1,27 +1,53 @@
-// createshop.js
-async function createShop() {
-    const shopName = document.getElementById('shopName').value;
+import { supabase } from './supabaseClient.js';
 
-    const { data: session, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !session) {
-        alert('You need to log in first!');
-        return;
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('create-shop-form');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const shopNameInput = document.getElementById('shopName');
+        const shopName = shopNameInput.value.trim();
+        const submitButton = form.querySelector('button');
 
-    const user = session.user;
+        // Validate shop name
+        if (!shopName) {
+            alert('Shop name cannot be empty.');
+            return;
+        }
 
-    const { data: shop, error: shopError } = await supabase
-        .from('shops')
-        .insert({
-            name: shopName,
-            owner_id: user.id, // Use the user's ID as the shop owner
-        });
+        // Disable button while processing
+        submitButton.disabled = true;
+        submitButton.textContent = 'Creating...';
 
-    if (shopError) {
-        console.error('[DEBUG] Error creating shop:', shopError);
-        alert('Failed to create shop. Please try again.');
-    } else {
-        alert('Shop created successfully!');
-        window.location.href = '/myshops.html'; // Redirect to My Shops
-    }
-}
+        try {
+            // Check if user is logged in
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            if (userError || !user) {
+                alert('You need to log in first!');
+                window.location.href = '/';
+                return;
+            }
+
+            // Insert shop into database
+            const { error: shopError } = await supabase
+                .from('shops')
+                .insert({ name: shopName, owner_id: user.id });
+
+            if (shopError) {
+                console.error('[DEBUG] Error creating shop:', shopError);
+                alert('Failed to create shop. Please try again.');
+            } else {
+                alert('Shop created successfully!');
+                window.location.href = '/myshops.html';
+            }
+        } catch (error) {
+            console.error('[DEBUG] Unexpected error:', error);
+            alert('An unexpected error occurred.');
+        } finally {
+            // Re-enable button
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create Shop';
+        }
+    });
+});

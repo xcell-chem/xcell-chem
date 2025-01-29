@@ -1,11 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My shops</title>
+    <title>My Shops</title>
     <link rel="stylesheet" href="css/main.css">
+    <script type="module" src="js/supabaseClient.js"></script>
     <script type="module" src="js/myshops.js"></script>
 </head>
 <body>
@@ -19,35 +19,11 @@
     </nav>
 
     <div class="content">
-        <h1 class="content-title">My shops</h1>
+        <h1 class="content-title">My Shops</h1>
         <div class="container">
-            
-    <div id="shopList">
-        <!-- User's shops will be dynamically loaded here -->
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const { data: session } = await supabase.auth.getSession();
-            if (!session) {
-                alert('Please log in to view your shops.');
-                window.location.href = '/';
-                return;
-            }
-            const { data: shops, error } = await supabase.from('shops').select('*').eq('owner_id', session.user.id);
-            if (error) {
-                alert('Error loading shops: ' + error.message);
-                return;
-            }
-            const shopList = document.getElementById('shopList');
-            shopList.innerHTML = shops.map(shop => `
-                <div class="shop">
-                    <h3>${shop.name}</h3>
-                    <p>Created on: ${new Date(shop.created_at).toLocaleDateString()}</p>
-                </div>
-            `).join('');
-        });
-    </script>
-    
+            <ul id="shopList">
+                <!-- User's shops will be dynamically loaded here -->
+            </ul>
         </div>
     </div>
 
