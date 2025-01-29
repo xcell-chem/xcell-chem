@@ -62,7 +62,7 @@ export async function openLoginPopup() {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { 
-                redirectTo: window.location.origin,  // ✅ Ensure this matches your Supabase settings
+                redirectTo: window.location.origin,
                 skipBrowserRedirect: false
             }
         });
@@ -77,6 +77,10 @@ export async function openLoginPopup() {
         console.error('[DEBUG] Unexpected error during OAuth login:', err);
     }
 }
+
+// ✅ Attach to `window` to make it available globally
+window.openLoginPopup = openLoginPopup;
+
 
 export async function ensureUserExists(user) {
     console.log('[DEBUG] Checking if user exists in public.users...');
