@@ -5,7 +5,7 @@ import { supabase } from './supabaseClient.js';
  * Checks if the user is logged in and updates UI accordingly.
  * @returns {Promise<boolean>} Returns true if logged in, false otherwise.
  */
-export async function checkLoginStatus() {
+ async function checkLoginStatus() {
     console.log('[DEBUG] Checking login status...');
 
     try {
@@ -28,7 +28,7 @@ export async function checkLoginStatus() {
 /**
  * Redirects to login page if the user is not logged in.
  */
-export async function requireLogin() {
+async function requireLogin() {
     const isLoggedIn = await checkLoginStatus();
     if (!isLoggedIn) {
         alert('You must log in to access this page.');
@@ -122,4 +122,4 @@ async function logout() {
     }
 }
 
-export { checkLoginStatus, openLoginPopup, logout };
+export { checkLoginStatus, openLoginPopup, logout,requireLogin };
