@@ -17,6 +17,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     const urlParams = new URLSearchParams(window.location.search);
 
     if (urlParams.has('code')) {
+        console.log('[DEBUG] Processing OAuth login...');
         const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
         if (error) {
             console.error('[DEBUG] Error exchanging OAuth code:', error);
@@ -24,8 +25,16 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
             console.log('[DEBUG] OAuth session exchanged successfully.');
         }
 
-        // ✅ Remove query params from URL to prevent infinite loops
+        // ✅ Remove query params from URL to prevent login loops
         const newUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
+    }
+
+    // ✅ Fetch the latest session after OAuth processing
+    const { data: session, error } = await supabase.auth.getSession();
+    if (error || !session) {
+        console.warn('[DEBUG] No active session found after OAuth check.');
+    } else {
+        console.log('[DEBUG] Active session found:', session);
     }
 })();
