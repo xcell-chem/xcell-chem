@@ -17,7 +17,7 @@ export async function requireLogin(callback) {
  * @param {Object} user - The logged-in user object.
  */
 export async function ensureUserExists(user) {
-    console.log('[DEBUG] Checking if user exists in public.users...');
+    console.log('[DEBUG] Ensuring user exists...');
     try {
         const { data, error } = await supabase
             .from('users')
@@ -26,25 +26,27 @@ export async function ensureUserExists(user) {
             .single();
 
         if (error && error.code !== 'PGRST116') {
-            console.error('[DEBUG] Error checking user existence:', error);
+            console.error('[DEBUG] User check error:', error);
             return;
         }
 
         if (!data) {
-            console.log('[DEBUG] User not found in public.users, inserting...');
-            const { error: insertError } = await supabase.from('users').insert({
-                auth_user_id: user.id,
-                name: user.user_metadata?.full_name || 'New User',
-                email: user.email
-            });
+            console.log('[DEBUG] User not found, inserting...');
+            const { error: insertError } = await supabase.from('users').upsert([
+                {
+                    auth_user_id: user.id,
+                    name: user.user_metadata?.full_name || 'New User',
+                    email: user.email
+                }
+            ], { onConflict: ['auth_user_id'] });
 
             if (insertError) {
-                console.error('[DEBUG] Error inserting user into public.users:', insertError);
+                console.error('[DEBUG] Error inserting user:', insertError);
             } else {
-                console.log('[DEBUG] User inserted successfully into public.users');
+                console.log('[DEBUG] User inserted successfully.');
             }
         } else {
-            console.log('[DEBUG] User already exists in public.users');
+            console.log('[DEBUG] User already exists.');
         }
     } catch (err) {
         console.error('[DEBUG] Unexpected error in ensureUserExists:', err);
@@ -55,6 +57,34 @@ export async function ensureUserExists(user) {
  * Check if the user is logged in and restore session if needed.
  */
 export async function checkLoginStatus() {
+    console.log('[DEBUG] Checking login status...');
+    try {
+        let { data, error } = await supabase.auth.getSession();
+
+        if (error || !data.session) {
+            console.warn('[DEBUG] No active session found. Trying to refresh...');
+            const { data: refreshedData, error: refreshError } = await supabase.auth.refreshSession();
+            
+            if (refreshError) {
+                console.error('[DEBUG] Session refresh failed:', refreshError);
+                return false;
+            }
+
+            data = refreshedData;
+        }
+
+        if (data.session && data.session.user) {
+            console.log('[DEBUG] User is logged in:', data.session.user);
+            return true;
+        }
+
+        console.warn('[DEBUG] Still no valid session.');
+        return false;
+    } catch (err) {
+        console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
+        return false;
+    }
+}
     console.log('[DEBUG] Checking login status...');
     try {
         let { data, error } = await supabase.auth.getSession();
@@ -90,7 +120,7 @@ export async function checkLoginStatus() {
         console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
         return false;
     }
-}
+
 
 /**
  * Listen for authentication state changes and store session in localStorage.
