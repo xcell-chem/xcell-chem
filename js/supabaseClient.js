@@ -5,13 +5,13 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
-        persistSession: true,  // ✅ Ensures session is stored across reloads
+        persistSession: true,  // ✅ Ensures session persists
         autoRefreshToken: true, // ✅ Automatically refresh expired sessions
         detectSessionInUrl: true, // ✅ Handles OAuth redirects properly
     },
 });
 
-// Ensure OAuth login is processed correctly
+// ✅ Handle OAuth redirects properly
 (async () => {
     console.log('[DEBUG] Checking for OAuth session...');
     const urlParams = new URLSearchParams(window.location.search);
@@ -24,8 +24,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
             console.log('[DEBUG] OAuth session exchanged successfully.');
         }
 
-        // Remove query params from URL
+        // ✅ Remove query params from URL to prevent infinite loops
         const newUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-    }
-})();
+        window.history.replaceState({}, document

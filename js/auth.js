@@ -1,30 +1,22 @@
 import { supabase } from './supabaseClient.js';
 
 /**
- * Check if the user is logged in and refresh session if needed.
+ * Check if the user is logged in without infinite refresh attempts.
  * @returns {Promise<boolean>} Returns true if logged in, false otherwise.
  */
 export async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');
     try {
-        let { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { user }, error } = await supabase.auth.getUser();
 
-        if (error || !user) {
-            console.warn('[DEBUG] No active session found. Attempting session refresh...');
-            
-            // Try to refresh the session
-            const { error: refreshError } = await supabase.auth.refreshSession();
-            if (refreshError) {
-                console.error('[DEBUG] Session refresh failed:', refreshError);
-                return false;
-            }
+        if (error) {
+            console.warn('[DEBUG] Error fetching session:', error.message);
+            return false;
+        }
 
-            // Try getting the user again
-            ({ data: { user }, error } = await supabase.auth.getUser());
-            if (error || !user) {
-                console.warn('[DEBUG] No user detected after refresh.');
-                return false;
-            }
+        if (!user) {
+            console.warn('[DEBUG] No active user session.');
+            return false;
         }
 
         console.log('[DEBUG] User is logged in:', user);
@@ -36,15 +28,16 @@ export async function checkLoginStatus() {
 }
 
 /**
- * Ensure user is logged in before accessing the page.
+ * Redirect to login page only if necessary.
  */
 export async function requireLogin() {
     const isLoggedIn = await checkLoginStatus();
+    
     if (!isLoggedIn) {
         console.warn('[DEBUG] User is not logged in. Redirecting...');
-        
-        // Prevent infinite redirect loops
-        if (window.location.pathname !== '/') {
+
+        // ✅ Prevent infinite redirect loops
+        if (window.location.pathname !== '/' && !window.location.search.includes('error')) {
             window.location.href = '/';
         }
     }
