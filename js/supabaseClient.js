@@ -11,8 +11,21 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     },
 });
 
-// Ensure OAuth redirect processing
+// Ensure OAuth login is processed correctly
 (async () => {
     console.log('[DEBUG] Checking for OAuth session...');
-    await supabase.auth.getSessionFromUrl({ storeSession: true });
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.has('code')) {
+        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        if (error) {
+            console.error('[DEBUG] Error exchanging OAuth code:', error);
+        } else {
+            console.log('[DEBUG] OAuth session exchanged successfully.');
+        }
+
+        // Remove query params from URL
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }
 })();

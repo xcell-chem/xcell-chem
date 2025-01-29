@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome Page</title>
     <link rel="stylesheet" href="css/main.css">
+    <script type="module">
+        import { requireLogin } from './js/auth.js';
+    
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('[DEBUG] Document loaded. Checking login status...');
+            await requireLogin();
+        });
+    </script>
+    
     
     <script type="module">
         import { supabase } from './js/supabaseClient.js';
@@ -82,20 +91,7 @@
             }
         }
 
-        /**
-         * Require login before performing an action.
-         * @param {Function} action - The action to execute after login.
-         */
-        function requireLogin(action) {
-            if (!isLoggedIn) {
-                console.log('[DEBUG] User not logged in. Prompting for login...');
-                alert('You must log in first!');
-                openLoginPopup();
-            } else {
-                console.log('[DEBUG] User is logged in. Proceeding with action...');
-                action();
-            }
-        }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             console.log('[DEBUG] Document loaded. Initializing...');

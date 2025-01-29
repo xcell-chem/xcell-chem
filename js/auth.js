@@ -13,8 +13,8 @@ export async function checkLoginStatus() {
             console.warn('[DEBUG] No active session found. Attempting session refresh...');
             
             // Try to refresh the session
-            const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession();
-            if (refreshError || !refreshedSession) {
+            const { error: refreshError } = await supabase.auth.refreshSession();
+            if (refreshError) {
                 console.error('[DEBUG] Session refresh failed:', refreshError);
                 return false;
             }
