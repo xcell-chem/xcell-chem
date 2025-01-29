@@ -5,7 +5,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
-        persistSession: true,  // ✅ Ensures session is stored
+        persistSession: true,  // ✅ Ensures session is stored in localStorage
         autoRefreshToken: true, // ✅ Enables automatic token refresh
         detectSessionInUrl: true, // ✅ Handles OAuth redirects properly
     },

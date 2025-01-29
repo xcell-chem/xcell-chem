@@ -35,27 +35,28 @@
         /**
          * Open the OAuth popup for logging in with Google.
          */
-        async function openLoginPopup() {
-            console.log('[DEBUG] Attempting to open login popup for Google OAuth...');
-            try {
-                const { error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: { 
-                        redirectTo: window.location.origin,
-                        skipBrowserRedirect: true // ✅ Forces a popup instead of a redirect
-                    }
-                });
-
-                if (error) {
-                    console.error('[DEBUG] OAuth login error:', error);
-                    alert('Login failed. Please try again.');
-                } else {
-                    console.log('[DEBUG] OAuth login initiated successfully.');
-                }
-            } catch (err) {
-                console.error('[DEBUG] Unexpected error during OAuth login:', err);
+         async function openLoginPopup() {
+    console.log('[DEBUG] Attempting to open login popup for Google OAuth...');
+    try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { 
+                redirectTo: window.location.origin,
+                skipBrowserRedirect: false // ✅ Forces proper OAuth flow
             }
+        });
+
+        if (error) {
+            console.error('[DEBUG] OAuth login error:', error);
+            alert('Login failed. Please try again.');
+        } else {
+            console.log('[DEBUG] OAuth login initiated successfully.');
         }
+    } catch (err) {
+        console.error('[DEBUG] Unexpected error during OAuth login:', err);
+    }
+}
+
 
         /**
          * Log out the current user.
