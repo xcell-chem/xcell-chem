@@ -13,7 +13,7 @@ export async function ensureUserExists(user) {
             .eq('auth_user_id', user.id)
             .single();
 
-        if (error && error.code !== 'PGRST116') {
+        if (error && error.code !== 'PGRST116') { // PGRST116 means no record found
             console.error('[DEBUG] Error checking user existence:', error);
             return;
         }
@@ -38,18 +38,7 @@ export async function ensureUserExists(user) {
         console.error('[DEBUG] Unexpected error in ensureUserExists:', err);
     }
 }
-export async function requireLogin(callback) {
-    const isLoggedIn = await checkLoginStatus();
-    
-    if (!isLoggedIn) {
-        console.warn('[DEBUG] User is not logged in. Redirecting...');
-        if (window.location.pathname !== '/' && !window.location.search.includes('error')) {
-            window.location.href = '/';
-        }
-    } else if (typeof callback === 'function') {
-        callback();
-    }
-}
+
 /**
  * Check if the user is logged in and sync with public.users.
  */
