@@ -1,107 +1,63 @@
+import { supabase } from './supabaseClient.js';
 
-    // Updated user_interactions.js with correct save logic and image upload functionality
-
-    // Function to handle image selection and upload
-    let selectedImageFile = null; // To store the selected image file
-
-    document.getElementById('changeImageButton')?.addEventListener('click', () => {
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.onchange = (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                selectedImageFile = file;
-                alert(`Selected image: ${file.name}`);
-            }
-        };
-        fileInput.click();
-    });
-
-    // Function to save changes (update record, upload image, or insert new record)
-    async function saveChanges() {
-        try {
-            const data = prepareDataForSave(); // Prepare the data to be saved
-
-            if (selectedImageFile) {
-                const imageUrl = await uploadImageToSupabase(selectedImageFile);
-                data.image_url = imageUrl; // Add the image URL to the record data
-            }
-
-            if (data.id) {
-                // Update existing record
-                const response = await fetch('/update-record', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    alert('Record updated successfully!');
-                } else {
-                    alert(`Failed to update record: ${result.message}`);
-                }
-            } else {
-                // Insert new record
-                const response = await fetch('/add-record', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    alert('New record added successfully!');
-                } else {
-                    alert(`Failed to add record: ${result.message}`);
-                }
-            }
-        } catch (error) {
-            console.error('Error saving changes:', error);
-            alert('An error occurred while saving changes. Please check the console.');
-        }
+/**
+ * Upload an image to Supabase Storage
+ * @param {File} imageFile - The image file to upload
+ * @returns {Promise<string|null>} - The URL of the uploaded image or null if failed
+ */
+export async function uploadImageToSupabase(imageFile) {
+    if (!imageFile) {
+        console.warn('[DEBUG] No image file selected, skipping upload.');
+        return null;
     }
 
-    // Function to prepare data for saving
-    function prepareDataForSave() {
-        const id = document.getElementById('recordId')?.value; // Example of capturing a unique ID
-        const name = document.getElementById('recordName')?.value;
-        const description = document.getElementById('recordDescription')?.value;
-
-        // Add more fields as necessary based on your form
-
-        return {
-            id: id ? parseInt(id, 10) : null, // Convert to integer if present
-            name,
-            description,
-            // Add additional fields here
-        };
-    }
-// auth.js
-import { supabase } from './supabaseClient.js'; // Import the centralized client
-
-    // Function to upload an image to Supabase Storage
-    async function uploadImageToSupabase(file) {
-      
-
+    try {
+        console.log('[DEBUG] Uploading image to Supabase...');
         const { data, error } = await supabase.storage
-            .from('images') // Replace with your Supabase storage bucket name
-            .upload(`public/${Date.now()}_${file.name}`, file, {
-                cacheControl: '3600',
-                upsert: true,
-            });
+            .from('images')
+            .upload(`public/${Date.now()}-${imageFile.name}`, imageFile);
 
         if (error) {
-            console.error('Error uploading image:', error);
-            throw new Error('Image upload failed.');
+            console.error('[DEBUG] Image upload error:', error);
+            return null;
         }
 
-        const { publicUrl } = supabase.storage.from('images').getPublicUrl(data.path);
-        return publicUrl;
+        console.log('[DEBUG] Image uploaded successfully:', data.path);
+        return supabase.storage.from('images').getPublicUrl(data.path).publicUrl;
+    } catch (err) {
+        console.error('[DEBUG] Unexpected error during image upload:', err);
+        return null;
     }
-    
+}
+
+/**
+ * Save changes to the database.
+ */
+async function saveChanges() {
+    try {
+        const data = prepareDataForSave();
+
+        if (selectedImageFile) {
+            console.log('[DEBUG] Uploading image to Supabase...');
+            data.image_url = await uploadImageToSupabase(selectedImageFile);
+        } else {
+            console.log('[DEBUG] No image selected, skipping upload.');
+        }
+
+        const response = await fetch(data.id ? '/update-record' : '/add-record', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert(data.id ? 'Record updated successfully!' : 'New record added successfully!');
+        } else {
+            alert(`Error: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Error saving changes:', error);
+        alert('An error occurred while saving. Check the console.');
+    }
+}

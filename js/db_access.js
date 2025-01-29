@@ -1,9 +1,11 @@
-// db_access.js
-import { supabase } from './supabaseClient.js'; // ✅ Ensure consistent import name
+import { supabase } from './supabaseClient.js';
 
-async function loadProducts() {
+/**
+ * Load all products from the database.
+ */
+export async function loadProducts() {
     try {
-        console.log('[loadProducts] Fetching products...');
+        console.log('[DEBUG] Fetching products...');
         const { data, error } = await supabase
             .from('products')
             .select(`
@@ -14,7 +16,7 @@ async function loadProducts() {
 
         if (error) throw error;
 
-        console.log('[loadProducts] Products fetched:', data);
+        console.log('[DEBUG] Products fetched:', data);
         return data;
     } catch (error) {
         console.error('[Error] Failed to load products:', error);
@@ -24,15 +26,15 @@ async function loadProducts() {
 }
 
 /**
- * Load all categories from the database
+ * Load all categories from the database.
  */
-async function loadCategories() {
+export async function loadCategories() {
     try {
-        console.log('[loadCategories] Fetching categories...');
+        console.log('[DEBUG] Fetching categories...');
         const { data: categories, error } = await supabase.from('categories').select('*');
         if (error) throw error;
 
-        console.log('[loadCategories] Categories fetched:', categories);
+        console.log('[DEBUG] Categories fetched:', categories);
         return categories;
     } catch (error) {
         console.error('[Error] Failed to load categories:', error);
@@ -41,15 +43,12 @@ async function loadCategories() {
     }
 }
 
-// Export or expose globally if needed
-window.loadCategories = loadCategories;
-
 /**
- * Remove a category from a product
+ * Remove a category from a product.
  * @param {number} productId - Product ID
  * @param {number} categoryId - Category ID
  */
-async function removeCategoryFromProduct(productId, categoryId) {
+export async function removeCategoryFromProduct(productId, categoryId) {
     try {
         const { error } = await supabase
             .from('product_category')

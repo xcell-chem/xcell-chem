@@ -9,7 +9,6 @@
 
     <script type="module">
         import { requireLogin, checkLoginStatus } from './js/auth.js';
-        import { supabase } from './js/supabaseClient.js';
 
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('[DEBUG] Document loaded. Checking login status...');
@@ -27,55 +26,10 @@
                 loginButton.onclick = openLoginPopup;
             }
 
-            // Attach click events to buttons
             document.getElementById('createShopButton').onclick = () => requireLogin(() => location.href = '/createshop.html');
             document.getElementById('myShopsButton').onclick = () => requireLogin(() => location.href = '/myshops.html');
             document.getElementById('myAccountButton').onclick = () => requireLogin(() => location.href = '/myaccount.html');
         });
-
-       
-document.getElementById('loginButton').addEventListener('click', async () => {
-    console.log('[DEBUG] Opening login popup for Google OAuth...');
-    try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { 
-                redirectTo: window.location.origin,
-                skipBrowserRedirect: false 
-            }
-        });
-
-        if (error) {
-            console.error('[DEBUG] OAuth login error:', error);
-            alert('Login failed. Please try again.');
-        } else {
-            console.log('[DEBUG] OAuth login initiated successfully.');
-        }
-    } catch (err) {
-        console.error('[DEBUG] Unexpected error during OAuth login:', err);
-    }
-});
-
-
-        /**
-         * Log out the current user.
-         */
-        async function logout() {
-            console.log('[DEBUG] Logging out the user...');
-            try {
-                const { error } = await supabase.auth.signOut();
-                if (error) {
-                    console.error('[DEBUG] Logout error:', error);
-                    alert('Failed to log out. Please try again.');
-                } else {
-                    console.log('[DEBUG] User logged out successfully.');
-                    alert('Logged out successfully!');
-                    location.reload();
-                }
-            } catch (err) {
-                console.error('[DEBUG] Unexpected error during logout:', err);
-            }
-        }
     </script>
 </head>
 <body>
