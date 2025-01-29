@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.textContent = 'Creating...';
 
         try {
-            // Get current user
+            // Get logged-in user
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             if (userError || !user) {
                 alert('You need to log in first!');
@@ -30,6 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             console.log('[DEBUG] User found:', user.id);
+
+            // Ensure user exists in the `users` table before inserting shop
+            const { data: existingUser, error: userCheckError } = await supabase
+                .from('users')
+                .select('id')
+                .eq('id', user.id)
+                .single();
+
+            if (userCheckError || !existingUser) {
+                alert('Your user account is not registered in the database. Please contact support.');
+                return;
+            }
 
             // Insert shop into database
             const { error: shopError } = await supabase
