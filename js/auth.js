@@ -34,3 +34,18 @@ export async function checkLoginStatus() {
         return false;
     }
 }
+
+/**
+ * Ensure user is logged in before accessing the page.
+ */
+export async function requireLogin() {
+    const isLoggedIn = await checkLoginStatus();
+    if (!isLoggedIn) {
+        console.warn('[DEBUG] User is not logged in. Redirecting...');
+        
+        // Prevent infinite redirect loops
+        if (window.location.pathname !== '/') {
+            window.location.href = '/';
+        }
+    }
+}

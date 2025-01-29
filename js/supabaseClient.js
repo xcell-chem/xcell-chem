@@ -10,3 +10,9 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
         detectSessionInUrl: true, // ✅ Handles OAuth redirects properly
     },
 });
+
+// Ensure OAuth redirect processing
+(async () => {
+    console.log('[DEBUG] Checking for OAuth session...');
+    await supabase.auth.getSessionFromUrl({ storeSession: true });
+})();
