@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,20 +16,21 @@
         async function checkLoginStatus() {
             console.log('[DEBUG] Starting login status check...');
             try {
-                const { data: session, error } = await supabase.auth.getSession();
+                const { data: { user }, error } = await supabase.auth.getUser();
+
                 const loginButton = document.getElementById('loginButton');
 
                 if (error) {
                     console.error('[DEBUG] Error fetching session:', error);
                 }
 
-                if (!session || !session.user) {
-                    console.log('[DEBUG] No session or user detected.');
+                if (!user) {
+                    console.log('[DEBUG] No user detected.');
                     isLoggedIn = false;
                     loginButton.textContent = "Login";
                     loginButton.onclick = openLoginPopup;
                 } else {
-                    console.log('[DEBUG] User session found:', session.user);
+                    console.log('[DEBUG] User session found:', user);
                     isLoggedIn = true;
                     loginButton.textContent = "Logout";
                     loginButton.onclick = logout;
