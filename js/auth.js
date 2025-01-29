@@ -7,7 +7,7 @@ import { supabase } from './supabaseClient.js';
 export async function checkLoginStatus() {
     console.log('[DEBUG] Starting login status check...');
     try {
-        const { data: session, error } = await supabase.auth.getSession();
+        let { data: session, error } = await supabase.auth.getSession();
 
         if (error) {
             console.warn('[DEBUG] Error fetching session:', error.message);
@@ -15,11 +15,21 @@ export async function checkLoginStatus() {
         }
 
         if (!session || !session.session || !session.session.user) {
-            console.warn('[DEBUG] No active user session.');
-            return false;
+            console.warn('[DEBUG] No active user session. Trying stored session...');
+            
+            // ✅ Try restoring session manually
+            const storedSession = localStorage.getItem('supabaseSession');
+            if (storedSession) {
+                session = JSON.parse(storedSession);
+                console.log('[DEBUG] Restored session from localStorage:', session);
+            }
+
+            if (!session || !session.user) {
+                return false;
+            }
         }
 
-        console.log('[DEBUG] User is logged in:', session.session.user);
+        console.log('[DEBUG] User is logged in:', session.user);
         return true;
     } catch (err) {
         console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);

@@ -5,24 +5,27 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
-        persistSession: true,  // ✅ Ensures session is stored in localStorage
+        persistSession: true,  // ✅ Ensures session is stored
         autoRefreshToken: true, // ✅ Enables automatic token refresh
         detectSessionInUrl: true, // ✅ Handles OAuth redirects properly
     },
 });
 
-// ✅ Handle OAuth session processing
+// ✅ Handle OAuth login processing
 (async () => {
     console.log('[DEBUG] Checking for OAuth session...');
     const urlParams = new URLSearchParams(window.location.search);
 
     if (urlParams.has('code')) {
         console.log('[DEBUG] Processing OAuth login...');
-        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
         if (error) {
             console.error('[DEBUG] Error exchanging OAuth code:', error);
         } else {
             console.log('[DEBUG] OAuth session exchanged successfully.');
+
+            // ✅ Store session explicitly
+            localStorage.setItem('supabaseSession', JSON.stringify(data.session));
         }
 
         // ✅ Remove query parameters to prevent login loops
