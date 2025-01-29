@@ -29,6 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Ensure the user exists in `users` table before inserting shop
+            const { data: existingUser, error: userCheckError } = await supabase
+                .from('users')
+                .select('id')
+                .eq('id', user.id)
+                .single();
+
+            if (userCheckError || !existingUser) {
+                alert('User does not exist in the database.');
+                return;
+            }
+
             // Insert shop into database
             const { error: shopError } = await supabase
                 .from('shops')
@@ -36,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (shopError) {
                 console.error('[DEBUG] Error creating shop:', shopError);
-                alert('Failed to create shop. Please try again.');
+                alert(`Failed to create shop: ${shopError.message}`);
             } else {
                 alert('Shop created successfully!');
                 window.location.href = '/myshops.html';
