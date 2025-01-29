@@ -15,13 +15,13 @@
 
     <script type="module">
         import { requireLogin, checkLoginStatus, logout, openLoginPopup } from './js/auth.js';
-
+    
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('[DEBUG] Document loaded. Checking login status...');
             
             const isLoggedIn = await checkLoginStatus();
             const loginButton = document.getElementById('loginButton');
-
+    
             if (isLoggedIn) {
                 console.log('[DEBUG] User is logged in.');
                 loginButton.textContent = "Logout";
@@ -31,12 +31,13 @@
                 loginButton.textContent = "Login";
                 loginButton.onclick = openLoginPopup;
             }
-
+    
             document.getElementById('createShopButton').onclick = () => requireLogin(() => location.href = '/createshop.html');
             document.getElementById('myShopsButton').onclick = () => requireLogin(() => location.href = '/myshops.html');
             document.getElementById('myAccountButton').onclick = () => requireLogin(() => location.href = '/myaccount.html');
         });
     </script>
+    
 </head>
 <body>
     <nav>

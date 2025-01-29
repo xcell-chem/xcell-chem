@@ -38,7 +38,18 @@ export async function ensureUserExists(user) {
         console.error('[DEBUG] Unexpected error in ensureUserExists:', err);
     }
 }
-
+export async function requireLogin(callback) {
+    const isLoggedIn = await checkLoginStatus();
+    
+    if (!isLoggedIn) {
+        console.warn('[DEBUG] User is not logged in. Redirecting...');
+        if (window.location.pathname !== '/' && !window.location.search.includes('error')) {
+            window.location.href = '/';
+        }
+    } else if (typeof callback === 'function') {
+        callback();
+    }
+}
 /**
  * Check if the user is logged in and sync with public.users.
  */

@@ -1,5 +1,13 @@
 import { requireLogin } from './auth.js';
 import { supabase } from './supabaseClient.js';
+import { requireLogin } from './auth.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    requireLogin(() => {
+        console.log("[DEBUG] User is logged in, loading account info...");
+        // Load user account info here
+    });
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
     await requireLogin(); // Ensure user is logged in
