@@ -17,5 +17,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 
 console.log("[DEBUG] Supabase initialized:", supabase);
 
-// ✅ Properly Export Supabase
+// ✅ Attach Supabase to `window` for debugging
+window.supabase = supabase;
+
 export { supabase };
