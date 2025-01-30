@@ -1,40 +1,90 @@
-<script type="module">
-    import { checkLoginStatus, openLoginPopup } from './js/auth.js';
-    import { supabase } from './js/supabaseClient.js';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Page</title>
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- ✅ Ensure scripts load in correct order -->
+    <script type="module" src="./js/supabaseClient.js"></script>
+    <script type="module" src="./js/auth.js"></script>
+    <script type="module" src="./js/user_interactions.js"></script>
+    <script type="module" src="./js/db_access.js"></script>
+    <script type="module" src="./js/popup.js"></script>
     
+    <script type="module">
+        import { requireLogin, checkLoginStatus, logout, openLoginPopup } from './js/auth.js';
+        import { supabase } from './js/supabaseClient.js';
+    
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('[DEBUG] 🚀 Document loaded. Checking login status...');
+            const loginButton = document.getElementById('loginButton');
+    
+            if (!window.supabase) {
+                console.error("[DEBUG] ❌ Supabase is undefined. Check script loading.");
+                return;
+            }
 
-    document.addEventListener('DOMContentLoaded', async () => {
-    console.log('[DEBUG] 🚀 Document loaded. Checking login status...');
+            // ✅ Check if localStorage contains a session
+            console.log("[DEBUG] 🔍 Checking localStorage before setting session:", localStorage.getItem("supabase.auth.token"));
 
-    if (!window.supabase) {
-        console.error("[DEBUG] ❌ Supabase is undefined. Check script loading.");
-        return;
-    }
+            // ✅ Force Supabase to use the stored session
+            const storedSession = localStorage.getItem("supabase.auth.token");
+            if (storedSession) {
+                console.log("[DEBUG] ✅ Found stored session. Forcing Supabase to use it...");
+                const parsedSession = JSON.parse(storedSession);
+                await supabase.auth.setSession(parsedSession);
+            }
 
-    // ✅ Check if localStorage contains a session
-    const storedSession = localStorage.getItem("supabase.auth.token");
-    console.log("[DEBUG] 🔍 Checking localStorage before setting session:", storedSession);
+            // ✅ Now check login status
+            const isLoggedIn = await checkLoginStatus();
+    
+            if (isLoggedIn) {
+                console.log('[DEBUG] ✅ User is logged in.');
+                loginButton.textContent = "Logout";
+                loginButton.onclick = async () => {
+                    await logout();
+                    loginButton.textContent = "Login";
+                    loginButton.onclick = openLoginPopup;
+                };
+            } else {
+                console.warn('[DEBUG] ❌ User is not logged in.');
+                loginButton.textContent = "Login";
+                loginButton.onclick = openLoginPopup;
+            }
+    
+            // ✅ Attach event listeners for buttons
+            document.getElementById('createShopButton').onclick = () => requireLogin(() => location.href = '/createshop.html');
+            document.getElementById('myShopsButton').onclick = () => requireLogin(() => location.href = '/myshops.html');
+            document.getElementById('myAccountButton').onclick = () => requireLogin(() => location.href = '/myaccount.html');
+        });
+    </script>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/uses">Uses</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/feedback">Contact</a></li>
+        </ul>
+    </nav>
 
-    if (storedSession) {
-        console.log("[DEBUG] ✅ Found stored session. Forcing Supabase to use it...");
-        const parsedSession = JSON.parse(storedSession);
-        await supabase.auth.setSession(parsedSession);
-    }
+    <div class="content">
+        <h1 class="content-title">Welcome to Let's See Bay</h1>
+        <div class="container">
+            <button id="loginButton" class="button">Checking...</button>
+            <div class="buttons">
+                <button id="createShopButton" class="button">Create Shop</button>
+                <button id="myShopsButton" class="button">My Shops</button>
+                <button id="myAccountButton" class="button">My Account</button>
+            </div>
+        </div>
+    </div>
 
-    // ✅ Now check login status
-    const isLoggedIn = await checkLoginStatus();
-    const loginButton = document.getElementById('loginButton');
-
-    if (isLoggedIn) {
-        console.log('[DEBUG] ✅ User is logged in.');
-        loginButton.textContent = "Logout";
-    } else {
-        console.warn('[DEBUG] ❌ User is not logged in.');
-        loginButton.textContent = "Login";
-        loginButton.onclick = openLoginPopup;
-    }
-});
-
-
-
-</script>
+    <footer>
+        <p class="footer">&copy; 2025 Let's See Bay. All rights reserved.</p>
+    </footer>
+</body>
+</html>
