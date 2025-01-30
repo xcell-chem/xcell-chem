@@ -1,10 +1,45 @@
-import { supabase } from "./supabaseClient.js";
-
 console.log("[DEBUG] Auth module loaded.");
 console.log("[DEBUG] Supabase instance in auth.js:", supabase);
+import { supabase } from "./supabaseClient.js";
+
+export async function signUpWithEmail(email, password, fullName) {
+    console.log("[DEBUG] Signing up user:", email);
+
+    // ✅ Step 1: Sign up user with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+    });
+
+    if (error) {
+        console.error("[DEBUG] Signup error:", error.message);
+        alert("Signup failed: " + error.message);
+        return;
+    }
+
+    console.log("[DEBUG] User signed up successfully:", data.user);
+
+    // ✅ Step 2: Ensure we use the correct `id`
+    const userId = data.user?.id;
+    if (!userId) {
+        console.error("[DEBUG] ❌ User ID is null! Cannot insert into public.users.");
+        return;
+    }
+
+    // ✅ Step 3: Insert user metadata into `public.users`
+    const { error: insertError } = await supabase
+        .from("users")
+        .insert([{ id: userId, full_name: fullName }]);
+
+    if (insertError) {
+        console.error("[DEBUG] Error inserting user metadata:", insertError.message);
+    } else {
+        console.log("[DEBUG] User metadata saved successfully.");
+    }
+}
 
 // ✅ Function to check login status
-async function checkLoginStatus() {
+export async function checkLoginStatus() {
     console.log("[DEBUG] Checking login status...");
     try {
         const { data, error } = await supabase.auth.getSession();
@@ -21,7 +56,7 @@ async function checkLoginStatus() {
 }
 
 // ✅ Function to open login popup
-async function openLoginPopup() {
+export async function openLoginPopup() {
     console.log("[DEBUG] Attempting to open login popup...");
     try {
         const { data, error } = await supabase.auth.signInWithOAuth({
@@ -44,7 +79,7 @@ async function openLoginPopup() {
 }
 
 // ✅ Function to ensure a user is logged in before executing an action
-function requireLogin(callback) {
+export function requireLogin(callback) {
     checkLoginStatus().then(isLoggedIn => {
         if (isLoggedIn) {
             callback();
@@ -56,7 +91,7 @@ function requireLogin(callback) {
 }
 
 // ✅ Function to log out user
-async function logout() {
+export async function logout() {
     console.log("[DEBUG] Logging out...");
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -67,7 +102,4 @@ async function logout() {
         window.location.reload();
     }
 }
-
-// ✅ Ensure all necessary functions are exported
-export { checkLoginStatus, openLoginPopup, logout, requireLogin };
 
