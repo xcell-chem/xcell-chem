@@ -19,5 +19,6 @@ console.log("[DEBUG] Supabase initialized:", supabase);
 
 // ✅ Attach Supabase to `window` for debugging
 window.supabase = supabase;
+console.log("[DEBUG] window.supabase is now set:", window.supabase);
 
 export { supabase };
