@@ -5,7 +5,7 @@ import { supabase } from "./supabaseClient.js";
 export async function signUpWithEmail(email, password, fullName) {
     console.log("[DEBUG] Signing up user:", email);
 
-    // ✅ Step 1: Sign up user with Supabase Auth
+    // ✅ Step 1: Sign up the user with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -19,7 +19,7 @@ export async function signUpWithEmail(email, password, fullName) {
 
     console.log("[DEBUG] User signed up successfully:", data.user);
 
-    // ✅ Step 2: Ensure we use the correct `id`
+    // ✅ Step 2: Ensure we use the correct `id` from `auth.users`
     const userId = data.user?.id;
     if (!userId) {
         console.error("[DEBUG] ❌ User ID is null! Cannot insert into public.users.");
@@ -37,6 +37,7 @@ export async function signUpWithEmail(email, password, fullName) {
         console.log("[DEBUG] User metadata saved successfully.");
     }
 }
+
 
 // ✅ Function to check login status
 export async function checkLoginStatus() {
