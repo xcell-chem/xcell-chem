@@ -4,7 +4,6 @@ import { supabase } from './supabaseClient.js';
 document.addEventListener('DOMContentLoaded', () => {
     requireLogin(() => {
         console.log("[DEBUG] User is logged in, loading shop info...");
-        // Load shop info here
     });
 });
 
@@ -16,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('[DEBUG] Failed to retrieve user:', error);
         return;
     }
-
 
     console.log('[DEBUG] Fetching shops for user:', user.id);
     try {
