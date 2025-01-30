@@ -3,8 +3,8 @@ import { supabase } from "./supabaseClient.js";
 console.log("[DEBUG] Auth module loaded.");
 console.log("[DEBUG] Supabase instance in auth.js:", supabase);
 
-// Function to check login status
-export async function checkLoginStatus() {
+// ✅ Function to check login status (ENSURE THIS IS ONLY DEFINED ONCE)
+async function checkLoginStatus() {
     console.log("[DEBUG] Checking login status...");
     try {
         let { data, error } = await supabase.auth.getSession();
@@ -34,8 +34,8 @@ export async function checkLoginStatus() {
     }
 }
 
-// ✅ Fix missing export issue
-export async function openLoginPopup() {
+// ✅ Function to open login popup
+async function openLoginPopup() {
     console.log("[DEBUG] Attempting to open login popup...");
     try {
         const { data, error } = await supabase.auth.signInWithOAuth({
@@ -53,4 +53,9 @@ export async function openLoginPopup() {
             console.log("[DEBUG] OAuth login initiated successfully.");
         }
     } catch (err) {
-   
+        console.error("[DEBUG] Unexpected error during OAuth login:", err);
+    }
+}
+
+// ✅ Ensure there is ONLY ONE export statement
+export { checkLoginStatus, openLoginPopup };

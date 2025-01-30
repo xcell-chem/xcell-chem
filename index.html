@@ -1,20 +1,37 @@
-import { createClient } from "@supabase/supabase-js";
+<script type="module">
+    import { checkLoginStatus, openLoginPopup } from './js/auth.js';
+    import { supabase } from './js/supabaseClient.js';
 
-console.log("[DEBUG] Initializing Supabase client...");
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('[DEBUG] Document fully loaded. Checking login status...');
+        const loginButton = document.getElementById('loginButton');
 
-const supabaseUrl = "https://tjbcucdewwczndkeypey.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ";
+        // ✅ Ensure Supabase is defined before calling it
+        if (!window.supabase) {
+            console.error("[DEBUG] Supabase is still undefined. Check script loading.");
+            return;
+        }
 
-// ✅ Ensure Supabase is only created once
-const supabase = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-        persistSession: true, // ✅ Ensures session persistence
-        storage: localStorage, // ✅ Forces localStorage usage
-        autoRefreshToken: true, // ✅ Enables auto-refresh
-        detectSessionInUrl: true, // ✅ Required for OAuth handling
-    }
-});
+        // ✅ Wait for Supabase session to be ready before checking login
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-// ✅ Export Supabase for module imports
-export { supabase };
-console.log("[DEBUG] Supabase initialized:", supabase);
+        // ✅ Refresh session only if Supabase is available
+        const session = await supabase.auth.getSession();
+        if (!session || !session.session) {
+            console.warn("[DEBUG] No active session found. Trying to refresh...");
+            await supabase.auth.refreshSession();
+        }
+
+        // ✅ Check if user is logged in
+        const isLoggedIn = await checkLoginStatus();
+
+        if (isLoggedIn) {
+            console.log('[DEBUG] User is logged in.');
+            loginButton.textContent = "Logout";
+        } else {
+            console.warn('[DEBUG] User is not logged in.');
+            loginButton.textContent = "Login";
+            loginButton.onclick = openLoginPopup;
+        }
+    });
+</script>

@@ -8,13 +8,14 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 // ✅ Ensure Supabase is only created once
 const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
-        persistSession: true, // ✅ Ensures session persistence
-        storage: localStorage, // ✅ Forces localStorage usage
-        autoRefreshToken: true, // ✅ Enables auto-refresh
-        detectSessionInUrl: true, // ✅ Required for OAuth handling
+        persistSession: true,
+        storage: localStorage,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
     }
 });
 
-// ✅ Export Supabase for module imports
-export { supabase };
 console.log("[DEBUG] Supabase initialized:", supabase);
+
+// ✅ Properly Export Supabase
+export { supabase };
