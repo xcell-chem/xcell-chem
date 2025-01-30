@@ -15,7 +15,8 @@
     const storedSession = localStorage.getItem("supabase.auth.token");
     if (storedSession) {
         console.log("[DEBUG] Found stored session. Forcing it into Supabase...");
-        await supabase.auth.setSession(JSON.parse(storedSession));
+        const parsedSession = JSON.parse(storedSession);
+        await supabase.auth.setSession(parsedSession);
     }
 
     // ✅ Now check login status
@@ -31,5 +32,6 @@
         loginButton.onclick = openLoginPopup;
     }
 });
+
 
 </script>

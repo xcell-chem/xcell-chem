@@ -24,14 +24,19 @@ async function checkLoginStatus() {
     }
 }
 
-supabase.auth.onAuthStateChange((event, session) => {
+supabase.auth.onAuthStateChange(async (event, session) => {
     console.log("[DEBUG] Auth state changed:", event, session);
+    
     if (session) {
+        console.log("[DEBUG] Storing session manually in localStorage.");
         localStorage.setItem("supabase.auth.token", JSON.stringify(session));
+        await supabase.auth.setSession(session);  // Force Supabase to recognize it
     } else {
+        console.warn("[DEBUG] Session is null. Removing from localStorage.");
         localStorage.removeItem("supabase.auth.token");
     }
 });
+
 
 
 // ✅ Function to open login popup
@@ -41,10 +46,11 @@ async function openLoginPopup() {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: { 
-                redirectTo: window.location.origin,
+                redirectTo: "https://shinyflake.co.uk",
                 skipBrowserRedirect: false
             }
         });
+        
 
         if (error) {
             console.error("[DEBUG] OAuth login error:", error);
