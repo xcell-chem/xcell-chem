@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  optimizeDeps: {
-    include: ['@supabase/supabase-js'],
-  },
   build: {
     rollupOptions: {
-      external: [],
-    },
+      external: [], // Ensure nothing is wrongly externalized
+    }
   },
+  optimizeDeps: {
+    include: ["@supabase/supabase-js"]
+  }
 });
