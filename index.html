@@ -4,17 +4,19 @@
     
 
     document.addEventListener('DOMContentLoaded', async () => {
-    console.log('[DEBUG] Document fully loaded. Checking login status...');
+    console.log('[DEBUG] 🚀 Document loaded. Checking login status...');
 
     if (!window.supabase) {
-        console.error("[DEBUG] Supabase is undefined. Check script loading.");
+        console.error("[DEBUG] ❌ Supabase is undefined. Check script loading.");
         return;
     }
 
-    // ✅ Force Supabase to use the stored session
+    // ✅ Check if localStorage contains a session
     const storedSession = localStorage.getItem("supabase.auth.token");
+    console.log("[DEBUG] 🔍 Checking localStorage before setting session:", storedSession);
+
     if (storedSession) {
-        console.log("[DEBUG] Found stored session. Forcing it into Supabase...");
+        console.log("[DEBUG] ✅ Found stored session. Forcing Supabase to use it...");
         const parsedSession = JSON.parse(storedSession);
         await supabase.auth.setSession(parsedSession);
     }
@@ -24,14 +26,15 @@
     const loginButton = document.getElementById('loginButton');
 
     if (isLoggedIn) {
-        console.log('[DEBUG] User is logged in.');
+        console.log('[DEBUG] ✅ User is logged in.');
         loginButton.textContent = "Logout";
     } else {
-        console.warn('[DEBUG] User is not logged in.');
+        console.warn('[DEBUG] ❌ User is not logged in.');
         loginButton.textContent = "Login";
         loginButton.onclick = openLoginPopup;
     }
 });
+
 
 
 </script>
