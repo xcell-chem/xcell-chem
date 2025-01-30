@@ -5,17 +5,17 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
-        persistSession: true,  // ✅ Ensures session persistence
-        storage: localStorage,  // ✅ Forces localStorage for session
-        autoRefreshToken: true, // ✅ Auto-refreshing tokens
-        detectSessionInUrl: true, // ✅ Ensures OAuth detection
+        persistSession: true, // ✅ Ensures session is saved across page reloads
+        storage: localStorage, // ✅ Forces storage to be localStorage
+        autoRefreshToken: true, // ✅ Ensures tokens refresh automatically
+        detectSessionInUrl: true, // ✅ Ensures OAuth login sessions persist
     }
 });
 
-// ✅ Attach Supabase to window for debugging
+// ✅ Attach Supabase to `window` for debugging in DevTools
 window.supabase = supabase;
 
-// ✅ Ensure session is restored on page load
+// ✅ Restore session immediately when the script loads
 async function restoreSession() {
     const { data, error } = await supabase.auth.getSession();
     if (data?.session) {

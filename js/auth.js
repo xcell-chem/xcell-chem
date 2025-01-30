@@ -62,7 +62,7 @@ export async function checkLoginStatus() {
     console.log('[DEBUG] Checking login status...');
 
     try {
-        // 🔍 First, check localStorage
+        // 🔍 First, try getting the session from localStorage
         const storedSession = JSON.parse(localStorage.getItem("supabaseSession"));
         if (storedSession && storedSession.user) {
             console.log("[DEBUG] Found stored session:", storedSession.user);
@@ -97,8 +97,6 @@ export async function checkLoginStatus() {
         return false;
     }
 }
-
-
 
 
 
