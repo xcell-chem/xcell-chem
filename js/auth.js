@@ -1,8 +1,8 @@
 console.log("[DEBUG] Auth module loaded.");
-console.log("[DEBUG] Supabase instance in auth.js:", supabase);
 import { supabase } from "./supabaseClient.js";
 
-export async function signUpWithEmail(email, password, fullName) {
+// ✅ Function to sign up a new user
+export async function signUpWithEmail(email, password) {
     console.log("[DEBUG] Signing up user:", email);
 
     // ✅ Step 1: Sign up the user with Supabase Auth
@@ -18,37 +18,18 @@ export async function signUpWithEmail(email, password, fullName) {
     }
 
     console.log("[DEBUG] User signed up successfully:", data.user);
-
-    // ✅ Step 2: Ensure we use the correct `id` from `auth.users`
-    const userId = data.user?.id;
-    if (!userId) {
-        console.error("[DEBUG] ❌ User ID is null! Cannot insert into public.users.");
-        return;
-    }
-
-    // ✅ Step 3: Insert user metadata into `public.users`
-    const { error: insertError } = await supabase
-        .from("users")
-        .insert([{ id: userId, full_name: fullName }]);
-
-    if (insertError) {
-        console.error("[DEBUG] Error inserting user metadata:", insertError.message);
-    } else {
-        console.log("[DEBUG] User metadata saved successfully.");
-    }
 }
-
 
 // ✅ Function to check login status
 export async function checkLoginStatus() {
     console.log("[DEBUG] Checking login status...");
     try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error || !data.session) {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
             console.warn("[DEBUG] No active session found.");
             return false;
         }
-        console.log("[DEBUG] User is logged in:", data.session.user);
+        console.log("[DEBUG] User is logged in:", user);
         return true;
     } catch (err) {
         console.error("[DEBUG] Unexpected error:", err);
@@ -103,4 +84,3 @@ export async function logout() {
         window.location.reload();
     }
 }
-
