@@ -1,10 +1,11 @@
 import { supabase } from './supabaseClient.js';
+
 /**
  * Redirect to login page only if necessary.
  */
 export async function requireLogin(callback) {
     const isLoggedIn = await checkLoginStatus();
-    
+
     if (!isLoggedIn) {
         console.warn('[DEBUG] User is not logged in. Redirecting...');
         window.location.href = '/login.html';  // Change this to your actual login page
@@ -12,6 +13,7 @@ export async function requireLogin(callback) {
         callback();
     }
 }
+
 /**
  * Ensure the user exists in public.users after login.
  * @param {Object} user - The logged-in user object.
@@ -64,7 +66,7 @@ export async function checkLoginStatus() {
         if (error || !data.session) {
             console.warn('[DEBUG] No active session found. Trying to refresh...');
             const { data: refreshedData, error: refreshError } = await supabase.auth.refreshSession();
-            
+
             if (refreshError) {
                 console.error('[DEBUG] Session refresh failed:', refreshError);
                 return false;
@@ -73,8 +75,10 @@ export async function checkLoginStatus() {
             data = refreshedData;
         }
 
-        if (data.session && data.session.user) {
+        if (data?.session?.user) {
             console.log('[DEBUG] User is logged in:', data.session.user);
+            localStorage.setItem("supabaseSession", JSON.stringify(data.session)); // ✅ Save session manually
+            await ensureUserExists(data.session.user);
             return true;
         }
 
@@ -85,42 +89,6 @@ export async function checkLoginStatus() {
         return false;
     }
 }
-    console.log('[DEBUG] Checking login status...');
-    try {
-        let { data, error } = await supabase.auth.getSession();
-
-        if (error) {
-            console.warn('[DEBUG] Error fetching session:', error.message);
-            return false;
-        }
-
-        if (!data.session || !data.session.user) {
-            console.warn('[DEBUG] No active session found. Attempting to refresh...');
-            const { error: refreshError } = await supabase.auth.refreshSession();
-
-            if (refreshError) {
-                console.error('[DEBUG] Failed to refresh session:', refreshError);
-                return false;
-            }
-
-            data = await supabase.auth.getSession();
-            if (!data.session || !data.session.user) {
-                console.warn('[DEBUG] No valid session after refresh.');
-                return false;
-            }
-        }
-
-        console.log('[DEBUG] User is logged in:', data.session.user);
-
-        // ✅ Ensure user exists in public.users
-        await ensureUserExists(data.session.user);
-
-        return true;
-    } catch (err) {
-        console.error('[DEBUG] Unexpected error in checkLoginStatus:', err);
-        return false;
-    }
-
 
 /**
  * Listen for authentication state changes and store session in localStorage.
@@ -134,14 +102,7 @@ supabase.auth.onAuthStateChange((event, session) => {
         localStorage.removeItem("supabaseSession");
     }
 });
-supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
-        console.log("[DEBUG] Saving session to localStorage...");
-        localStorage.setItem("supabaseSession", JSON.stringify(session));
-    } else {
-        console.log("[DEBUG] Clearing session from localStorage...");
-        localStorage.removeItem("supabaseSession");
-    }
+
 /**
  * Open the OAuth popup for logging in with Google.
  */
@@ -179,6 +140,7 @@ export async function logout() {
             alert('Failed to log out. Please try again.');
         } else {
             console.log('[DEBUG] User logged out successfully.');
+            localStorage.clear();  // ✅ Ensures session is fully removed
             alert('Logged out successfully!');
             location.reload();
         }
