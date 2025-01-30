@@ -134,7 +134,14 @@ supabase.auth.onAuthStateChange((event, session) => {
         localStorage.removeItem("supabaseSession");
     }
 });
-
+supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+        console.log("[DEBUG] Saving session to localStorage...");
+        localStorage.setItem("supabaseSession", JSON.stringify(session));
+    } else {
+        console.log("[DEBUG] Clearing session from localStorage...");
+        localStorage.removeItem("supabaseSession");
+    }
 /**
  * Open the OAuth popup for logging in with Google.
  */

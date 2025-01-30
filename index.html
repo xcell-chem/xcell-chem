@@ -15,12 +15,15 @@
 
     <script type="module">
         import { requireLogin, checkLoginStatus, logout, openLoginPopup } from './js/auth.js';
+        import { supabase } from './js/supabaseClient.js';
     
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('[DEBUG] Document loaded. Checking login status...');
-            
-            const isLoggedIn = await checkLoginStatus();
             const loginButton = document.getElementById('loginButton');
+    
+            // Refresh session before checking login status
+            await supabase.auth.refreshSession();
+            const isLoggedIn = await checkLoginStatus();
     
             if (isLoggedIn) {
                 console.log('[DEBUG] User is logged in.');
