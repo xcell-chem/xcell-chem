@@ -1,71 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome Page</title>
-    <link rel="stylesheet" href="css/main.css">
+import { createClient } from "@supabase/supabase-js";
 
-    <!-- Ensure scripts load as ES modules -->
-    <script type="module" src="./js/supabaseClient.js"></script>
-    <script type="module" src="./js/auth.js"></script>
-    <script type="module" src="./js/user_interactions.js"></script>
-    <script type="module" src="./js/db_access.js"></script>
-    <script type="module" src="./js/popup.js"></script>
+console.log("[DEBUG] Initializing Supabase client...");
 
-    <script type="module">
-        import { requireLogin, checkLoginStatus, logout, openLoginPopup } from './js/auth.js';
-        import { supabase } from './js/supabaseClient.js';
-    
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('[DEBUG] Document loaded. Checking login status...');
-            const loginButton = document.getElementById('loginButton');
-    
-            // Refresh session before checking login status
-            await supabase.auth.refreshSession();
-            const isLoggedIn = await checkLoginStatus();
-    
-            if (isLoggedIn) {
-                console.log('[DEBUG] User is logged in.');
-                loginButton.textContent = "Logout";
-                loginButton.onclick = logout;
-            } else {
-                console.warn('[DEBUG] User is not logged in.');
-                loginButton.textContent = "Login";
-                loginButton.onclick = openLoginPopup;
-            }
-    
-            document.getElementById('createShopButton').onclick = () => requireLogin(() => location.href = '/createshop.html');
-            document.getElementById('myShopsButton').onclick = () => requireLogin(() => location.href = '/myshops.html');
-            document.getElementById('myAccountButton').onclick = () => requireLogin(() => location.href = '/myaccount.html');
-        });
-    </script>
-    
-</head>
-<body>
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/uses">Uses</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/feedback">Contact</a></li>
-        </ul>
-    </nav>
+const supabaseUrl = "https://tjbcucdewwczndkeypey.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmN1Y2Rld3djem5ka2V5cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MzUwMzcsImV4cCI6MjA1MzUxMTAzN30.iBm2u7xY5qRQT6gOQw7OwAYTENJh49B9lI0YtLuKJAQ";
 
-    <div class="content">
-        <h1 class="content-title">Welcome to Let's See Bay</h1>
-        <div class="container">
-            <button id="loginButton" class="button">Checking...</button>
-            <div class="buttons">
-                <button id="createShopButton" class="button">Create Shop</button>
-                <button id="myShopsButton" class="button">My Shops</button>
-                <button id="myAccountButton" class="button">My Account</button>
-            </div>
-        </div>
-    </div>
+// ✅ Ensure Supabase is only created once
+const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        persistSession: true, // ✅ Ensures session persistence
+        storage: localStorage, // ✅ Forces localStorage usage
+        autoRefreshToken: true, // ✅ Enables auto-refresh
+        detectSessionInUrl: true, // ✅ Required for OAuth handling
+    }
+});
 
-    <footer>
-        <p class="footer">&copy; 2025 Let's See Bay. All rights reserved.</p>
-    </footer>
-</body>
-</html>
+// ✅ Export Supabase for module imports
+export { supabase };
+console.log("[DEBUG] Supabase initialized:", supabase);
