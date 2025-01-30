@@ -5,17 +5,18 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
-        persistSession: true, // ✅ Ensures session is saved across page reloads
-        storage: localStorage, // ✅ Forces storage to be localStorage
-        autoRefreshToken: true, // ✅ Ensures tokens refresh automatically
-        detectSessionInUrl: true, // ✅ Ensures OAuth login sessions persist
+        persistSession: true, // ✅ Ensures session persistence
+        storage: localStorage, // ✅ Forces localStorage usage
+        autoRefreshToken: true, // ✅ Enables auto-refresh
+        detectSessionInUrl: true, // ✅ Required for OAuth handling
     }
 });
 
-// ✅ Attach Supabase to `window` for debugging in DevTools
+// ✅ Attach Supabase to `window` for debugging
 window.supabase = supabase;
+console.log("[DEBUG] Supabase initialized:", window.supabase);
 
-// ✅ Restore session immediately when the script loads
+// ✅ Manually force session persistence
 async function restoreSession() {
     const { data, error } = await supabase.auth.getSession();
     if (data?.session) {
@@ -25,5 +26,4 @@ async function restoreSession() {
         console.warn("[DEBUG] No session found during restoration.");
     }
 }
-
 restoreSession();

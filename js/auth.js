@@ -55,14 +55,11 @@ export async function ensureUserExists(user) {
     }
 }
 
-/**
- * Check if the user is logged in and restore session if needed.
- */
 export async function checkLoginStatus() {
     console.log('[DEBUG] Checking login status...');
 
     try {
-        // 🔍 First, try getting the session from localStorage
+        // 🔍 First, check Local Storage for a session
         const storedSession = JSON.parse(localStorage.getItem("supabaseSession"));
         if (storedSession && storedSession.user) {
             console.log("[DEBUG] Found stored session:", storedSession.user);
@@ -97,6 +94,7 @@ export async function checkLoginStatus() {
         return false;
     }
 }
+
 
 
 
