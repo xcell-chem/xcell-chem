@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient.js';
-
+import { requireLogin } from './auth.js';
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('create-shop-form');
     

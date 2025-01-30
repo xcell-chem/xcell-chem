@@ -1,6 +1,5 @@
 import { requireLogin } from './auth.js';
 import { supabase } from './supabaseClient.js';
-import { requireLogin } from './auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     requireLogin(() => {
