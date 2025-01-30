@@ -62,14 +62,14 @@ export async function checkLoginStatus() {
     console.log('[DEBUG] Checking login status...');
 
     try {
-        // 🔍 Check localStorage before querying Supabase
+        // 🔍 First, check localStorage
         const storedSession = JSON.parse(localStorage.getItem("supabaseSession"));
         if (storedSession && storedSession.user) {
             console.log("[DEBUG] Found stored session:", storedSession.user);
             return true;
         }
 
-        // 🔄 Fetch session from Supabase
+        // 🔄 If no session in localStorage, check Supabase
         let { data, error } = await supabase.auth.getSession();
 
         if (error || !data.session) {
@@ -100,6 +100,8 @@ export async function checkLoginStatus() {
 
 
 
+
+
 supabase.auth.onAuthStateChange((event, session) => {
     console.log("[DEBUG] Auth state changed:", event);
     
@@ -111,6 +113,7 @@ supabase.auth.onAuthStateChange((event, session) => {
         localStorage.removeItem("supabaseSession");
     }
 });
+
 
 
 
