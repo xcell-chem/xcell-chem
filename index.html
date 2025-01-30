@@ -6,20 +6,19 @@
     document.addEventListener('DOMContentLoaded', async () => {
     console.log('[DEBUG] Document fully loaded. Checking login status...');
 
-    // ✅ Ensure Supabase is defined before calling it
     if (!window.supabase) {
-        console.error("[DEBUG] Supabase is still undefined. Check script loading.");
+        console.error("[DEBUG] Supabase is undefined. Check script loading.");
         return;
     }
 
     // ✅ Force Supabase to use the stored session
     const storedSession = localStorage.getItem("supabase.auth.token");
     if (storedSession) {
-        console.log("[DEBUG] Found stored session, forcing it into Supabase...");
+        console.log("[DEBUG] Found stored session. Forcing it into Supabase...");
         await supabase.auth.setSession(JSON.parse(storedSession));
     }
 
-    // ✅ Now check session again
+    // ✅ Now check login status
     const isLoggedIn = await checkLoginStatus();
     const loginButton = document.getElementById('loginButton');
 
