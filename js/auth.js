@@ -60,7 +60,16 @@ export async function ensureUserExists(user) {
  */
 export async function checkLoginStatus() {
     console.log('[DEBUG] Checking login status...');
+
     try {
+        // 🔍 First, try fetching session from localStorage
+        const storedSession = JSON.parse(localStorage.getItem("supabaseSession"));
+        if (storedSession && storedSession.user) {
+            console.log("[DEBUG] Found stored session:", storedSession.user);
+            return true;
+        }
+
+        // 🔄 Otherwise, get the session from Supabase
         let { data, error } = await supabase.auth.getSession();
 
         if (error || !data.session) {
@@ -78,7 +87,6 @@ export async function checkLoginStatus() {
         if (data?.session?.user) {
             console.log('[DEBUG] User is logged in:', data.session.user);
             localStorage.setItem("supabaseSession", JSON.stringify(data.session)); // ✅ Save session manually
-            await ensureUserExists(data.session.user);
             return true;
         }
 
@@ -90,18 +98,19 @@ export async function checkLoginStatus() {
     }
 }
 
-/**
- * Listen for authentication state changes and store session in localStorage.
- */
+
 supabase.auth.onAuthStateChange((event, session) => {
+    console.log("[DEBUG] Auth state changed:", event);
+    
     if (session) {
-        console.log("[DEBUG] Saving session to localStorage...");
+        console.log("[DEBUG] Storing session in localStorage...");
         localStorage.setItem("supabaseSession", JSON.stringify(session));
     } else {
         console.log("[DEBUG] Clearing session from localStorage...");
         localStorage.removeItem("supabaseSession");
     }
 });
+
 
 /**
  * Open the OAuth popup for logging in with Google.
