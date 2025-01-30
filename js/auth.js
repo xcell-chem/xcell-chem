@@ -7,32 +7,32 @@ console.log("[DEBUG] Supabase instance in auth.js:", supabase);
 async function checkLoginStatus() {
     console.log("[DEBUG] Checking login status...");
     try {
-        let { data, error } = await supabase.auth.getSession();
+        // Force Supabase to detect the stored session
+        await supabase.auth.getSession();  
+        const { data, error } = await supabase.auth.refreshSession();  
 
         if (error || !data.session) {
-            console.warn("[DEBUG] No active session found. Trying to refresh...");
-            const { data: refreshedData, error: refreshError } = await supabase.auth.refreshSession();
-
-            if (refreshError) {
-                console.error("[DEBUG] Session refresh failed:", refreshError);
-                return false;
-            }
-
-            data = refreshedData;
+            console.warn("[DEBUG] No active session found.");
+            return false;
         }
 
-        if (data?.session?.user) {
-            console.log("[DEBUG] User is logged in:", data.session.user);
-            return true;
-        }
-
-        console.warn("[DEBUG] Still no valid session.");
-        return false;
+        console.log("[DEBUG] User is logged in:", data.session.user);
+        return true;
     } catch (err) {
-        console.error("[DEBUG] Unexpected error in checkLoginStatus:", err);
+        console.error("[DEBUG] Unexpected error:", err);
         return false;
     }
 }
+
+supabase.auth.onAuthStateChange((event, session) => {
+    console.log("[DEBUG] Auth state changed:", event, session);
+    if (session) {
+        localStorage.setItem("supabase.auth.token", JSON.stringify(session));
+    } else {
+        localStorage.removeItem("supabase.auth.token");
+    }
+});
+
 
 // ✅ Function to open login popup
 async function openLoginPopup() {
