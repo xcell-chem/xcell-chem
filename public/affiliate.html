@@ -1,0 +1,251 @@
+<!-- affiliate.html: Add page description here -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G7SR5YRK9J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-G7SR5YRK9J');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Program - Shiny Flakes</title>
+    <style>
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            font-family: 'Arial', sans-serif;
+            background-image: url('https://i.postimg.cc/TppSbvf2/Shimer.png');
+            background-size: cover;
+            background-position: center;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            background-color: #333;
+            width: 100%;
+            padding: 5px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 10px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            font-size: 1em;
+        }
+
+        nav ul li a:hover {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        .content {
+            background-color: rgba(30, 46, 62, 0.9);
+            padding: 30px;
+            margin: 45px auto 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #fff;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            max-width: 80%;
+            padding: 10px;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            display: block;
+            text-align: center;
+        }
+
+        input[type="email"]::placeholder {
+            color: #aaa;
+        }
+
+        .btnsubmit {
+            text-align: center;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #e68900;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #fff;
+            background-color: #333;
+            position: relative;
+            margin-top: auto;
+        }
+        p{text-align:center;
+        color:white;}
+
+        footer p {
+            margin: 0;
+        }
+
+        @media (max-width: 600px) {
+            nav ul li {
+                margin: 0 5px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Shop</a></li>
+            <li><a href="about.html">More Info</a></li>
+            <li><a href="feedback.html">Contact</a></li>
+        </ul>
+    </nav>
+<div>
+    <div class="content">
+        <h1>Affiliate Program</h1>
+        <p>All you need is a social media account an online presence or just a few friends,</p>
+        <p> With over 100 uses, this highly versatile product can be advertised by anyone!</p>
+        <p>Earn 10% on referred sales, and 8% on sub affiliate sales!!</p><br><br>
+        <h2>Sign up to become an affiliate and get your unique link!</h2>
+
+        <form id="affiliateForm">
+            <input type="email" id="email" name="email" placeholder="Email Address" required>
+
+            <div class="btnsubmit">
+                <input type="submit" value="Register">
+            </div>
+        </form>
+    </div>#
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Shiny Flakes. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Clear the input box when clicked
+        const emailInput = document.getElementById('email');
+        emailInput.addEventListener('focus', function () {
+            if (this.value === 'Email Address') {
+                this.value = '';
+            }
+        });
+
+        function getCookie(cname) {
+            let cookieName = cname + "=";
+            let decodedCookie = decodeURIComponent(document.cookie);
+            let ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(cookieName) == 0) {
+                    return c.substring(cookieName.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        document.getElementById('affiliateForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            var formData = new FormData(this);
+            // Check for the referral cookie
+            const referralCookie = getCookie("referral");
+            formData.append("parent_id", referralCookie ? referralCookie : null); // Set parent_id based on cookie
+
+            fetch('submit_affiliate.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.message); // Show alert if there's an error
+                } else {
+                    // Redirect to confirmation page with the new referral ID
+                    window.location.href = 'affiliateconfirmation.html?affiliateID=' + encodeURIComponent(data.affiliateID);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,186 @@
+<!-- feedback.html: Add page description here -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - Shiny Flakes</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-image: url('https://i.postimg.cc/TppSbvf2/Shimer.png');
+            background-size: cover;
+            background-position: center;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #333;
+            z-index: 1000;
+            border-radius: 10px;
+            padding: 10px 0;
+        }
+
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            text-align: center;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        nav ul li a:hover {
+            background-color: #555;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 0px 5;
+            margin: 5px 0px;
+            border-radius: 10px;
+            text-align: center;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: black;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.2em;
+            text-align: center;
+            margin-top: 5px;
+            color: black;
+        }
+
+        main {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 70px;
+        }
+
+        .content {
+            background-color: #ededed;
+            padding: 20px;
+            margin: 45px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        form {
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        input[type="email"],
+        textarea {
+            width: 80%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s;
+        }
+
+        input[type="email"]:focus,
+        textarea:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+
+        input[type="email"]::placeholder,
+        textarea::placeholder {
+            color: #999;
+        }
+
+        textarea {
+            resize: none;
+        }
+
+        .btnsubmit {
+            margin-top: 10px;
+        }
+
+        .btnsubmit input[type="submit"] {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btnsubmit input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background: #f1f1f1;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Shop</a></li>
+            <li><a href="uses.html">Uses for Shiny Flakes™</a></li>
+            <li><a href="about.html">More Info</a></li>
+        </ul>
+    </nav>
+
+    <div class="content">
+        <h1>Contact/Feedback</h1>
+        <h2>We value your feedback! Please fill out the form below to share your thoughts or suggestions.</h2>
+
+        <form action="feedback.php" method="POST">
+            <input type="email" id="email" name="email" placeholder="Email Address" onfocus="this.value='';"><br>
+            <p style="margin: 0;">(Only needed if you require a response)</p>
+
+            <textarea id="message" name="message" rows="4" required placeholder="Your message..."></textarea><br>
+
+            <div class="btnsubmit">
+                <input type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+
+</body>
+
+</html>

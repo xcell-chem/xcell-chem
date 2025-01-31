@@ -1,0 +1,35 @@
+<script type="module">
+    import { supabase } from './js/supabaseClient.js';
+    import { requireLogin } from './js/auth.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log("[DEBUG] 🚀 Loading My Shops Page...");
+        await requireLogin();
+
+        const { data: shops, error } = await supabase.from('shops').select('*').order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("[DEBUG] ❌ Error fetching shops:", error);
+            alert("❌ Failed to load shops.");
+            return;
+        }
+
+        const shopList = document.getElementById('shopList');
+        shopList.innerHTML = ''; // Clear previous data
+
+        if (!shops.length) {
+            shopList.innerHTML = `<p>🛒 You don't have any shops yet. <a href="/createshop.html">Create one</a>.</p>`;
+            return;
+        }
+
+        shops.forEach(shop => {
+            const shopItem = document.createElement('li');
+            shopItem.innerHTML = `
+                <strong>${shop.name}</strong> <br>
+                <small>Created at: ${new Date(shop.created_at).toLocaleString()}</small>
+                <button onclick="window.location.href='/shop.html?id=${shop.id}'">View Shop</button>
+            `;
+            shopList.appendChild(shopItem);
+        });
+    });
+</script>

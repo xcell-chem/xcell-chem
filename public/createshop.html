@@ -1,0 +1,32 @@
+<script type="module">
+    import { supabase } from './js/supabaseClient.js';
+    import { requireLogin } from './js/auth.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log("[DEBUG] 🚀 Initializing Create Shop Page...");
+        await requireLogin();
+
+        const form = document.getElementById('create-shop-form');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const shopName = document.getElementById('shopName').value.trim();
+            if (!shopName) {
+                alert("⚠️ Please enter a shop name!");
+                return;
+            }
+
+            console.log("[DEBUG] Creating shop:", shopName);
+            const { data, error } = await supabase.from('shops').insert([{ name: shopName }]);
+
+            if (error) {
+                console.error("[DEBUG] ❌ Error creating shop:", error);
+                alert("❌ Error creating shop! Try again.");
+            } else {
+                console.log("[DEBUG] ✅ Shop created:", data);
+                alert("✅ Shop successfully created!");
+                window.location.href = "/myshops.html";
+            }
+        });
+    });
+</script>

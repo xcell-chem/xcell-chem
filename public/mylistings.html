@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My listings</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script type="module" src="js/mylistings.js"></script>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/uses">Uses</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/feedback">Contact</a></li>
+        </ul>
+    </nav>
+
+    <div class="content">
+        <h1 class="content-title">My listings</h1>
+        <div class="container">
+            
+    <div id="productList">
+        <!-- User's products will be dynamically loaded here -->
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: session } = await supabase.auth.getSession();
+            if (!session) {
+                alert('Please log in to view your products.');
+                window.location.href = '/';
+                return;
+            }
+            const { data: products, error } = await supabase.from('products').select('*').eq('owner_id', session.user.id);
+            if (error) {
+                alert('Error loading products: ' + error.message);
+                return;
+            }
+            const productList = document.getElementById('productList');
+            productList.innerHTML = products.map(product => `
+                <div class="product">
+                    <h3>${product.name}</h3>
+                    <p>Description: ${product.description}</p>
+                </div>
+            `).join('');
+        });
+    </script>
+    
+        </div>
+    </div>
+
+    <footer>
+        <p class="footer">&copy; 2025 Let's See Bay. All rights reserved.</p>
+    </footer>
+</body>
+</html>
