@@ -14,23 +14,22 @@ export async function signUpWithEmail(email, password) {
 
     console.log("[DEBUG] User signed up successfully:", data.user);
 }
-
-// ✅ Function to check login status and refresh session if needed
 export async function checkLoginStatus() {
     console.log("[DEBUG] Checking login status...");
     try {
+        // ✅ Attempt to refresh session first
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+            console.warn("[DEBUG] Session refresh failed:", refreshError);
+        } else {
+            console.log("[DEBUG] Session refreshed successfully:", refreshData);
+        }
+
+        // ✅ Now check if user is logged in
         const { data: { user }, error } = await supabase.auth.getUser();
-        
         if (error || !user) {
-            console.warn("[DEBUG] No active session found. Attempting to refresh...");
-            await supabase.auth.refreshSession();  // Try refreshing session
-            const { data: refreshedSession, error: refreshError } = await supabase.auth.getSession();
-            if (refreshError || !refreshedSession.session) {
-                console.warn("[DEBUG] Session refresh failed.");
-                return false;
-            }
-            console.log("[DEBUG] Session refreshed successfully.");
-            return true;
+            console.warn("[DEBUG] No active session found even after refresh.");
+            return false;
         }
 
         console.log("[DEBUG] User is logged in:", user);
@@ -41,11 +40,12 @@ export async function checkLoginStatus() {
     }
 }
 
-// ✅ Ensure auth state is tracked
+
+// ✅ Track session changes and store session
 supabase.auth.onAuthStateChange(async (event, session) => {
     console.log(`[DEBUG] Auth state changed: ${event}`);
     if (session) {
-        console.log("[DEBUG] New session detected. Saving...");
+        console.log("[DEBUG] New session detected. Storing...");
         localStorage.setItem("supabase.auth.token", JSON.stringify(session));
     } else {
         console.warn("[DEBUG] Session cleared.");
@@ -53,11 +53,22 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     }
 });
 
-// ✅ Function to open login popup
+
+// ✅ Function to ensure a user is logged in before executing an action
+export function requireLogin(callback) {
+    checkLoginStatus().then(isLoggedIn => {
+        if (isLoggedIn) {
+            callback();
+        } else {
+            console.warn("[DEBUG] User must be logged in to perform this action.");
+            openLoginPopup();
+        }
+    });
+}
 export async function openLoginPopup() {
     console.log("[DEBUG] Attempting to open login popup...");
     try {
-        const { error } = await supabase.auth.signInWithOAuth({
+        const { data, error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: { redirectTo: window.location.origin }
         });
@@ -72,19 +83,6 @@ export async function openLoginPopup() {
         console.error("[DEBUG] Unexpected error during OAuth login:", err);
     }
 }
-
-// ✅ Function to ensure a user is logged in before executing an action
-export function requireLogin(callback) {
-    checkLoginStatus().then(isLoggedIn => {
-        if (isLoggedIn) {
-            callback();
-        } else {
-            console.warn("[DEBUG] User must be logged in to perform this action.");
-            openLoginPopup();
-        }
-    });
-}
-
 // ✅ Function to log out user
 export async function logout() {
     console.log("[DEBUG] Logging out...");
