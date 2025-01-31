@@ -6,40 +6,20 @@
     <title>Welcome Page</title>
     <link rel="stylesheet" href="css/main.css">
 
-    <!-- ✅ Ensure scripts load in correct order -->
     <script type="module" src="/js/supabaseClient.js"></script>
     <script type="module" src="/js/auth.js"></script>
-    <script type="module" src="/js/user_interactions.js"></script>
     <script type="module" src="/js/db_access.js"></script>
-    <script type="module" src="/js/popup.js"></script>
-    
+
     <script type="module">
         import { requireLogin, checkLoginStatus, logout, openLoginPopup } from './js/auth.js';
-        import { supabase } from './js/supabaseClient.js';
-    
+
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('[DEBUG] 🚀 Document loaded. Checking login status...');
             const loginButton = document.getElementById('loginButton');
-    
-            if (!window.supabase) {
-                console.error("[DEBUG] ❌ Supabase is undefined. Check script loading.");
-                return;
-            }
 
-            // ✅ Check if localStorage contains a session
-            console.log("[DEBUG] 🔍 Checking localStorage before setting session:", localStorage.getItem("supabase.auth.token"));
-
-            // ✅ Force Supabase to use the stored session
-            const storedSession = localStorage.getItem("supabase.auth.token");
-            if (storedSession) {
-                console.log("[DEBUG] ✅ Found stored session. Forcing Supabase to use it...");
-                const parsedSession = JSON.parse(storedSession);
-                await supabase.auth.setSession(parsedSession);
-            }
-
-            // ✅ Now check login status
+            // ✅ Check login status without manual localStorage management
             const isLoggedIn = await checkLoginStatus();
-    
+
             if (isLoggedIn) {
                 console.log('[DEBUG] ✅ User is logged in.');
                 loginButton.textContent = "Logout";
@@ -53,7 +33,7 @@
                 loginButton.textContent = "Login";
                 loginButton.onclick = openLoginPopup;
             }
-    
+
             // ✅ Attach event listeners for buttons
             document.getElementById('createShopButton').addEventListener('click', () => requireLogin(() => location.href = '/createshop.html'));
             document.getElementById('myShopsButton').addEventListener('click', () => requireLogin(() => location.href = '/myshops.html'));

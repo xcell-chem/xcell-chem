@@ -4,12 +4,7 @@ import { supabase } from "./supabaseClient.js";
 // ✅ Function to sign up a new user
 export async function signUpWithEmail(email, password) {
     console.log("[DEBUG] Signing up user:", email);
-
-    // ✅ Step 1: Sign up the user with Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-    });
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
         console.error("[DEBUG] Signup error:", error.message);
@@ -20,16 +15,16 @@ export async function signUpWithEmail(email, password) {
     console.log("[DEBUG] User signed up successfully:", data.user);
 }
 
-// ✅ Function to check login status
+// ✅ Improved function to check login status
 export async function checkLoginStatus() {
     console.log("[DEBUG] Checking login status...");
     try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session || !session.user) {
             console.warn("[DEBUG] No active session found.");
             return false;
         }
-        console.log("[DEBUG] User is logged in:", user);
+        console.log("[DEBUG] User is logged in:", session.user);
         return true;
     } catch (err) {
         console.error("[DEBUG] Unexpected error:", err);
@@ -41,19 +36,16 @@ export async function checkLoginStatus() {
 export async function openLoginPopup() {
     console.log("[DEBUG] Attempting to open login popup...");
     try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
-            options: { 
-                redirectTo: window.location.origin,
-                skipBrowserRedirect: false
-            }
+            options: { redirectTo: window.location.origin }
         });
 
         if (error) {
             console.error("[DEBUG] OAuth login error:", error);
             alert("Login failed. Please try again.");
         } else {
-            console.log("[DEBUG] OAuth login initiated successfully.");
+            console.log("[DEBUG] OAuth login initiated successfully. Awaiting redirect...");
         }
     } catch (err) {
         console.error("[DEBUG] Unexpected error during OAuth login:", err);
@@ -80,7 +72,6 @@ export async function logout() {
         console.error("[DEBUG] Logout failed:", error);
     } else {
         console.log("[DEBUG] Successfully logged out.");
-        localStorage.removeItem("supabase.auth.token");
         window.location.reload();
     }
 }
