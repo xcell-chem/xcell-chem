@@ -40,6 +40,14 @@
             document.getElementById('createShopButton').addEventListener('click', () => requireLogin(() => location.href = '/createshop.html'));
             document.getElementById('myShopsButton').addEventListener('click', () => requireLogin(() => location.href = '/myshops.html'));
             document.getElementById('myAccountButton').addEventListener('click', () => requireLogin(() => location.href = '/myaccount.html'));
+        
+            document.getElementById('resendConfirmationButton').addEventListener('click', async () => {
+    const email = prompt("Enter your email to resend the confirmation:");
+    if (email) {
+        await resendConfirmationEmail(email);
+    }
+});
+
         });
     </script>
 </head>
@@ -61,6 +69,8 @@
                 <button id="createShopButton" class="button">Create Shop</button>
                 <button id="myShopsButton" class="button">My Shops</button>
                 <button id="myAccountButton" class="button">My Account</button>
+                <button id="resendConfirmationButton">Resend Confirmation Email</button>
+
             </div>
         </div>
     </div>

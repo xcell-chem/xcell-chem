@@ -38,6 +38,23 @@ export async function checkLoginStatus() {
         return false;
     }
 }
+export async function resendConfirmationEmail(email) {
+    console.log("[DEBUG] Resending confirmation email to:", email);
+
+    const { data, error } = await supabase.auth.resend({
+        type: "signup",
+        email: email,
+    });
+
+    if (error) {
+        console.error("[DEBUG] Failed to resend email:", error.message);
+        alert("Failed to resend confirmation email: " + error.message);
+        return;
+    }
+
+    console.log("[DEBUG] Confirmation email sent again!");
+    alert("Confirmation email sent. Please check your inbox.");
+}
 
 
 
