@@ -1,41 +1,52 @@
 import { requireLogin } from './auth.js';
-import { supabase } from './supabaseClient.js';
-
-document.addEventListener('DOMContentLoaded', () => {
-    requireLogin(() => {
-        console.log("[DEBUG] User is logged in, loading shop info...");
-    });
-});
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await requireLogin(); // Ensure user is logged in
+    console.log("[DEBUG] 🚀 Loading My Shops Page...");
+    
+    // Ensure the user is logged in before allowing access
+    await requireLogin();
 
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error || !user) {
-        console.error('[DEBUG] Failed to retrieve user:', error);
-        return;
-    }
+    console.log("[DEBUG] ✅ User is authenticated. Fetching shops...");
 
-    console.log('[DEBUG] Fetching shops for user:', user.id);
-    try {
-        const { data: shops, error: shopError } = await supabase
+    // Function to load and display user's shops
+    async function loadShops() {
+        const { data: shops, error } = await supabase
             .from('shops')
             .select('*')
-            .eq('owner_id', user.id);
+            .order('created_at', { ascending: false });
 
-        if (shopError) {
-            console.error('[DEBUG] Error fetching shops:', shopError);
-            alert('Failed to load your shops.');
+        if (error) {
+            console.error("[DEBUG] ❌ Error fetching shops:", error);
+            alert("Failed to load shops.");
             return;
         }
 
-        const shopList = document.getElementById('shopList');
-        shopList.innerHTML = shops.length > 0
-            ? shops.map(shop => `<li>${shop.name} - Created on: ${new Date(shop.created_at).toLocaleDateString()}</li>`).join('')
-            : '<p>No shops found.</p>';
+        const shopsContainer = document.getElementById('shopsContainer');
+        shopsContainer.innerHTML = ''; // Clear previous data
 
-        console.log('[DEBUG] Shops loaded successfully.');
-    } catch (err) {
-        console.error('[DEBUG] Unexpected error:', err);
+        if (shops.length === 0) {
+            shopsContainer.innerHTML = '<p>No shops found.</p>';
+            return;
+        }
+
+        shops.forEach(shop => {
+            const shopElement = document.createElement('div');
+            shopElement.classList.add('shop-item');
+            shopElement.innerHTML = `
+                <h3>${shop.name}</h3>
+                <p>Created at: ${new Date(shop.created_at).toLocaleString()}</p>
+                <button onclick="viewShop('${shop.id}')">View Shop</button>
+            `;
+            shopsContainer.appendChild(shopElement);
+        });
     }
+
+    // Function to handle clicking "View Shop"
+    window.viewShop = function(shopId) {
+        console.log(`[DEBUG] 🔍 Viewing shop ID: ${shopId}`);
+        window.location.href = `/shop.html?id=${shopId}`;
+    };
+
+    // Load shops when the page is ready
+    await loadShops();
 });

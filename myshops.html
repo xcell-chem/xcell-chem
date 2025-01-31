@@ -1,34 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Shops</title>
-    <link rel="stylesheet" href="css/main.css">
-    <script type="module" src="js/supabaseClient.js"></script>
-    <script type="module" src="js/myshops.js"></script>
-</head>
-<body>
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/uses">Uses</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/feedback">Contact</a></li>
-        </ul>
-    </nav>
+<script type="module">
+    import { supabase } from './js/supabaseClient.js';
+    import { requireLogin } from './js/auth.js';
 
-    <div class="content">
-        <h1 class="content-title">My Shops</h1>
-        <div class="container">
-            <ul id="shopList">
-                <!-- User's shops will be dynamically loaded here -->
-            </ul>
-        </div>
-    </div>
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log("[DEBUG] 🚀 Loading My Shops Page...");
+        await requireLogin();
 
-    <footer>
-        <p class="footer">&copy; 2025 Let's See Bay. All rights reserved.</p>
-    </footer>
-</body>
-</html>
+        const { data: shops, error } = await supabase.from('shops').select('*').order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("[DEBUG] ❌ Error fetching shops:", error);
+            alert("❌ Failed to load shops.");
+            return;
+        }
+
+        const shopList = document.getElementById('shopList');
+        shopList.innerHTML = ''; // Clear previous data
+
+        if (!shops.length) {
+            shopList.innerHTML = `<p>🛒 You don't have any shops yet. <a href="/createshop.html">Create one</a>.</p>`;
+            return;
+        }
+
+        shops.forEach(shop => {
+            const shopItem = document.createElement('li');
+            shopItem.innerHTML = `
+                <strong>${shop.name}</strong> <br>
+                <small>Created at: ${new Date(shop.created_at).toLocaleString()}</small>
+                <button onclick="window.location.href='/shop.html?id=${shop.id}'">View Shop</button>
+            `;
+            shopList.appendChild(shopItem);
+        });
+    });
+</script>
