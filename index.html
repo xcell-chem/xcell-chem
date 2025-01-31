@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome Page</title>
     <link rel="stylesheet" href="css/main.css">
-
-    <script type="module" src="/js/supabaseClient.js"></script>
+    <script type="module">
+        import { supabase } from "/js/supabaseClient.js";
+        window.supabase = supabase;  // ✅ Ensures global access
+    </script>
     <script type="module" src="/js/auth.js"></script>
     <script type="module" src="/js/db_access.js"></script>
 
