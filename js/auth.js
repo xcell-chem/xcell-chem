@@ -17,18 +17,17 @@ export async function signUpWithEmail(email, password) {
 export async function checkLoginStatus() {
     console.log("[DEBUG] Checking login status...");
     try {
-        // ✅ Attempt to refresh session first
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-        if (refreshError) {
-            console.warn("[DEBUG] Session refresh failed:", refreshError);
-        } else {
-            console.log("[DEBUG] Session refreshed successfully:", refreshData);
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error || !user) {
+            console.warn("[DEBUG] No active session found.");
+            return false;
         }
 
-        // ✅ Now check if user is logged in
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
-            console.warn("[DEBUG] No active session found even after refresh.");
+        // ✅ Check if the user's email is confirmed
+        if (!user.email_confirmed_at) {
+            console.warn("[DEBUG] Email not confirmed. User cannot proceed.");
+            alert("Please verify your email before logging in.");
             return false;
         }
 
@@ -39,6 +38,7 @@ export async function checkLoginStatus() {
         return false;
     }
 }
+
 
 
 // ✅ Track session changes and store session
